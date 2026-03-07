@@ -86,34 +86,34 @@ export default function ItemFormPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link to="/items" className="text-indigo-600 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-indigo-400 hover:underline text-sm">← アイテム一覧</Link>
 
-      <div className="bg-white rounded-lg shadow p-6 mt-4">
-        <h1 className="text-xl font-bold text-gray-800 mb-6">
+      <div className="bg-gray-800 rounded-lg shadow p-6 mt-4">
+        <h1 className="text-xl font-bold text-gray-100 mb-6">
           {isEdit ? 'アイテム編集' : 'アイテム追加'}
         </h1>
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">アイテム名 *</label>
+            <label className="block text-sm font-medium text-gray-200 mb-1">アイテム名 *</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ゲーム *</label>
+            <label className="block text-sm font-medium text-gray-200 mb-1">ゲーム *</label>
             <select
               value={form.gameId}
               onChange={(e) => setForm({ ...form, gameId: e.target.value })}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">選択してください</option>
               {games.map((g) => (
@@ -123,9 +123,9 @@ export default function ItemFormPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
-              <span className="ml-2 text-xs text-indigo-500 font-normal">
+              <span className="ml-2 text-xs text-indigo-400 font-normal">
                 ※ 画像を選択するとテキストを自動抽出して説明欄に入力します
               </span>
             </label>
@@ -133,22 +133,22 @@ export default function ItemFormPage() {
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border"
+                className="w-40 h-40 object-cover rounded mb-2 border border-gray-600"
               />
             )}
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="text-sm text-gray-600"
+              className="text-sm text-gray-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               説明
               {analyzing && (
-                <span className="ml-2 text-xs text-indigo-500 animate-pulse">
+                <span className="ml-2 text-xs text-indigo-400 animate-pulse">
                   画像からテキストを解析中...
                 </span>
               )}
@@ -159,12 +159,12 @@ export default function ItemFormPage() {
               rows={4}
               disabled={analyzing}
               placeholder={analyzing ? '解析中...' : ''}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-800 disabled:text-gray-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               タグ（カンマ区切り）
             </label>
             <input
@@ -172,7 +172,7 @@ export default function ItemFormPage() {
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
               placeholder="例: 武器, レア, 強化"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
@@ -187,7 +187,7 @@ export default function ItemFormPage() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
+              className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
             >
               キャンセル
             </button>
