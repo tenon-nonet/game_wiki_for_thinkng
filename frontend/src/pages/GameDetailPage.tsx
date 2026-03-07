@@ -42,13 +42,13 @@ export default function GameDetailPage() {
     navigate('/games')
   }
 
-  if (!game) return <div className="text-center py-12 text-gray-500">読み込み中...</div>
+  if (!game) return <div className="text-center py-12 text-gray-400">読み込み中...</div>
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link to="/games" className="text-indigo-600 hover:underline text-sm">← ゲーム一覧</Link>
+      <Link to="/games" className="text-indigo-400 hover:underline text-sm">← ゲーム一覧</Link>
 
-      <div className="bg-white rounded-lg shadow mt-4 overflow-hidden">
+      <div className="bg-gray-800 rounded-lg shadow mt-4 overflow-hidden">
         {!editing && game.imagePath && (
           <img
             src={`/uploads/${game.imagePath}`}
@@ -65,24 +65,24 @@ export default function GameDetailPage() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xl font-bold"
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xl font-bold"
               />
               <textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={4}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <div>
-                <label className="block text-sm text-gray-600 mb-1">画像を変更</label>
+                <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
                 {(preview || game.imagePath) && (
                   <img
                     src={preview || `/uploads/${game.imagePath}`}
                     alt="preview"
-                    className="w-24 h-24 object-cover rounded mb-2 border"
+                    className="w-24 h-24 object-cover rounded mb-2 border border-gray-600"
                   />
                 )}
-                <input type="file" accept="image/*" onChange={handleImageChange} className="text-sm text-gray-600" />
+                <input type="file" accept="image/*" onChange={handleImageChange} className="text-sm text-gray-400" />
               </div>
               <div className="flex gap-2">
                 <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm">
@@ -91,7 +91,7 @@ export default function GameDetailPage() {
                 <button
                   type="button"
                   onClick={() => { setEditing(false); setImage(null); setPreview(null) }}
-                  className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-sm"
+                  className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm"
                 >
                   キャンセル
                 </button>
@@ -100,24 +100,24 @@ export default function GameDetailPage() {
           ) : (
             <>
               <div className="flex items-start justify-between mb-3">
-                <h1 className="text-2xl font-bold text-gray-800">{game.name}</h1>
+                <h1 className="text-2xl font-bold text-gray-100">{game.name}</h1>
                 {admin && (
                   <div className="flex gap-2">
-                    <button onClick={() => setEditing(true)} className="text-indigo-600 hover:underline text-sm">編集</button>
-                    <button onClick={handleDelete} className="text-red-500 hover:underline text-sm">削除</button>
+                    <button onClick={() => setEditing(true)} className="text-indigo-400 hover:underline text-sm">編集</button>
+                    <button onClick={handleDelete} className="text-red-400 hover:underline text-sm">削除</button>
                   </div>
                 )}
               </div>
-              {game.description && <p className="text-gray-600 mb-4">{game.description}</p>}
-              <p className="text-xs text-gray-400">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
+              {game.description && <p className="text-gray-300 mb-4">{game.description}</p>}
+              <p className="text-xs text-gray-500">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
             </>
           )}
         </div>
       </div>
 
       <div className="mt-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-700">このゲームのアイテム</h2>
-        <Link to={`/items?gameId=${game.id}`} className="text-indigo-600 hover:underline text-sm">
+        <h2 className="text-lg font-semibold text-gray-200">このゲームのアイテム</h2>
+        <Link to={`/items?gameId=${game.id}`} className="text-indigo-400 hover:underline text-sm">
           アイテム一覧を見る →
         </Link>
       </div>

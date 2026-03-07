@@ -42,7 +42,7 @@ export default function ItemsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">アイテム一覧</h1>
+        <h1 className="text-2xl font-bold text-gray-100">アイテム一覧</h1>
         {loggedIn && (
           <Link
             to="/items/new"
@@ -53,13 +53,13 @@ export default function ItemsPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-3 items-end">
+      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6 flex flex-wrap gap-3 items-end">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">ゲームで絞り込み</label>
+          <label className="block text-xs text-gray-400 mb-1">ゲームで絞り込み</label>
           <select
             value={gameId}
             onChange={(e) => setGameId(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">すべて</option>
             {games.map((g) => (
@@ -68,11 +68,11 @@ export default function ItemsPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">タグで絞り込み</label>
+          <label className="block text-xs text-gray-400 mb-1">タグで絞り込み</label>
           <select
             value={tag}
             onChange={(e) => setTag(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">すべて</option>
             {tags.map((t) => (
@@ -82,12 +82,12 @@ export default function ItemsPage() {
         </div>
         <button
           onClick={handleFilter}
-          className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm"
+          className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm"
         >
           絞り込む
         </button>
         {(gameId || tag) && (
-          <button onClick={clearFilter} className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded text-sm">
+          <button onClick={clearFilter} className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm">
             クリア
           </button>
         )}
@@ -101,7 +101,7 @@ export default function ItemsPage() {
             <Link
               key={item.id}
               to={`/items/${item.id}`}
-              className="bg-white rounded-lg shadow hover:shadow-md transition overflow-hidden"
+              className="bg-gray-800 rounded-lg shadow hover:shadow-md transition overflow-hidden"
             >
               {item.imagePath ? (
                 <img
@@ -110,20 +110,20 @@ export default function ItemsPage() {
                   className="w-full h-40 object-cover"
                 />
               ) : (
-                <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
                   画像なし
                 </div>
               )}
               <div className="p-3">
-                <p className="font-semibold text-gray-800">{item.name}</p>
-                <p className="text-xs text-indigo-500 mb-1">{item.gameName}</p>
+                <p className="font-semibold text-gray-100">{item.name}</p>
+                <p className="text-xs text-indigo-400 mb-1">{item.gameName}</p>
                 {item.description && (
-                  <p className="text-gray-600 text-xs line-clamp-2">{item.description}</p>
+                  <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
                 )}
                 {item.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {item.tags.map((t) => (
-                      <span key={t.id} className="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full">
+                      <span key={t.id} className="bg-indigo-900 text-indigo-300 text-xs px-2 py-0.5 rounded-full">
                         {t.name}
                       </span>
                     ))}

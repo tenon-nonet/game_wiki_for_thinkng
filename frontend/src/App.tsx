@@ -12,7 +12,7 @@ import ItemFormPage from './pages/ItemFormPage'
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-950">
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
