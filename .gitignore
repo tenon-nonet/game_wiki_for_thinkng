@@ -1,0 +1,30 @@
+# Backend
+backend/target/
+backend/uploads/
+backend/.mvn/
+*.class
+*.jar
+*.war
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+*.env
+application-local.properties
+backend/src/main/resources/application.properties
+
+# Claude
+.claude/
