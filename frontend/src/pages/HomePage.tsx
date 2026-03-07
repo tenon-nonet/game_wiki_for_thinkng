@@ -32,12 +32,25 @@ export default function HomePage() {
               <Link
                 key={g.id}
                 to={`/games/${g.id}`}
-                className="bg-gray-800 rounded-lg shadow hover:shadow-md transition p-4"
+                className="bg-gray-800 rounded-lg shadow hover:shadow-md transition overflow-hidden"
               >
-                <p className="font-semibold text-gray-100">{g.name}</p>
-                {g.description && (
-                  <p className="text-gray-400 text-xs mt-1 line-clamp-2">{g.description}</p>
+                {g.imagePath ? (
+                  <img
+                    src={`/uploads/${g.imagePath}`}
+                    alt={g.name}
+                    className="w-full h-32 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-gray-700 flex items-center justify-center text-gray-500 text-xs">
+                    画像なし
+                  </div>
                 )}
+                <div className="p-3">
+                  <p className="font-semibold text-gray-100 text-sm">{g.name}</p>
+                  {g.description && (
+                    <p className="text-gray-400 text-xs mt-1 line-clamp-2">{g.description}</p>
+                  )}
+                </div>
               </Link>
             ))}
           </div>
