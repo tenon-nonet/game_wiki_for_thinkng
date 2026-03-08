@@ -18,6 +18,13 @@ export interface Tag {
   name: string
 }
 
+export interface Comment {
+  id: number
+  content: string
+  username: string
+  createdAt: string
+}
+
 export interface Item {
   id: number
   name: string
