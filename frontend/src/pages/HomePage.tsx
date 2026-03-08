@@ -15,8 +15,8 @@ export default function HomePage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-100 mb-2">GameWiki</h1>
-        <p className="text-gray-400">ゲームのアイテム情報を共有するWikiサイト</p>
+        <h1 className="text-4xl font-bold text-gray-100 mb-2">Enlightmenter's Archives 瞳の書院</h1>
+        <p className="text-gray-400">考察者或いは啓蒙者の為のアーカイブ、もっと瞳が必要なのだ</p>
       </div>
 
       <section className="mb-10">
