@@ -101,7 +101,7 @@ export default function ItemsPage() {
             <Link
               key={item.id}
               to={`/items/${item.id}`}
-              className="bg-gray-800 rounded-lg shadow hover:shadow-md transition overflow-hidden"
+              className="group relative bg-gray-800 rounded-lg shadow hover:shadow-md transition overflow-hidden"
             >
               {item.imagePath ? (
                 <img
@@ -130,6 +130,12 @@ export default function ItemsPage() {
                   </div>
                 )}
               </div>
+              {item.description && (
+                <div className="absolute inset-0 bg-gray-900/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center p-4 pointer-events-none">
+                  <p className="text-gray-100 font-semibold text-sm mb-2">{item.name}</p>
+                  <p className="text-gray-300 text-xs leading-relaxed line-clamp-[10]">{item.description}</p>
+                </div>
+              )}
             </Link>
           ))}
         </div>
