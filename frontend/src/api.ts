@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Tag } from './types'
+import type { AuthResponse, Game, Item, Tag, Comment } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -59,6 +59,28 @@ export const deleteItem = (id: number) =>
 // Tags
 export const getTags = () =>
   api.get<Tag[]>('/tags')
+
+export const createTag = (name: string) =>
+  api.post<Tag>('/tags', { name })
+
+export const updateTag = (id: number, name: string) =>
+  api.put<Tag>(`/tags/${id}`, { name })
+
+export const deleteTag = (id: number) =>
+  api.delete(`/tags/${id}`)
+
+// Comments
+export const getComments = (itemId: number) =>
+  api.get<Comment[]>(`/items/${itemId}/comments`)
+
+export const createComment = (itemId: number, content: string) =>
+  api.post<Comment>(`/items/${itemId}/comments`, { content })
+
+export const updateComment = (id: number, content: string) =>
+  api.put<Comment>(`/comments/${id}`, { content })
+
+export const deleteComment = (id: number) =>
+  api.delete(`/comments/${id}`)
 
 // Image Analysis
 export const analyzeImageText = (image: File) => {

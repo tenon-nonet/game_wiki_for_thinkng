@@ -23,13 +23,23 @@ public class TagController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TagResponse> create(@RequestBody Map<String, String> body) {
         String name = body.get("name");
         if (name == null || name.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(tagService.create(name));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TagResponse> update(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String name = body.get("name");
+        if (name == null || name.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(tagService.update(id, name));
     }
 
     @DeleteMapping("/{id}")

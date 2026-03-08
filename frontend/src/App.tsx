@@ -8,6 +8,7 @@ import GameDetailPage from './pages/GameDetailPage'
 import ItemsPage from './pages/ItemsPage'
 import ItemDetailPage from './pages/ItemDetailPage'
 import ItemFormPage from './pages/ItemFormPage'
+import TagsAdminPage from './pages/TagsAdminPage'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/items/new" element={<ItemFormPage />} />
           <Route path="/items/:id" element={<ItemDetailPage />} />
           <Route path="/items/:id/edit" element={<ItemFormPage />} />
+          <Route path="/tags" element={<TagsAdminPage />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -104,13 +104,10 @@ public class ItemService {
 
     private Set<Tag> resolveTags(Set<String> tagNames) {
         if (tagNames == null || tagNames.isEmpty()) return new HashSet<>();
-        return tagNames.stream().map(name -> {
-            return tagRepository.findByName(name).orElseGet(() -> {
-                Tag tag = new Tag();
-                tag.setName(name);
-                return tagRepository.save(tag);
-            });
-        }).collect(Collectors.toSet());
+        return tagNames.stream().map(name ->
+            tagRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + name))
+        ).collect(Collectors.toSet());
     }
 
     private ItemResponse toResponse(Item item) {
