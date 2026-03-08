@@ -40,12 +40,20 @@ export default function ItemsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-100">アイテム一覧</h1>
         {loggedIn && (
-          <Link
-            to="/items/new"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm"
-          >
-            + アイテム追加
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              to="/items/bulk-import"
+              className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm"
+            >
+              一括取り込み
+            </Link>
+            <Link
+              to="/items/new"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm"
+            >
+              + アイテム追加
+            </Link>
+          </div>
         )}
       </div>
 
