@@ -23,8 +23,9 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<ItemResponse>> findAll(
             @RequestParam(required = false) Long gameId,
-            @RequestParam(required = false) String tag) {
-        return ResponseEntity.ok(itemService.findAll(gameId, tag));
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(itemService.findAll(gameId, tag, keyword));
     }
 
     @GetMapping("/{id}")

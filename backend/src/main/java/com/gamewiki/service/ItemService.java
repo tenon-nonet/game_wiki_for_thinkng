@@ -27,7 +27,7 @@ public class ItemService {
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
-    public List<ItemResponse> findAll(Long gameId, String tagName) {
+    public List<ItemResponse> findAll(Long gameId, String tagName, String keyword) {
         List<Item> items;
         if (gameId != null) {
             items = itemRepository.findAll().stream()
@@ -39,6 +39,13 @@ public class ItemService {
         if (tagName != null && !tagName.isBlank()) {
             items = items.stream()
                     .filter(i -> i.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
+                    .toList();
+        }
+        if (keyword != null && !keyword.isBlank()) {
+            String lower = keyword.toLowerCase();
+            items = items.stream()
+                    .filter(i -> i.getName().toLowerCase().contains(lower)
+                            || (i.getDescription() != null && i.getDescription().toLowerCase().contains(lower)))
                     .toList();
         }
         return items.stream().map(this::toResponse).toList();

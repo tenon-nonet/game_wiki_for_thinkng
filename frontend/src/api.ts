@@ -41,8 +41,8 @@ export const deleteGame = (id: number) =>
   api.delete(`/games/${id}`)
 
 // Items
-export const getItems = (gameId?: number, tag?: string) =>
-  api.get<Item[]>('/items', { params: { ...(gameId ? { gameId } : {}), ...(tag ? { tag } : {}) } })
+export const getItems = (gameId?: number, tag?: string, keyword?: string) =>
+  api.get<Item[]>('/items', { params: { ...(gameId ? { gameId } : {}), ...(tag ? { tag } : {}), ...(keyword ? { keyword } : {}) } })
 
 export const getItem = (id: number) =>
   api.get<Item>(`/items/${id}`)
