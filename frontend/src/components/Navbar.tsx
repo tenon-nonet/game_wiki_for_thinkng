@@ -13,7 +13,7 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow">
       <Link to="/" className="text-xl font-bold text-indigo-400 hover:text-indigo-300">
-        GameWiki
+        Enlightmenter's Archives 啓蒙の書院
       </Link>
       <div className="flex items-center gap-4">
         <Link to="/games" className="hover:text-indigo-300 text-sm">ゲーム</Link>
