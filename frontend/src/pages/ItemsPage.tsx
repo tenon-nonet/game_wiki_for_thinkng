@@ -14,32 +14,25 @@ export default function ItemsPage() {
   const [keyword, setKeyword] = useState<string>(searchParams.get('keyword') || '')
   const loggedIn = isLoggedIn()
 
-  const load = async (gId?: string, t?: string, kw?: string) => {
-    const res = await getItems(gId ? Number(gId) : undefined, t || undefined, kw || undefined)
-    setItems(res.data)
-  }
-
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
     getTags().then((r) => setTags(r.data))
-    load(gameId || undefined, tag || undefined, keyword || undefined)
   }, [])
 
-  const handleFilter = () => {
+  useEffect(() => {
     const params: Record<string, string> = {}
     if (gameId) params.gameId = gameId
     if (tag) params.tag = tag
     if (keyword) params.keyword = keyword
-    setSearchParams(params)
-    load(gameId || undefined, tag || undefined, keyword || undefined)
-  }
+    setSearchParams(params, { replace: true })
+    getItems(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
+      .then((r) => setItems(r.data))
+  }, [gameId, tag, keyword])
 
   const clearFilter = () => {
     setGameId('')
     setTag('')
     setKeyword('')
-    setSearchParams({})
-    load()
   }
 
   return (
@@ -89,17 +82,10 @@ export default function ItemsPage() {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleFilter()}
             placeholder="例: ルーン"
             className="border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
-        <button
-          onClick={handleFilter}
-          className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm"
-        >
-          絞り込む
-        </button>
         {(gameId || tag || keyword) && (
           <button onClick={clearFilter} className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm">
             クリア
