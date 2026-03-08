@@ -13,7 +13,7 @@ export default function ItemFormPage() {
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [form, setForm] = useState({ name: '', description: '', gameId: '' })
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+  const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -32,16 +32,16 @@ export default function ItemFormPage() {
           description: item.description || '',
           gameId: String(item.gameId),
         })
-        setSelectedTags(new Set(item.tags.map((t) => t.name)))
+        setSelectedTags(new Set(item.tags.map((t) => t.id)))
         setExistingImage(item.imagePath)
       })
     }
   }, [id])
 
-  const toggleTag = (name: string) => {
+  const toggleTag = (id: number) => {
     setSelectedTags((prev) => {
       const next = new Set(prev)
-      next.has(name) ? next.delete(name) : next.add(name)
+      next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
   }
@@ -52,7 +52,7 @@ export default function ItemFormPage() {
     try {
       const res = await createTag(name)
       setAllTags((prev) => [...prev, res.data])
-      setSelectedTags((prev) => new Set(prev).add(res.data.name))
+      setSelectedTags((prev) => new Set(prev).add(res.data.id))
       setNewTag('')
     } catch {
       setError('タグの作成に失敗しました（同名のタグが既に存在する可能性があります）')
@@ -88,7 +88,7 @@ export default function ItemFormPage() {
       name: form.name,
       description: form.description,
       gameId: Number(form.gameId),
-      tags: Array.from(selectedTags),
+      tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -193,9 +193,9 @@ export default function ItemFormPage() {
                   <button
                     key={t.id}
                     type="button"
-                    onClick={() => toggleTag(t.name)}
+                    onClick={() => toggleTag(t.id)}
                     className={`px-3 py-1 rounded-full text-sm border transition ${
-                      selectedTags.has(t.name)
+                      selectedTags.has(t.id)
                         ? 'bg-indigo-600 border-indigo-500 text-white'
                         : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-indigo-500'
                     }`}
@@ -226,7 +226,7 @@ export default function ItemFormPage() {
             )}
             {selectedTags.size > 0 && (
               <p className="text-xs text-gray-400 mt-2">
-                選択中: {Array.from(selectedTags).join(', ')}
+                選択中: {Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean).join(', ')}
               </p>
             )}
           </div>
