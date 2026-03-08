@@ -84,7 +84,7 @@ export default function ItemsPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-gray-400 mb-1">説明文キーワード</label>
+          <label className="block text-xs text-gray-400 mb-1">名前・説明文キーワード</label>
           <input
             type="text"
             value={keyword}

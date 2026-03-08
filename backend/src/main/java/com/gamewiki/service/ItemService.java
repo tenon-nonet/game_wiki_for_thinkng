@@ -44,7 +44,8 @@ public class ItemService {
         if (keyword != null && !keyword.isBlank()) {
             String lower = keyword.toLowerCase();
             items = items.stream()
-                    .filter(i -> i.getDescription() != null && i.getDescription().toLowerCase().contains(lower))
+                    .filter(i -> i.getName().toLowerCase().contains(lower)
+                            || (i.getDescription() != null && i.getDescription().toLowerCase().contains(lower)))
                     .toList();
         }
         return items.stream().map(this::toResponse).toList();
