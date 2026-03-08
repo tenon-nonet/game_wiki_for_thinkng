@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { getItem, getGames, createItem, updateItem, analyzeImageText } from '../api'
-import type { Game } from '../types'
+import { getItem, getGames, getTags, createTag, createItem, updateItem, analyzeImageText } from '../api'
+import { isAdmin } from '../auth'
+import type { Game, Tag } from '../types'
 
 export default function ItemFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEdit = !!id
+  const admin = isAdmin()
 
   const [games, setGames] = useState<Game[]>([])
-  const [form, setForm] = useState({ name: '', description: '', gameId: '', tags: '' })
+  const [allTags, setAllTags] = useState<Tag[]>([])
+  const [form, setForm] = useState({ name: '', description: '', gameId: '' })
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
+  const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [existingImage, setExistingImage] = useState<string | null>(null)
@@ -18,6 +23,7 @@ export default function ItemFormPage() {
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
+    getTags().then((r) => setAllTags(r.data))
     if (isEdit) {
       getItem(Number(id)).then((r) => {
         const item = r.data
@@ -25,12 +31,33 @@ export default function ItemFormPage() {
           name: item.name,
           description: item.description || '',
           gameId: String(item.gameId),
-          tags: item.tags.map((t) => t.name).join(', '),
         })
+        setSelectedTags(new Set(item.tags.map((t) => t.name)))
         setExistingImage(item.imagePath)
       })
     }
   }, [id])
+
+  const toggleTag = (name: string) => {
+    setSelectedTags((prev) => {
+      const next = new Set(prev)
+      next.has(name) ? next.delete(name) : next.add(name)
+      return next
+    })
+  }
+
+  const addNewTag = async () => {
+    const name = newTag.trim()
+    if (!name) return
+    try {
+      const res = await createTag(name)
+      setAllTags((prev) => [...prev, res.data])
+      setSelectedTags((prev) => new Set(prev).add(res.data.name))
+      setNewTag('')
+    } catch {
+      setError('タグの作成に失敗しました（同名のタグが既に存在する可能性があります）')
+    }
+  }
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
@@ -56,17 +83,12 @@ export default function ItemFormPage() {
     e.preventDefault()
     setError('')
 
-    const tagList = form.tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
-
     const data = new FormData()
     const json = JSON.stringify({
       name: form.name,
       description: form.description,
       gameId: Number(form.gameId),
-      tags: tagList,
+      tags: Array.from(selectedTags),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -164,16 +186,49 @@ export default function ItemFormPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-1">
-              タグ（カンマ区切り）
-            </label>
-            <input
-              type="text"
-              value={form.tags}
-              onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              placeholder="例: 武器, レア, 強化"
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <label className="block text-sm font-medium text-gray-200 mb-2">タグ</label>
+            {allTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {allTags.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleTag(t.name)}
+                    className={`px-3 py-1 rounded-full text-sm border transition ${
+                      selectedTags.has(t.name)
+                        ? 'bg-indigo-600 border-indigo-500 text-white'
+                        : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-indigo-500'
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {admin && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNewTag() } }}
+                  placeholder="新規タグを追加"
+                  className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  type="button"
+                  onClick={addNewTag}
+                  className="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1.5 rounded text-sm"
+                >
+                  追加
+                </button>
+              </div>
+            )}
+            {selectedTags.size > 0 && (
+              <p className="text-xs text-gray-400 mt-2">
+                選択中: {Array.from(selectedTags).join(', ')}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">

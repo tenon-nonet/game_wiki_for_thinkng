@@ -60,6 +60,15 @@ export const deleteItem = (id: number) =>
 export const getTags = () =>
   api.get<Tag[]>('/tags')
 
+export const createTag = (name: string) =>
+  api.post<Tag>('/tags', { name })
+
+export const updateTag = (id: number, name: string) =>
+  api.put<Tag>(`/tags/${id}`, { name })
+
+export const deleteTag = (id: number) =>
+  api.delete(`/tags/${id}`)
+
 // Image Analysis
 export const analyzeImageText = (image: File) => {
   const data = new FormData()

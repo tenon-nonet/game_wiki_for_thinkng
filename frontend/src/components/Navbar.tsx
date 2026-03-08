@@ -20,6 +20,9 @@ export default function Navbar() {
         <Link to="/items" className="hover:text-indigo-300 text-sm">アイテム</Link>
         {loggedIn ? (
           <>
+            {isAdmin() && (
+              <Link to="/tags" className="hover:text-indigo-300 text-sm">タグ管理</Link>
+            )}
             <span className="text-gray-400 text-sm">{getUsername()}{isAdmin() && ' (Admin)'}</span>
             <button
               onClick={handleLogout}
