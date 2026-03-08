@@ -64,7 +64,7 @@ public class ImageAnalysisService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            throw new RuntimeException("Anthropic API error: " + response.statusCode());
+            throw new RuntimeException("Anthropic API error: " + response.statusCode() + " - " + response.body());
         }
 
         JsonNode root = objectMapper.readTree(response.body());

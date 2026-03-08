@@ -71,8 +71,9 @@ export default function ItemFormPage() {
         if (extracted) {
           setForm((prev) => ({ ...prev, description: extracted }))
         }
-      } catch {
-        // 解析失敗は無視してそのまま続行
+      } catch (err: any) {
+        const msg = err.response?.data?.error || err.message || '不明なエラー'
+        setError('画像解析に失敗しました: ' + msg)
       } finally {
         setAnalyzing(false)
       }
