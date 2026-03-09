@@ -153,9 +153,9 @@ export default function GamesPage() {
       {games.length === 0 ? (
         <p className="text-gray-500 text-center py-12">ゲームがありません</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {games.map((game) => (
-            <div key={game.id} className="bg-gray-800 rounded-lg shadow overflow-hidden">
+            <div key={game.id} className="bg-gray-800 rounded-xl shadow overflow-hidden">
               {editingId === game.id ? (
                 <form onSubmit={(e) => handleUpdate(e, game)} className="p-4 space-y-3">
                   <input
@@ -177,7 +177,7 @@ export default function GamesPage() {
                       <img
                         src={editPreview || `/uploads/${game.imagePath}`}
                         alt="preview"
-                        className="w-16 h-16 object-cover rounded mb-2 border border-gray-600"
+                        className="w-full h-32 object-contain bg-gray-900 rounded mb-2 border border-gray-600"
                       />
                     )}
                     <input type="file" accept="image/*" onChange={handleEditImageChange} className="text-xs text-gray-400" />
@@ -196,51 +196,38 @@ export default function GamesPage() {
                   </div>
                 </form>
               ) : (
-                <div className="flex">
+                <>
                   {game.imagePath ? (
                     <img
                       src={`/uploads/${game.imagePath}`}
                       alt={game.name}
-                      className="w-24 h-24 object-cover flex-shrink-0"
+                      className="w-full h-52 object-contain bg-gray-900"
                     />
                   ) : (
-                    <div className="w-24 h-24 bg-gray-700 flex items-center justify-center text-gray-500 text-xs flex-shrink-0">
+                    <div className="w-full h-52 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
                       画像なし
                     </div>
                   )}
-                  <div className="p-4 flex flex-col gap-1 flex-1 min-w-0">
+                  <div className="p-4 flex flex-col gap-1">
                     <div className="flex items-start justify-between">
-                      <Link to={`/games/${game.id}`} className="text-lg font-semibold text-indigo-400 hover:underline truncate">
+                      <Link to={`/games/${game.id}`} className="text-lg font-semibold text-indigo-400 hover:underline">
                         {game.name}
                       </Link>
                       {admin && (
                         <div className="flex gap-2 ml-2 flex-shrink-0">
-                          <button
-                            onClick={() => startEdit(game)}
-                            className="text-indigo-400 hover:text-indigo-300 text-sm"
-                          >
-                            編集
-                          </button>
-                          <button
-                            onClick={() => handleDelete(game.id)}
-                            className="text-red-400 hover:text-red-300 text-sm"
-                          >
-                            削除
-                          </button>
+                          <button onClick={() => startEdit(game)} className="text-indigo-400 hover:text-indigo-300 text-sm">編集</button>
+                          <button onClick={() => handleDelete(game.id)} className="text-red-400 hover:text-red-300 text-sm">削除</button>
                         </div>
                       )}
                     </div>
                     {game.description && (
                       <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>
                     )}
-                    <Link
-                      to={`/items?gameId=${game.id}`}
-                      className="text-xs text-indigo-400 hover:underline mt-auto"
-                    >
+                    <Link to={`/items?gameId=${game.id}`} className="text-xs text-indigo-400 hover:underline mt-1">
                       アイテムを見る →
                     </Link>
                   </div>
-                </div>
+                </>
               )}
             </div>
           ))}
