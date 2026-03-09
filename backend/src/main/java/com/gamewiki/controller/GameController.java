@@ -50,6 +50,13 @@ public class GameController {
         return ResponseEntity.ok(gameService.update(id, request, image));
     }
 
+    @PutMapping("/order")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateOrder(@RequestBody List<Long> ids) {
+        gameService.updateOrder(ids);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

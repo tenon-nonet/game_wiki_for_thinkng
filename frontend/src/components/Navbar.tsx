@@ -11,32 +11,31 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between shadow">
-      <Link to="/" className="text-xl font-bold text-indigo-400 hover:text-indigo-300">
+    <nav className="bg-gray-900 text-white px-8 py-4 flex items-center justify-between shadow">
+      <Link to="/" className="text-2xl font-bold text-indigo-400 hover:text-indigo-300">
         Enlightmenter's Archives 啓蒙の書院
       </Link>
-      <div className="flex items-center gap-4">
-        <Link to="/games" className="hover:text-indigo-300 text-sm">ゲーム</Link>
-        <Link to="/items" className="hover:text-indigo-300 text-sm">アイテム</Link>
+      <div className="flex items-center gap-6">
+        <Link to="/items" className="hover:text-indigo-300 text-base">アイテム</Link>
         {loggedIn ? (
           <>
             {isAdmin() && (
-              <Link to="/tags" className="hover:text-indigo-300 text-sm">タグ管理</Link>
+              <Link to="/tags" className="hover:text-indigo-300 text-base">タグ管理</Link>
             )}
-            <span className="text-gray-400 text-sm">{getUsername()}{isAdmin() && ' (Admin)'}</span>
+            <span className="text-gray-400 text-base">{getUsername()}{isAdmin() && ' (Admin)'}</span>
             <button
               onClick={handleLogout}
-              className="bg-gray-700 hover:bg-gray-600 text-sm px-3 py-1 rounded"
+              className="bg-gray-700 hover:bg-gray-600 text-base px-4 py-1.5 rounded"
             >
               ログアウト
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-indigo-300 text-sm">ログイン</Link>
+            <Link to="/login" className="hover:text-indigo-300 text-base">ログイン</Link>
             <Link
               to="/register"
-              className="bg-indigo-600 hover:bg-indigo-500 text-sm px-3 py-1 rounded"
+              className="bg-indigo-600 hover:bg-indigo-500 text-base px-4 py-1.5 rounded"
             >
               登録
             </Link>

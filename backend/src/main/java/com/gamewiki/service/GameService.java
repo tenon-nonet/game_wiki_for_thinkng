@@ -6,6 +6,7 @@ import com.gamewiki.entity.Game;
 import com.gamewiki.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -18,11 +19,20 @@ public class GameService {
     private final FileStorageService fileStorageService;
 
     public List<GameResponse> findAll() {
-        return gameRepository.findAll().stream().map(this::toResponse).toList();
+        return gameRepository.findAllByOrderBySortOrderAscIdAsc().stream().map(this::toResponse).toList();
     }
 
     public List<GameResponse> search(String name) {
-        return gameRepository.findByNameContainingIgnoreCase(name).stream().map(this::toResponse).toList();
+        return gameRepository.findByNameContainingIgnoreCaseOrderBySortOrderAscIdAsc(name).stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public void updateOrder(List<Long> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            Game game = getGame(ids.get(i));
+            game.setSortOrder(i);
+            gameRepository.save(game);
+        }
     }
 
     public GameResponse findById(Long id) {

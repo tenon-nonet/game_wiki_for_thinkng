@@ -26,6 +26,9 @@ public class Game {
 
     private String imagePath;
 
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private int sortOrder = 0;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

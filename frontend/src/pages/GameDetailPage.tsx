@@ -45,7 +45,7 @@ export default function GameDetailPage() {
   if (!game) return <div className="text-center py-12 text-gray-400">読み込み中...</div>
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="w-full max-w-5xl mx-auto px-8 py-10">
       <Link to="/games" className="text-indigo-400 hover:underline text-sm">← ゲーム一覧</Link>
 
       <div className="bg-gray-800 rounded-lg shadow mt-4 overflow-hidden">
@@ -53,11 +53,11 @@ export default function GameDetailPage() {
           <img
             src={`/uploads/${game.imagePath}`}
             alt={game.name}
-            className="w-full max-h-64 object-contain bg-gray-900"
+            className="w-full max-h-96 object-contain bg-gray-900"
           />
         )}
 
-        <div className="p-6">
+        <div className="p-8">
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-3">
               <input
