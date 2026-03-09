@@ -44,20 +44,20 @@ export default function ItemsPage() {
   }
 
   return (
-    <div className="w-full px-8 py-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-100">アイテム一覧</h1>
+    <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
+      <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">アイテム一覧</h1>
         {loggedIn && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <Link
               to="/items/bulk-import"
-              className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm"
+              className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm whitespace-nowrap"
             >
               一括取り込み
             </Link>
             <Link
               to="/items/new"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-sm whitespace-nowrap"
             >
               + アイテム追加
             </Link>
@@ -65,13 +65,13 @@ export default function ItemsPage() {
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6 flex flex-wrap gap-3 items-end w-fit">
+      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end w-full sm:w-fit">
         <div>
           <label className="block text-xs text-gray-400 mb-1">ゲームで絞り込み</label>
           <select
             value={gameId}
             onChange={(e) => setGameId(e.target.value)}
-            className="border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">すべて</option>
             {games.map((g) => (
@@ -84,7 +84,7 @@ export default function ItemsPage() {
           <select
             value={tag}
             onChange={(e) => setTag(e.target.value)}
-            className="border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">すべて</option>
             {tags.map((t) => (
@@ -99,7 +99,7 @@ export default function ItemsPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="例: ルーン"
-            className="border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
         {(gameId || tag || keyword) && (

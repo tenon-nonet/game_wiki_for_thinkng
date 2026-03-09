@@ -45,7 +45,7 @@ export default function GameDetailPage() {
   if (!game) return <div className="text-center py-12 text-gray-400">読み込み中...</div>
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-8 py-10">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
       <Link to="/games" className="text-indigo-400 hover:underline text-sm">← ゲーム一覧</Link>
 
       <div className="bg-gray-800 rounded-lg shadow mt-4 overflow-hidden">
@@ -57,7 +57,7 @@ export default function GameDetailPage() {
           />
         )}
 
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           {editing ? (
             <form onSubmit={handleUpdate} className="space-y-3">
               <input
@@ -99,10 +99,10 @@ export default function GameDetailPage() {
             </form>
           ) : (
             <>
-              <div className="flex items-start justify-between mb-3">
-                <h1 className="text-2xl font-bold text-gray-100">{game.name}</h1>
+              <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-100">{game.name}</h1>
                 {admin && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
                     <button onClick={() => setEditing(true)} className="text-indigo-400 hover:underline text-sm">編集</button>
                     <button onClick={handleDelete} className="text-red-400 hover:underline text-sm">削除</button>
                   </div>
