@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, createGame, updateGame, deleteGame } from '../api'
+import { getGames, createGame, updateGame, deleteGame, updateGameOrder } from '../api'
 import { isAdmin, isLoggedIn } from '../auth'
 import type { Game } from '../types'
 
@@ -18,6 +18,8 @@ export default function HomePage() {
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const admin = isAdmin()
   const loggedIn = isLoggedIn()
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const load = async (q?: string) => {
     const res = await getGames(q)
@@ -64,6 +66,33 @@ export default function HomePage() {
     if (!confirm('削除しますか？')) return
     await deleteGame(id)
     load()
+  }
+
+  const handleDragStart = (index: number) => setDragIndex(index)
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    setDragOverIndex(index)
+  }
+
+  const handleDrop = async (index: number) => {
+    if (dragIndex === null || dragIndex === index) {
+      setDragIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+    const newGames = [...games]
+    const [moved] = newGames.splice(dragIndex, 1)
+    newGames.splice(index, 0, moved)
+    setGames(newGames)
+    setDragIndex(null)
+    setDragOverIndex(null)
+    await updateGameOrder(newGames.map((g) => g.id))
+  }
+
+  const handleDragEnd = () => {
+    setDragIndex(null)
+    setDragOverIndex(null)
   }
 
   return (
@@ -150,8 +179,16 @@ export default function HomePage() {
           <p className="text-gray-500 text-sm">まだゲームが登録されていません</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {games.map((game) => (
-              <div key={game.id} className="bg-gray-800 rounded-xl shadow overflow-hidden">
+            {games.map((game, index) => (
+              <div
+                key={game.id}
+                className={`bg-gray-800 rounded-xl shadow overflow-hidden transition-opacity ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-indigo-400 opacity-75' : ''}`}
+                draggable={admin}
+                onDragStart={() => admin && handleDragStart(index)}
+                onDragOver={(e) => admin && handleDragOver(e, index)}
+                onDrop={() => admin && handleDrop(index)}
+                onDragEnd={handleDragEnd}
+              >
                 {editingId === game.id ? (
                   <form onSubmit={(e) => handleUpdate(e, game)} className="p-4 space-y-3">
                     <input
