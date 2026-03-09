@@ -101,9 +101,12 @@ export default function HomePage() {
       <div className="text-center mb-8 sm:mb-12">
         <div className="max-w-3xl mx-auto bg-gray-800 rounded-xl p-5 sm:p-8 text-left space-y-3 text-base text-gray-300">
           <p><span className="text-gray-100 font-medium">Enlightmenter's Archives</span> は、ゲームに登場するアイテムの情報をみんなで共有・編集できるWikiサービスです。</p>
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-wrap gap-3 pt-2">
             <Link to="/items" className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded text-base font-medium transition">
               アイテム一覧を見る
+            </Link>
+            <Link to="/games" className="bg-gray-700 hover:bg-gray-600 text-gray-100 px-5 py-2.5 rounded text-base font-medium transition">
+              ゲーム一覧を見る
             </Link>
           </div>
         </div>
