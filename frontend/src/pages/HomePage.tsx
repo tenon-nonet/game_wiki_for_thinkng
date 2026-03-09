@@ -99,16 +99,8 @@ export default function HomePage() {
     <div className="w-full px-8 py-10">
       {/* ヘッダー */}
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold text-gray-100 mb-4">Enlightmenter's Archives 瞳の書院</h1>
-        <p className="text-gray-400 text-xl mb-8">考察者或いは啓蒙者の為のアーカイブ、もっと瞳が必要なのだ</p>
         <div className="max-w-3xl mx-auto bg-gray-800 rounded-xl p-8 text-left space-y-3 text-base text-gray-300">
           <p><span className="text-gray-100 font-medium">Enlightmenter's Archives</span> は、ゲームに登場するアイテムの情報をみんなで共有・編集できるWikiサービスです。</p>
-          <ul className="space-y-1 pl-4 list-disc text-gray-400">
-            <li>ゲームとアイテムを登録して情報を整理</li>
-            <li>アイテムにタグを付けて分類・検索</li>
-            <li>画像をアップロードしてビジュアルで管理</li>
-            <li>アカウント登録でアイテムの追加・編集が可能</li>
-          </ul>
           <div className="flex gap-3 pt-2">
             <Link to="/items" className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded text-base font-medium transition">
               アイテム一覧を見る
@@ -182,7 +174,7 @@ export default function HomePage() {
             {games.map((game, index) => (
               <div
                 key={game.id}
-                className={`bg-gray-800 rounded-xl shadow overflow-hidden transition-opacity ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-indigo-400 opacity-75' : ''}`}
+                className={`group bg-gray-800 rounded-xl shadow overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-indigo-400 opacity-75' : ''}`}
                 draggable={admin}
                 onDragStart={() => admin && handleDragStart(index)}
                 onDragOver={(e) => admin && handleDragOver(e, index)}
@@ -218,9 +210,9 @@ export default function HomePage() {
                   </form>
                 ) : (
                   <>
-                    <Link to={`/games/${game.id}`}>
+                    <Link to={`/games/${game.id}`} className="block overflow-hidden">
                       {game.imagePath ? (
-                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-gray-900 hover:opacity-90 transition" />
+                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-gray-900 transition-transform duration-500 ease-out group-hover:scale-125" />
                       ) : (
                         <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
                       )}
