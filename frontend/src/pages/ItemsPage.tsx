@@ -44,9 +44,9 @@ export default function ItemsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="w-full px-8 py-10">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-100">アイテム一覧</h1>
+        <h1 className="text-3xl font-bold text-gray-100">アイテム一覧</h1>
         {loggedIn && (
           <div className="flex gap-2">
             <Link
@@ -112,7 +112,7 @@ export default function ItemsPage() {
       {items.length === 0 ? (
         <p className="text-gray-500 text-center py-12">アイテムがありません</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
           {items.map((item) => (
             <Link
               key={item.id}
@@ -123,16 +123,16 @@ export default function ItemsPage() {
                 <img
                   src={`/uploads/${item.imagePath}`}
                   alt={item.name}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-52 object-cover"
                 />
               ) : (
-                <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
+                <div className="w-full h-52 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
                   画像なし
                 </div>
               )}
-              <div className="p-3">
-                <p className="font-semibold text-gray-100">{item.name}</p>
-                <p className="text-xs text-indigo-400 mb-1">{item.gameName}</p>
+              <div className="p-4">
+                <p className="font-semibold text-gray-100 text-base">{item.name}</p>
+                <p className="text-sm text-indigo-400 mb-1">{item.gameName}</p>
                 {item.description && (
                   <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
                 )}

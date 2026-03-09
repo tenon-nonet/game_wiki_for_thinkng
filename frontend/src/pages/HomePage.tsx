@@ -67,12 +67,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="w-full px-8 py-10">
       {/* ヘッダー */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-100 mb-3">Enlightmenter's Archives 瞳の書院</h1>
-        <p className="text-gray-400 text-lg mb-6">考察者或いは啓蒙者の為のアーカイブ、もっと瞳が必要なのだ</p>
-        <div className="max-w-2xl mx-auto bg-gray-800 rounded-xl p-6 text-left space-y-3 text-sm text-gray-300">
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold text-gray-100 mb-4">Enlightmenter's Archives 瞳の書院</h1>
+        <p className="text-gray-400 text-xl mb-8">考察者或いは啓蒙者の為のアーカイブ、もっと瞳が必要なのだ</p>
+        <div className="max-w-3xl mx-auto bg-gray-800 rounded-xl p-8 text-left space-y-3 text-base text-gray-300">
           <p><span className="text-gray-100 font-medium">Enlightmenter's Archives</span> は、ゲームに登場するアイテムの情報をみんなで共有・編集できるWikiサービスです。</p>
           <ul className="space-y-1 pl-4 list-disc text-gray-400">
             <li>ゲームとアイテムを登録して情報を整理</li>
@@ -81,7 +81,7 @@ export default function HomePage() {
             <li>アカウント登録でアイテムの追加・編集が可能</li>
           </ul>
           <div className="flex gap-3 pt-2">
-            <Link to="/items" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm font-medium transition">
+            <Link to="/items" className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded text-base font-medium transition">
               アイテム一覧を見る
             </Link>
           </div>
@@ -90,12 +90,12 @@ export default function HomePage() {
 
       {/* ゲーム一覧 */}
       <section>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-semibold text-gray-200">登録ゲーム</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-200">登録ゲーム</h2>
           {loggedIn && (
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded text-sm"
             >
               + ゲーム追加
             </button>
@@ -149,7 +149,7 @@ export default function HomePage() {
         {games.length === 0 ? (
           <p className="text-gray-500 text-sm">まだゲームが登録されていません</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {games.map((game) => (
               <div key={game.id} className="bg-gray-800 rounded-xl shadow overflow-hidden">
                 {editingId === game.id ? (
@@ -183,14 +183,14 @@ export default function HomePage() {
                   <>
                     <Link to={`/games/${game.id}`}>
                       {game.imagePath ? (
-                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-52 object-contain bg-gray-900 hover:opacity-90 transition" />
+                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-gray-900 hover:opacity-90 transition" />
                       ) : (
-                        <div className="w-full h-52 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
+                        <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
                       )}
                     </Link>
-                    <div className="p-4 flex flex-col gap-1">
+                    <div className="p-5 flex flex-col gap-1">
                       <div className="flex items-start justify-between">
-                        <Link to={`/games/${game.id}`} className="text-lg font-semibold text-indigo-400 hover:underline">
+                        <Link to={`/games/${game.id}`} className="text-xl font-semibold text-indigo-400 hover:underline">
                           {game.name}
                         </Link>
                         {admin && (
