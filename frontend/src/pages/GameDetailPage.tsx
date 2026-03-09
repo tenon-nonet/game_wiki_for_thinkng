@@ -53,7 +53,7 @@ export default function GameDetailPage() {
           <img
             src={`/uploads/${game.imagePath}`}
             alt={game.name}
-            className="w-full max-h-64 object-cover"
+            className="w-full max-h-64 object-contain bg-gray-900"
           />
         )}
 

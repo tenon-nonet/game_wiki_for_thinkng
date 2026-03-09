@@ -53,7 +53,7 @@ export default function HomePage() {
                   <img
                     src={`/uploads/${g.imagePath}`}
                     alt={g.name}
-                    className="w-full h-44 object-cover"
+                    className="w-full h-44 object-contain bg-gray-900"
                   />
                 ) : (
                   <div className="w-full h-44 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
