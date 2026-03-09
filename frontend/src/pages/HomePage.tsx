@@ -112,7 +112,7 @@ export default function HomePage() {
       {/* ゲーム一覧 */}
       <section>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-200">登録ゲーム</h2>
+          <h2 className="text-2xl font-semibold text-gray-200">ゲーム一覧</h2>
           {loggedIn && (
             <button
               onClick={() => setShowForm(!showForm)}
