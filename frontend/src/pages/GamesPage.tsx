@@ -96,7 +96,7 @@ export default function GamesPage() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+    <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">ゲーム一覧</h1>
         {loggedIn && (
@@ -156,7 +156,7 @@ export default function GamesPage() {
       {games.length === 0 ? (
         <p className="text-gray-500 text-sm">まだゲームが登録されていません</p>
       ) : (
-        <div className="flex flex-col gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {games.map((game, index) => (
             <div
               key={game.id}
