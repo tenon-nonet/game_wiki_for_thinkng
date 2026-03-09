@@ -132,7 +132,7 @@ export default function HomePage() {
           </form>
         )}
 
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+        <form onSubmit={handleSearch} className="flex gap-2 mb-6 max-w-xl">
           <input
             type="text"
             placeholder="ゲームを検索..."

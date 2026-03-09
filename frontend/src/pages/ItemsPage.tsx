@@ -65,7 +65,7 @@ export default function ItemsPage() {
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6 flex flex-wrap gap-3 items-end">
+      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6 flex flex-wrap gap-3 items-end w-fit">
         <div>
           <label className="block text-xs text-gray-400 mb-1">ゲームで絞り込み</label>
           <select
