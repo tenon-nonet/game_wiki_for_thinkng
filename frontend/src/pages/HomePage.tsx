@@ -230,7 +230,7 @@ export default function HomePage() {
                         )}
                       </div>
                       {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
-                      <Link to={`/items?gameId=${game.id}`} className="text-xs text-indigo-400 hover:underline mt-1">アイテムを見る →</Link>
+                      <Link to={`/items?gameId=${game.id}`} className="mt-3 inline-block bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded transition">アイテムを見る →</Link>
                     </div>
                   </>
                 )}
