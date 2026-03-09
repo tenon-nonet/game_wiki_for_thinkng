@@ -23,7 +23,6 @@ export default function ItemFormPage() {
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
-    getTags().then((r) => setAllTags(r.data))
     if (isEdit) {
       getItem(Number(id)).then((r) => {
         const item = r.data
@@ -34,9 +33,18 @@ export default function ItemFormPage() {
         })
         setSelectedTags(new Set(item.tags.map((t) => t.id)))
         setExistingImage(item.imagePath)
+        getTags(item.gameId).then((r2) => setAllTags(r2.data))
       })
     }
   }, [id])
+
+  useEffect(() => {
+    if (form.gameId && !isEdit) {
+      setAllTags([])
+      setSelectedTags(new Set())
+      getTags(Number(form.gameId)).then((r) => setAllTags(r.data))
+    }
+  }, [form.gameId])
 
   const toggleTag = (id: number) => {
     setSelectedTags((prev) => {
@@ -48,9 +56,9 @@ export default function ItemFormPage() {
 
   const addNewTag = async () => {
     const name = newTag.trim()
-    if (!name) return
+    if (!name || !form.gameId) return
     try {
-      const res = await createTag(name)
+      const res = await createTag(name, Number(form.gameId))
       setAllTags((prev) => [...prev, res.data])
       setSelectedTags((prev) => new Set(prev).add(res.data.id))
       setNewTag('')
@@ -188,7 +196,9 @@ export default function ItemFormPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-2">タグ</label>
-            {allTags.length > 0 && (
+            {!form.gameId ? (
+              <p className="text-gray-500 text-xs">ゲームを選択するとタグが表示されます</p>
+            ) : allTags.length > 0 ? (
               <div className="flex flex-wrap gap-2 mb-3">
                 {allTags.map((t) => (
                   <button
@@ -205,8 +215,10 @@ export default function ItemFormPage() {
                   </button>
                 ))}
               </div>
+            ) : (
+              <p className="text-gray-500 text-xs mb-2">このゲームにタグはありません</p>
             )}
-            {admin && (
+            {admin && form.gameId && (
               <div className="flex gap-2">
                 <input
                   type="text"

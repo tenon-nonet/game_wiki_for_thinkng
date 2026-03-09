@@ -57,11 +57,11 @@ export const deleteItem = (id: number) =>
   api.delete(`/items/${id}`)
 
 // Tags
-export const getTags = () =>
-  api.get<Tag[]>('/tags')
+export const getTags = (gameId: number) =>
+  api.get<Tag[]>('/tags', { params: { gameId } })
 
-export const createTag = (name: string) =>
-  api.post<Tag>('/tags', { name })
+export const createTag = (name: string, gameId: number) =>
+  api.post<Tag>('/tags', { name, gameId })
 
 export const updateTag = (id: number, name: string) =>
   api.put<Tag>(`/tags/${id}`, { name })

@@ -28,8 +28,16 @@ export default function BulkImportPage() {
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
-    getTags().then((r) => setAllTags(r.data))
   }, [])
+
+  useEffect(() => {
+    if (gameId) {
+      setSelectedTags(new Set())
+      getTags(Number(gameId)).then((r) => setAllTags(r.data))
+    } else {
+      setAllTags([])
+    }
+  }, [gameId])
 
   const toggleTag = (id: number) => {
     setSelectedTags((prev) => {

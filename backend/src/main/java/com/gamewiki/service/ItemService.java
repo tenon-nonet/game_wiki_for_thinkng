@@ -63,7 +63,7 @@ public class ItemService {
         item.setName(request.getName());
         item.setDescription(request.getDescription());
         item.setGame(game);
-        item.setTags(resolveTags(request.getTags()));
+        item.setTags(resolveTags(request.getTags(), request.getGameId()));
 
         if (image != null && !image.isEmpty()) {
             item.setImagePath(fileStorageService.store(image));
@@ -81,7 +81,7 @@ public class ItemService {
         item.setName(request.getName());
         item.setDescription(request.getDescription());
         item.setGame(game);
-        item.setTags(resolveTags(request.getTags()));
+        item.setTags(resolveTags(request.getTags(), request.getGameId()));
 
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(item.getImagePath());
@@ -102,10 +102,10 @@ public class ItemService {
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
     }
 
-    private Set<Tag> resolveTags(Set<String> tagNames) {
+    private Set<Tag> resolveTags(Set<String> tagNames, Long gameId) {
         if (tagNames == null || tagNames.isEmpty()) return new HashSet<>();
         return tagNames.stream().map(name ->
-            tagRepository.findByName(name)
+            tagRepository.findByNameAndGameId(name, gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + name))
         ).collect(Collectors.toSet());
     }
