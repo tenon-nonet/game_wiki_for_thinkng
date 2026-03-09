@@ -117,14 +117,14 @@ export default function ItemFormPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link to="/items" className="text-indigo-400 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-red-700 hover:underline text-sm">← アイテム一覧</Link>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 mt-4">
+      <div className="bg-zinc-800 rounded-lg shadow p-6 mt-4">
         <h1 className="text-xl font-bold text-gray-100 mb-6">
           {isEdit ? 'アイテム編集' : 'アイテム追加'}
         </h1>
 
-        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -134,7 +134,7 @@ export default function ItemFormPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
           </div>
 
@@ -144,7 +144,7 @@ export default function ItemFormPage() {
               value={form.gameId}
               onChange={(e) => setForm({ ...form, gameId: e.target.value })}
               required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
             >
               <option value="">選択してください</option>
               {games.map((g) => (
@@ -156,7 +156,7 @@ export default function ItemFormPage() {
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
-              <span className="ml-2 text-xs text-indigo-400 font-normal">
+              <span className="ml-2 text-xs text-red-700 font-normal">
                 ※ 画像を選択するとテキストを自動抽出して説明欄に入力します
               </span>
             </label>
@@ -179,7 +179,7 @@ export default function ItemFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               説明
               {analyzing && (
-                <span className="ml-2 text-xs text-indigo-400 animate-pulse">
+                <span className="ml-2 text-xs text-red-700 animate-pulse">
                   画像からテキストを解析中...
                 </span>
               )}
@@ -190,7 +190,7 @@ export default function ItemFormPage() {
               rows={4}
               disabled={analyzing}
               placeholder={analyzing ? '解析中...' : ''}
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-800 disabled:text-gray-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
             />
           </div>
 
@@ -207,8 +207,8 @@ export default function ItemFormPage() {
                     onClick={() => toggleTag(t.id)}
                     className={`px-3 py-1 rounded-full text-sm border transition ${
                       selectedTags.has(t.id)
-                        ? 'bg-indigo-600 border-indigo-500 text-white'
-                        : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-indigo-500'
+                        ? 'bg-red-900 border-red-800 text-white'
+                        : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
                     }`}
                   >
                     {t.name}
@@ -226,7 +226,7 @@ export default function ItemFormPage() {
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNewTag() } }}
                   placeholder="新規タグを追加"
-                  className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
                 />
                 <button
                   type="button"
@@ -248,14 +248,14 @@ export default function ItemFormPage() {
             <button
               type="submit"
               disabled={analyzing}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+              className="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
             >
               {isEdit ? '更新する' : '追加する'}
             </button>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
+              className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
             >
               キャンセル
             </button>

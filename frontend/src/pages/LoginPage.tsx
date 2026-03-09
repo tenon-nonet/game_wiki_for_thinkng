@@ -22,10 +22,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="bg-gray-800 rounded-lg shadow p-8 w-full max-w-md">
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="bg-zinc-800 rounded-lg shadow p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-gray-100">ログイン</h1>
-        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">ユーザー名</label>
@@ -34,7 +34,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
           </div>
           <div>
@@ -44,19 +44,19 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded"
+            className="w-full bg-red-900 hover:bg-red-800 text-white font-medium py-2 rounded"
           >
             ログイン
           </button>
         </form>
         <p className="mt-4 text-sm text-gray-400 text-center">
           アカウントをお持ちでない方は{' '}
-          <Link to="/register" className="text-indigo-400 hover:underline">新規登録</Link>
+          <Link to="/register" className="text-red-700 hover:underline">新規登録</Link>
         </p>
       </div>
     </div>

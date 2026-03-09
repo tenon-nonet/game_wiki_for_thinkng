@@ -147,26 +147,26 @@ export default function BulkImportPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link to="/items" className="text-indigo-400 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-red-700 hover:underline text-sm">← アイテム一覧</Link>
 
-      <div className="bg-gray-800 rounded-lg shadow p-6 mt-4">
+      <div className="bg-zinc-800 rounded-lg shadow p-6 mt-4">
         <h1 className="text-xl font-bold text-gray-100 mb-6">画像一括取り込み</h1>
 
-        {globalError && <p className="text-red-400 text-sm mb-4">{globalError}</p>}
+        {globalError && <p className="text-red-600 text-sm mb-4">{globalError}</p>}
 
         {phase === 'done' ? (
           <div className="text-center py-8">
             <p className="text-green-400 text-lg font-semibold mb-4">✓ {importProgress.total}件のアイテムを登録しました</p>
-            <button onClick={() => navigate('/items')} className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded">
+            <button onClick={() => navigate('/items')} className="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded">
               アイテム一覧へ
             </button>
           </div>
         ) : phase === 'importing' ? (
           <div className="text-center py-8">
             <p className="text-gray-200 text-lg mb-2">登録中... {importProgress.current} / {importProgress.total}</p>
-            <div className="w-full bg-gray-700 rounded-full h-2 mt-4">
+            <div className="w-full bg-zinc-700 rounded-full h-2 mt-4">
               <div
-                className="bg-indigo-500 h-2 rounded-full transition-all"
+                className="bg-red-800 h-2 rounded-full transition-all"
                 style={{ width: `${importProgress.total ? (importProgress.current / importProgress.total) * 100 : 0}%` }}
               />
             </div>
@@ -185,7 +185,7 @@ export default function BulkImportPage() {
                   className="text-sm text-gray-400 disabled:opacity-50"
                 />
                 {entries.length > 0 && (
-                  <p className="text-xs text-indigo-400 mt-1">{entries.length}件の画像を検出</p>
+                  <p className="text-xs text-red-700 mt-1">{entries.length}件の画像を検出</p>
                 )}
               </div>
 
@@ -195,7 +195,7 @@ export default function BulkImportPage() {
                   value={gameId}
                   onChange={(e) => setGameId(e.target.value)}
                   disabled={phase === 'review'}
-                  className="border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                  className="border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:opacity-50"
                 >
                   <option value="">選択してください</option>
                   {games.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -213,8 +213,8 @@ export default function BulkImportPage() {
                       onClick={() => toggleTag(t.id)}
                       className={`px-3 py-1 rounded-full text-sm border transition disabled:opacity-50 ${
                         selectedTags.has(t.id)
-                          ? 'bg-indigo-600 border-indigo-500 text-white'
-                          : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-indigo-500'
+                          ? 'bg-red-900 border-red-800 text-white'
+                          : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
                       }`}
                     >
                       {t.name}
@@ -226,7 +226,7 @@ export default function BulkImportPage() {
               {phase === 'setup' && entries.length > 0 && (
                 <button
                   onClick={analyzeAll}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium"
+                  className="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded font-medium"
                 >
                   解析開始
                 </button>
@@ -237,14 +237,14 @@ export default function BulkImportPage() {
             {phase === 'review' && entries.length > 0 && (
               <>
                 {analyzingCount > 0 && (
-                  <p className="text-indigo-400 text-sm animate-pulse mb-4">
+                  <p className="text-red-700 text-sm animate-pulse mb-4">
                     解析中... ({entries.length - analyzingCount}/{entries.length} 完了)
                   </p>
                 )}
 
                 <div className="space-y-4 mb-6 max-h-[60vh] overflow-y-auto pr-1">
                   {entries.map((entry, i) => (
-                    <div key={i} className="bg-gray-700 rounded-lg p-4 flex gap-4">
+                    <div key={i} className="bg-zinc-700 rounded-lg p-4 flex gap-4">
                       <img src={entry.previewUrl} alt={entry.name} className="w-24 h-24 object-cover rounded flex-shrink-0" />
                       <div className="flex-1 space-y-2">
                         <div className="flex items-start justify-between gap-2">
@@ -253,23 +253,23 @@ export default function BulkImportPage() {
                             value={entry.name}
                             onChange={(e) => updateEntry(i, 'name', e.target.value)}
                             placeholder="アイテム名 *"
-                            className="flex-1 border border-gray-600 rounded px-2 py-1 bg-gray-800 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="flex-1 border border-gray-600 rounded px-2 py-1 bg-zinc-800 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-800"
                           />
-                          <button onClick={() => removeEntry(i)} className="text-red-400 hover:text-red-300 text-xs flex-shrink-0">
+                          <button onClick={() => removeEntry(i)} className="text-red-600 hover:text-red-300 text-xs flex-shrink-0">
                             削除
                           </button>
                         </div>
                         {entry.analyzing ? (
-                          <p className="text-indigo-400 text-xs animate-pulse">解析中...</p>
+                          <p className="text-red-700 text-xs animate-pulse">解析中...</p>
                         ) : entry.error ? (
-                          <p className="text-red-400 text-xs">{entry.error}</p>
+                          <p className="text-red-600 text-xs">{entry.error}</p>
                         ) : null}
                         <textarea
                           value={entry.description}
                           onChange={(e) => updateEntry(i, 'description', e.target.value)}
                           rows={3}
                           placeholder="説明（自動抽出）"
-                          className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-800 text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                          className="w-full border border-gray-600 rounded px-2 py-1 bg-zinc-800 text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-red-800 resize-none"
                         />
                       </div>
                     </div>
@@ -281,13 +281,13 @@ export default function BulkImportPage() {
                     <button
                       onClick={importAll}
                       disabled={entries.filter((e) => e.name.trim()).length === 0}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded font-medium disabled:opacity-40"
+                      className="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded font-medium disabled:opacity-40"
                     >
                       {entries.filter((e) => e.name.trim()).length}件を一括登録
                     </button>
                     <button
                       onClick={() => { setPhase('setup'); setEntries([]) }}
-                      className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
+                      className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
                     >
                       やり直す
                     </button>

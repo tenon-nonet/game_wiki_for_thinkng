@@ -70,12 +70,12 @@ export default function TagsAdminPage() {
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
       <h1 className="text-3xl font-bold text-gray-100 mb-8">タグ管理</h1>
 
-      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-zinc-800 rounded-lg p-4 mb-6">
         <label className="block text-sm font-medium text-gray-200 mb-2">ゲームを選択</label>
         <select
           value={selectedGameId}
           onChange={(e) => { setSelectedGameId(e.target.value); setEditingId(null); setError('') }}
-          className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
         >
           <option value="">選択してください</option>
           {games.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -84,20 +84,20 @@ export default function TagsAdminPage() {
 
       {selectedGameId && (
         <>
-          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
-          <form onSubmit={handleCreate} className="bg-gray-800 rounded-lg p-4 mb-6 flex gap-2">
+          <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg p-4 mb-6 flex gap-2">
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="新規タグ名"
               required
-              className="flex-1 border border-gray-600 rounded px-3 py-2 text-sm bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm"
+              className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm"
             >
               追加
             </button>
@@ -108,7 +108,7 @@ export default function TagsAdminPage() {
           ) : (
             <ul className="space-y-2">
               {tags.map((tag) => (
-                <li key={tag.id} className="bg-gray-800 rounded-lg px-4 py-3 flex items-center gap-3">
+                <li key={tag.id} className="bg-zinc-800 rounded-lg px-4 py-3 flex items-center gap-3">
                   {editingId === tag.id ? (
                     <form onSubmit={handleUpdate} className="flex gap-2 flex-1">
                       <input
@@ -116,22 +116,22 @@ export default function TagsAdminPage() {
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         required
-                        className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
                       />
-                      <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-sm">
+                      <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded text-sm">
                         保存
                       </button>
-                      <button type="button" onClick={() => setEditingId(null)} className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded text-sm">
+                      <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded text-sm">
                         キャンセル
                       </button>
                     </form>
                   ) : (
                     <>
                       <span className="flex-1 text-gray-100 text-sm">{tag.name}</span>
-                      <button onClick={() => startEdit(tag)} className="text-indigo-400 hover:text-indigo-300 text-sm">
+                      <button onClick={() => startEdit(tag)} className="text-red-700 hover:text-red-600 text-sm">
                         編集
                       </button>
-                      <button onClick={() => handleDelete(tag.id)} className="text-red-400 hover:text-red-300 text-sm">
+                      <button onClick={() => handleDelete(tag.id)} className="text-red-600 hover:text-red-300 text-sm">
                         削除
                       </button>
                     </>

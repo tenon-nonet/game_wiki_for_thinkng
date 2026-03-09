@@ -73,17 +73,17 @@ export default function ItemDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      <Link to="/items" className="text-indigo-400 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-red-700 hover:underline text-sm">← アイテム一覧</Link>
 
-      <div className="bg-gray-800 rounded-lg shadow mt-4 overflow-hidden">
+      <div className="bg-zinc-800 rounded-lg shadow mt-4 overflow-hidden">
         {item.imagePath ? (
           <img
             src={`/uploads/${item.imagePath}`}
             alt={item.name}
-            className="w-full max-h-[500px] object-contain bg-gray-900"
+            className="w-full max-h-[500px] object-contain bg-zinc-900"
           />
         ) : (
-          <div className="w-full h-48 bg-gray-700 flex items-center justify-center text-gray-500">
+          <div className="w-full h-48 bg-zinc-700 flex items-center justify-center text-gray-500">
             画像なし
           </div>
         )}
@@ -95,18 +95,18 @@ export default function ItemDetailPage() {
               <div className="flex gap-2 flex-shrink-0">
                 <Link
                   to={`/items/${item.id}/edit`}
-                  className="text-indigo-400 hover:underline text-sm"
+                  className="text-red-700 hover:underline text-sm"
                 >
                   編集
                 </Link>
-                <button onClick={handleDelete} className="text-red-400 hover:underline text-sm">
+                <button onClick={handleDelete} className="text-red-600 hover:underline text-sm">
                   削除
                 </button>
               </div>
             )}
           </div>
 
-          <Link to={`/games/${item.gameId}`} className="text-indigo-400 hover:underline text-sm">
+          <Link to={`/games/${item.gameId}`} className="text-red-700 hover:underline text-sm">
             {item.gameName}
           </Link>
 
@@ -117,7 +117,7 @@ export default function ItemDetailPage() {
           {item.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {item.tags.map((t) => (
-                <span key={t.id} className="bg-indigo-900 text-indigo-300 text-sm px-3 py-1 rounded-full">
+                <span key={t.id} className="bg-red-950 text-red-200 text-sm px-3 py-1 rounded-full">
                   {t.name}
                 </span>
               ))}
@@ -135,21 +135,21 @@ export default function ItemDetailPage() {
         <h2 className="text-lg font-bold text-gray-100 mb-4">考察・コメント</h2>
 
         {loggedIn && (
-          <form onSubmit={handleCommentSubmit} className="bg-gray-800 rounded-lg p-4 mb-6">
+          <form onSubmit={handleCommentSubmit} className="bg-zinc-800 rounded-lg p-4 mb-6">
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="考察・メモを書く..."
               rows={3}
               required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm resize-none"
             />
-            {commentError && <p className="text-red-400 text-xs mt-1">{commentError}</p>}
+            {commentError && <p className="text-red-600 text-xs mt-1">{commentError}</p>}
             <div className="flex justify-end mt-2">
               <button
                 type="submit"
                 disabled={!commentText.trim()}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-1.5 rounded disabled:opacity-40"
+                className="bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-1.5 rounded disabled:opacity-40"
               >
                 投稿
               </button>
@@ -162,20 +162,20 @@ export default function ItemDetailPage() {
         ) : (
           <ul className="space-y-3">
             {comments.map((c) => (
-              <li key={c.id} className="bg-gray-800 rounded-lg px-4 py-3">
+              <li key={c.id} className="bg-zinc-800 rounded-lg px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between mb-1 gap-1">
-                  <span className="text-indigo-400 text-xs font-medium">{c.username}</span>
+                  <span className="text-red-700 text-xs font-medium">{c.username}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 text-xs">
                       {new Date(c.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {c.username === currentUser && editingId !== c.id && (
-                      <button onClick={() => startEdit(c)} className="text-indigo-400 hover:text-indigo-300 text-xs">
+                      <button onClick={() => startEdit(c)} className="text-red-700 hover:text-red-600 text-xs">
                         編集
                       </button>
                     )}
                     {(admin || c.username === currentUser) && (
-                      <button onClick={() => handleCommentDelete(c.id)} className="text-red-400 hover:text-red-300 text-xs">
+                      <button onClick={() => handleCommentDelete(c.id)} className="text-red-600 hover:text-red-300 text-xs">
                         削除
                       </button>
                     )}
@@ -188,12 +188,12 @@ export default function ItemDetailPage() {
                       onChange={(e) => setEditText(e.target.value)}
                       rows={3}
                       required
-                      className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+                      className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm resize-none"
                     />
-                    {commentError && <p className="text-red-400 text-xs mt-1">{commentError}</p>}
+                    {commentError && <p className="text-red-600 text-xs mt-1">{commentError}</p>}
                     <div className="flex gap-2 justify-end mt-2">
-                      <button type="submit" disabled={!editText.trim()} className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded disabled:opacity-40">保存</button>
-                      <button type="button" onClick={() => setEditingId(null)} className="bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs px-3 py-1.5 rounded">キャンセル</button>
+                      <button type="submit" disabled={!editText.trim()} className="bg-red-900 hover:bg-red-800 text-white text-xs px-3 py-1.5 rounded disabled:opacity-40">保存</button>
+                      <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 text-xs px-3 py-1.5 rounded">キャンセル</button>
                     </div>
                   </form>
                 ) : (
