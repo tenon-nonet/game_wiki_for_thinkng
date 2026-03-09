@@ -123,7 +123,7 @@ export default function ItemsPage() {
                 <img
                   src={`/uploads/${item.imagePath}`}
                   alt={item.name}
-                  className="w-full h-52 object-cover"
+                  className="w-full h-52 object-contain bg-gray-900"
                 />
               ) : (
                 <div className="w-full h-52 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
