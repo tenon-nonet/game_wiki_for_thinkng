@@ -16,8 +16,16 @@ export default function ItemsPage() {
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
-    getTags().then((r) => setTags(r.data))
   }, [])
+
+  useEffect(() => {
+    if (gameId) {
+      getTags(Number(gameId)).then((r) => setTags(r.data))
+    } else {
+      setTags([])
+      setTag('')
+    }
+  }, [gameId])
 
   useEffect(() => {
     const params: Record<string, string> = {}

@@ -18,18 +18,20 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<List<TagResponse>> findAll() {
-        return ResponseEntity.ok(tagService.findAll());
+    public ResponseEntity<List<TagResponse>> findAll(@RequestParam Long gameId) {
+        return ResponseEntity.ok(tagService.findByGameId(gameId));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TagResponse> create(@RequestBody Map<String, String> body) {
-        String name = body.get("name");
-        if (name == null || name.isBlank()) {
+    public ResponseEntity<TagResponse> create(@RequestBody Map<String, Object> body) {
+        String name = (String) body.get("name");
+        Object gameIdObj = body.get("gameId");
+        if (name == null || name.isBlank() || gameIdObj == null) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(tagService.create(name));
+        Long gameId = Long.valueOf(gameIdObj.toString());
+        return ResponseEntity.ok(tagService.create(name, gameId));
     }
 
     @PutMapping("/{id}")
