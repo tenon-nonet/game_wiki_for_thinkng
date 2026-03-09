@@ -72,7 +72,7 @@ export default function ItemDetailPage() {
   if (!item) return <div className="text-center py-12 text-gray-400">読み込み中...</div>
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-8 py-10">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
       <Link to="/items" className="text-indigo-400 hover:underline text-sm">← アイテム一覧</Link>
 
       <div className="bg-gray-800 rounded-lg shadow mt-4 overflow-hidden">
@@ -88,11 +88,11 @@ export default function ItemDetailPage() {
           </div>
         )}
 
-        <div className="p-8">
-          <div className="flex items-start justify-between mb-3">
-            <h1 className="text-3xl font-bold text-gray-100">{item.name}</h1>
+        <div className="p-5 sm:p-8">
+          <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{item.name}</h1>
             {loggedIn && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <Link
                   to={`/items/${item.id}/edit`}
                   className="text-indigo-400 hover:underline text-sm"
@@ -163,9 +163,9 @@ export default function ItemDetailPage() {
           <ul className="space-y-3">
             {comments.map((c) => (
               <li key={c.id} className="bg-gray-800 rounded-lg px-4 py-3">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex flex-wrap items-center justify-between mb-1 gap-1">
                   <span className="text-indigo-400 text-xs font-medium">{c.username}</span>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <span className="text-gray-500 text-xs">
                       {new Date(c.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>

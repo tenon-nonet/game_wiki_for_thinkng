@@ -96,10 +96,10 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full px-8 py-10">
+    <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       {/* ヘッダー */}
-      <div className="text-center mb-12">
-        <div className="max-w-3xl mx-auto bg-gray-800 rounded-xl p-8 text-left space-y-3 text-base text-gray-300">
+      <div className="text-center mb-8 sm:mb-12">
+        <div className="max-w-3xl mx-auto bg-gray-800 rounded-xl p-5 sm:p-8 text-left space-y-3 text-base text-gray-300">
           <p><span className="text-gray-100 font-medium">Enlightmenter's Archives</span> は、ゲームに登場するアイテムの情報をみんなで共有・編集できるWikiサービスです。</p>
           <div className="flex gap-3 pt-2">
             <Link to="/items" className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded text-base font-medium transition">
@@ -111,12 +111,12 @@ export default function HomePage() {
 
       {/* ゲーム一覧 */}
       <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-200">ゲーム一覧</h2>
+        <div className="flex items-center justify-between mb-6 gap-3">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">ゲーム一覧</h2>
           {loggedIn && (
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded text-sm"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded text-sm whitespace-nowrap"
             >
               + ゲーム追加
             </button>
@@ -153,7 +153,7 @@ export default function HomePage() {
           </form>
         )}
 
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6 max-w-xl">
+        <form onSubmit={handleSearch} className="flex gap-2 mb-6 max-w-xl w-full">
           <input
             type="text"
             placeholder="ゲームを検索..."
