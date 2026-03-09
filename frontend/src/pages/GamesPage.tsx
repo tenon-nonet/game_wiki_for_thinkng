@@ -102,7 +102,7 @@ export default function GamesPage() {
         {loggedIn && (
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm whitespace-nowrap"
+            className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm whitespace-nowrap"
           >
             + ゲーム追加
           </button>
@@ -110,31 +110,31 @@ export default function GamesPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-gray-800 rounded-lg shadow p-4 mb-6 space-y-3">
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+        <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           <input
             type="text"
             placeholder="ゲーム名"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
-            className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
           <textarea
             placeholder="説明"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={2}
-            className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
           <div>
             <label className="block text-sm text-gray-300 mb-1">画像</label>
-            {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-gray-900 rounded mb-2 border border-gray-600" />}
+            {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />}
             <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setImage(f); setPreview(f ? URL.createObjectURL(f) : null) }} className="text-sm text-gray-400" />
           </div>
           <div className="flex gap-2">
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm">保存</button>
-            <button type="button" onClick={() => { setShowForm(false); setImage(null); setPreview(null) }} className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm">キャンセル</button>
+            <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm">保存</button>
+            <button type="button" onClick={() => { setShowForm(false); setImage(null); setPreview(null) }} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm">キャンセル</button>
           </div>
         </form>
       )}
@@ -145,11 +145,11 @@ export default function GamesPage() {
           placeholder="ゲームを検索..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
         />
         <button type="submit" className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm">検索</button>
         {search && (
-          <button type="button" onClick={() => { setSearch(''); load() }} className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm">クリア</button>
+          <button type="button" onClick={() => { setSearch(''); load() }} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm">クリア</button>
         )}
       </form>
 
@@ -160,7 +160,7 @@ export default function GamesPage() {
           {games.map((game, index) => (
             <div
               key={game.id}
-              className={`bg-gray-800 rounded-lg shadow overflow-hidden transition-all duration-200 ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-indigo-400 opacity-75' : ''}`}
+              className={`bg-zinc-800 rounded-lg shadow overflow-hidden transition-all duration-200 ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
               draggable={admin}
               onDragStart={() => admin && handleDragStart(index)}
               onDragOver={(e) => admin && handleDragOver(e, index)}
@@ -174,13 +174,13 @@ export default function GamesPage() {
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                     required
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xl font-bold"
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-xl font-bold"
                   />
                   <textarea
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     rows={4}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
                   />
                   <div>
                     <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
@@ -190,8 +190,8 @@ export default function GamesPage() {
                     <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setEditImage(f); setEditPreview(f ? URL.createObjectURL(f) : null) }} className="text-sm text-gray-400" />
                   </div>
                   <div className="flex gap-2">
-                    <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded text-sm">保存</button>
-                    <button type="button" onClick={() => setEditingId(null)} className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm">キャンセル</button>
+                    <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm">保存</button>
+                    <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm">キャンセル</button>
                   </div>
                 </form>
               ) : (
@@ -200,27 +200,26 @@ export default function GamesPage() {
                     <img
                       src={`/uploads/${game.imagePath}`}
                       alt={game.name}
-                      className="w-full max-h-96 object-contain bg-gray-900"
+                      className="w-full max-h-96 object-contain bg-zinc-900"
                     />
                   )}
                   <div className="p-5 sm:p-8">
                     <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
-                      <Link to={`/games/${game.id}`} className="text-xl sm:text-2xl font-bold text-gray-100 hover:text-indigo-400 transition">
+                      <Link to={`/games/${game.id}`} className="text-xl sm:text-2xl font-bold text-gray-100 hover:text-red-700 transition">
                         {game.name}
                       </Link>
                       {admin && (
                         <div className="flex gap-2 flex-shrink-0">
-                          <button onClick={() => startEdit(game)} className="text-indigo-400 hover:text-indigo-300 text-sm">編集</button>
-                          <button onClick={() => handleDelete(game.id)} className="text-red-400 hover:text-red-300 text-sm">削除</button>
+                          <button onClick={() => startEdit(game)} className="text-red-700 hover:text-red-600 text-sm">編集</button>
+                          <button onClick={() => handleDelete(game.id)} className="text-red-600 hover:text-red-300 text-sm">削除</button>
                         </div>
                       )}
                     </div>
                     {game.description && <p className="text-gray-300 mb-4 whitespace-pre-wrap">{game.description}</p>}
                     <p className="text-xs text-gray-500 mb-4">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
                     <div className="flex items-center justify-between">
-                      <h2 className="text-base font-semibold text-gray-200">このゲームのアイテム</h2>
-                      <Link to={`/items?gameId=${game.id}`} className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded transition">
-                        アイテムを見る →
+                      <Link to={`/items?gameId=${game.id}`} className="bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-2 rounded transition">
+                        アイテムを見る
                       </Link>
                     </div>
                   </div>

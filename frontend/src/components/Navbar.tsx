@@ -14,35 +14,35 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-900 text-white shadow">
+    <nav className="bg-zinc-900 text-white shadow">
       <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="text-lg sm:text-2xl font-bold text-indigo-400 hover:text-indigo-300 leading-tight">
+        <Link to="/" className="text-lg sm:text-2xl font-bold text-red-700 hover:text-red-600 leading-tight">
           <span className="hidden sm:inline">Enlightmenter's Archives 啓蒙の書院</span>
           <span className="sm:hidden">E's Archives</span>
         </Link>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/items" className="hover:text-indigo-300 text-base">アイテム</Link>
+          <Link to="/items" className="hover:text-red-600 text-base">アイテム</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
-                <Link to="/tags" className="hover:text-indigo-300 text-base">タグ管理</Link>
+                <Link to="/tags" className="hover:text-red-600 text-base">タグ管理</Link>
               )}
               <span className="text-gray-400 text-base">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
                 onClick={handleLogout}
-                className="bg-gray-700 hover:bg-gray-600 text-base px-4 py-1.5 rounded"
+                className="bg-zinc-700 hover:bg-gray-600 text-base px-4 py-1.5 rounded"
               >
                 ログアウト
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-indigo-300 text-base">ログイン</Link>
+              <Link to="/login" className="hover:text-red-600 text-base">ログイン</Link>
               <Link
                 to="/register"
-                className="bg-indigo-600 hover:bg-indigo-500 text-base px-4 py-1.5 rounded"
+                className="bg-red-900 hover:bg-red-800 text-base px-4 py-1.5 rounded"
               >
                 登録
               </Link>
@@ -53,7 +53,7 @@ export default function Navbar() {
         {/* Hamburger button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden p-2 rounded text-gray-300 hover:text-white hover:bg-gray-700"
+          className="md:hidden p-2 rounded text-gray-300 hover:text-white hover:bg-zinc-700"
           aria-label="メニュー"
         >
           {menuOpen ? (
@@ -71,27 +71,27 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-700 px-4 py-3 flex flex-col gap-3">
-          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-indigo-300 py-1">アイテム</Link>
+          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-red-600 py-1">アイテム</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
-                <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-indigo-300 py-1">タグ管理</Link>
+                <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-red-600 py-1">タグ管理</Link>
               )}
               <span className="text-gray-400 py-1">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
                 onClick={handleLogout}
-                className="bg-gray-700 hover:bg-gray-600 text-left px-4 py-2 rounded"
+                className="bg-zinc-700 hover:bg-gray-600 text-left px-4 py-2 rounded"
               >
                 ログアウト
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-indigo-300 py-1">ログイン</Link>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-red-600 py-1">ログイン</Link>
               <Link
                 to="/register"
                 onClick={() => setMenuOpen(false)}
-                className="bg-indigo-600 hover:bg-indigo-500 text-center px-4 py-2 rounded"
+                className="bg-red-900 hover:bg-red-800 text-center px-4 py-2 rounded"
               >
                 登録
               </Link>
