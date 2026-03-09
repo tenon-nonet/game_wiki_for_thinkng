@@ -16,7 +16,6 @@ export default function Navbar() {
         Enlightmenter's Archives 啓蒙の書院
       </Link>
       <div className="flex items-center gap-4">
-        <Link to="/games" className="hover:text-indigo-300 text-sm">ゲーム</Link>
         <Link to="/items" className="hover:text-indigo-300 text-sm">アイテム</Link>
         {loggedIn ? (
           <>
