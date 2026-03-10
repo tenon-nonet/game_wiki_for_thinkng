@@ -9,6 +9,20 @@ http://localhost:8080
 cd backend
 mvn spring-boot:run
 
+# バックエンド再起動（ポート 8080 が使用中 / API Error: Unable to connect to API の場合）
+# 1. 使用中の PID を確認
+netstat -ano | grep ":8080 "
+# 2. プロセスを強制終了（{PID} を実際の番号に置き換える）
+taskkill //PID {PID} //F
+# 3. 再起動
+cd backend && mvn spring-boot:run
+# ビルドキャッシュが古い場合
+cd backend && mvn clean spring-boot:run
+
+#frontend
+cd frontend
+npm run dev
+
 #postgresql
 psql -U postgres -d gamewiki
 

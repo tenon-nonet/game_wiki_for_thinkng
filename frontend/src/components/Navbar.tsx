@@ -17,8 +17,8 @@ export default function Navbar() {
     <nav className="bg-zinc-900 text-white shadow">
       <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
         <Link to="/" className="text-lg sm:text-2xl font-bold text-red-700 hover:text-red-600 leading-tight">
-          <span className="hidden sm:inline">Enlightmenter's Archives 啓蒙の書院</span>
-          <span className="sm:hidden">E's Archives</span>
+          <span className="hidden sm:inline">Archives for Enlightmenters -啓蒙の書院-</span>
+          <span className="sm:hidden">-啓蒙の書院-</span>
         </Link>
 
         {/* Desktop nav */}

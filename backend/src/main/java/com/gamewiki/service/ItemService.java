@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,14 +29,21 @@ public class ItemService {
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
+    @Transactional
+    public void updateOrder(List<Long> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            Item item = getItem(ids.get(i));
+            item.setSortOrder(i);
+            itemRepository.save(item);
+        }
+    }
+
     public List<ItemResponse> findAll(Long gameId, String tagName, String keyword) {
         List<Item> items;
         if (gameId != null) {
-            items = itemRepository.findAll().stream()
-                    .filter(i -> i.getGame().getId().equals(gameId))
-                    .toList();
+            items = itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId);
         } else {
-            items = itemRepository.findAll();
+            items = itemRepository.findAllByOrderBySortOrderAscIdAsc();
         }
         if (tagName != null && !tagName.isBlank()) {
             items = items.stream()

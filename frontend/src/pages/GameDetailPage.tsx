@@ -116,7 +116,7 @@ export default function GameDetailPage() {
       </div>
 
       <div className="mt-6 flex items-center justify-between">
-        <Link to={`/items?gameId=${game.id}`} className="text-red-700 hover:underline text-sm">
+        <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
           アイテム一覧を見る →
         </Link>
       </div>
