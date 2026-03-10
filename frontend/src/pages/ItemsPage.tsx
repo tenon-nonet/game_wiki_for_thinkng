@@ -141,7 +141,7 @@ export default function ItemsPage() {
       {items.length === 0 ? (
         <p className="text-gray-500 text-center py-12">アイテムがありません</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
           {items.map((item, index) => (
             <div
               key={item.id}
@@ -152,23 +152,23 @@ export default function ItemsPage() {
               onDragEnd={handleDragEnd}
               className={`group relative bg-zinc-800 rounded-lg shadow hover:shadow-md transition overflow-hidden ${loggedIn ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
             >
-              <Link to={`/items/${item.id}`} className="block">
+              <Link to={`/items/${item.id}`} className="flex items-stretch">
                 {item.imagePath ? (
                   <img
                     src={`/uploads/${item.imagePath}`}
                     alt={item.name}
-                    className="w-full h-52 object-contain bg-zinc-900"
+                    className="w-24 h-24 sm:w-36 sm:h-36 object-contain bg-zinc-900 flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-full h-52 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">
+                  <div className="w-24 h-24 sm:w-36 sm:h-36 bg-zinc-700 flex items-center justify-center text-gray-500 text-xs flex-shrink-0">
                     画像なし
                   </div>
                 )}
-                <div className="p-4">
-                  <p className="font-semibold text-gray-100 text-base">{item.name}</p>
-                  <p className="text-sm text-red-700 mb-1">{item.gameName}</p>
+                <div className="p-3 sm:p-4 flex flex-col justify-center min-w-0">
+                  <p className="font-semibold text-gray-100 text-sm sm:text-base line-clamp-2">{item.name}</p>
+                  <p className="text-xs sm:text-sm text-red-700 mb-1">{item.gameName}</p>
                   {item.description && (
-                    <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
+                    <p className="text-gray-400 text-xs line-clamp-2 sm:line-clamp-3">{item.description}</p>
                   )}
                   {item.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
@@ -180,13 +180,13 @@ export default function ItemsPage() {
                     </div>
                   )}
                 </div>
-                {item.description && (
-                  <div className="absolute inset-0 bg-zinc-900/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center p-4 pointer-events-none">
-                    <p className="text-gray-100 font-semibold text-sm mb-2">{item.name}</p>
-                    <p className="text-gray-300 text-xs leading-relaxed line-clamp-[10]">{item.description}</p>
-                  </div>
-                )}
               </Link>
+              {item.description && (
+                <div className="absolute inset-0 bg-zinc-900/92 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center p-4 pointer-events-none">
+                  <p className="text-gray-100 font-semibold text-sm mb-2">{item.name}</p>
+                  <p className="text-gray-300 text-xs leading-relaxed line-clamp-[8]">{item.description}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
