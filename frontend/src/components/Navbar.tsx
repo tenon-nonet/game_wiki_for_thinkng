@@ -24,6 +24,7 @@ export default function Navbar() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-6">
           <Link to="/games" className="hover:text-gray-300 text-base">ゲーム一覧</Link>
+          <Link to="/bosses" className="hover:text-gray-300 text-base">ボス一覧</Link>
           <Link to="/items" className="hover:text-gray-300 text-base">アイテム一覧</Link>
           {loggedIn ? (
             <>
@@ -68,6 +69,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t border-gray-700 px-4 py-3 flex flex-col gap-3">
           <Link to="/games" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ゲーム一覧</Link>
+          <Link to="/bosses" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ボス一覧</Link>
           <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム一覧</Link>
           {loggedIn ? (
             <>
