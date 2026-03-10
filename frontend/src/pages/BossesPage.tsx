@@ -133,7 +133,7 @@ export default function BossesPage() {
       {bosses.length === 0 ? (
         <p className="text-gray-500 text-center py-12">ボスが登録されていません</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           {bosses.map((boss, index) => (
             <div
               key={boss.id}
@@ -142,28 +142,27 @@ export default function BossesPage() {
               onDragOver={(e) => loggedIn && handleDragOver(e, index)}
               onDrop={() => loggedIn && handleDrop(index)}
               onDragEnd={handleDragEnd}
-              className={`group relative bg-zinc-800 rounded-lg shadow hover:shadow-md transition overflow-hidden ${loggedIn ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
+              className={`group bg-zinc-800 rounded-xl shadow overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${loggedIn ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
             >
-              <Link to={`/bosses/${boss.id}`} className="flex items-stretch">
-                {boss.imagePath ? (
-                  <img
-                    src={`/uploads/${boss.imagePath}`}
-                    alt={boss.name}
-                    className="w-24 h-24 sm:w-36 sm:h-36 object-contain bg-zinc-900 flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-24 h-24 sm:w-36 sm:h-36 bg-zinc-700 flex items-center justify-center text-gray-500 text-xs flex-shrink-0">
-                    画像なし
-                  </div>
-                )}
-                <div className="p-3 sm:p-4 flex flex-col justify-center min-w-0">
-                  <p className="text-xs sm:text-sm text-gray-400 mb-0.5">{boss.gameName}</p>
-                  <p className="font-semibold text-gray-100 text-sm sm:text-base line-clamp-2 mb-1">{boss.name}</p>
-                  {boss.description && (
-                    <p className="text-gray-400 text-xs line-clamp-2 sm:line-clamp-3">{boss.description}</p>
+              <Link to={`/bosses/${boss.id}`} className="block">
+                <div className="overflow-hidden">
+                  {boss.imagePath ? (
+                    <img
+                      src={`/uploads/${boss.imagePath}`}
+                      alt={boss.name}
+                      className="w-full h-48 object-contain bg-zinc-900 transition-transform duration-500 ease-out group-hover:scale-125"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-zinc-700 flex items-center justify-center text-gray-500 text-xs">
+                      画像なし
+                    </div>
                   )}
+                </div>
+                <div className="p-3 flex flex-col gap-1">
+                  <p className="text-xs text-gray-400">{boss.gameName}</p>
+                  <p className="font-semibold text-gray-100 text-sm line-clamp-2">{boss.name}</p>
                   {boss.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
+                    <div className="flex flex-wrap gap-1 mt-1">
                       {boss.tags.map((t) => (
                         <span key={t.id} className="bg-red-950 text-white text-xs px-2 py-0.5 rounded-full">
                           {t.name}
@@ -173,12 +172,6 @@ export default function BossesPage() {
                   )}
                 </div>
               </Link>
-              {boss.description && (
-                <div className="absolute inset-0 bg-zinc-900/92 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center p-4 pointer-events-none">
-                  <p className="text-gray-100 font-semibold text-sm mb-2">{boss.name}</p>
-                  <p className="text-gray-300 text-xs leading-relaxed line-clamp-[8]">{boss.description}</p>
-                </div>
-              )}
             </div>
           ))}
         </div>
