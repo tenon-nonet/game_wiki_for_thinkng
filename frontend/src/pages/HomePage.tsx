@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews } from '../api'
 import { isAdmin, isLoggedIn } from '../auth'
@@ -47,7 +47,7 @@ export default function HomePage() {
     e.preventDefault()
     setError('')
     try {
-      await createGame(form.name, form.description, image)
+      await createGame(form, image)
       setForm({ name: '', description: '' })
       setImage(null)
       setPreview(null)
@@ -67,7 +67,7 @@ export default function HomePage() {
 
   const handleUpdate = async (e: React.FormEvent, game: Game) => {
     e.preventDefault()
-    await updateGame(game.id, editForm.name, editForm.description, editImage)
+    await updateGame(game.id, editForm, editImage)
     setEditingId(null)
     load()
   }
@@ -107,21 +107,6 @@ export default function HomePage() {
 
   return (
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
-      {/* ヘッダー */}
-      <div className="text-center mb-8 sm:mb-12">
-        <div className="max-w-3xl mx-auto bg-zinc-800 rounded-xl p-5 sm:p-8 text-left space-y-3 text-base text-gray-300">
-          <p><span className="text-gray-100 font-medium">Archives for Enlightmenters</span> は、ゲーム内アイテム等のテキスト情報を共有できる考察用Wiki</p>
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link to="/items" className="border border-white/40 hover:border-white/70 text-white bg-transparent px-5 py-2.5 rounded text-base font-medium transition">
-              アイテム一覧を見る
-            </Link>
-            <Link to="/games" className="border border-white/40 hover:border-white/70 text-white bg-transparent px-5 py-2.5 rounded text-base font-medium transition">
-              ゲーム一覧を見る
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* ゲーム一覧 */}
       <section>
         <div className="flex items-center justify-between mb-6 gap-3">
@@ -138,7 +123,7 @@ export default function HomePage() {
 
         {showForm && (
           <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p className="text-gray-100 text-sm">{error}</p>}
             <input
               type="text"
               placeholder="ゲーム名"
@@ -232,13 +217,13 @@ export default function HomePage() {
                     </Link>
                     <div className="p-5 flex flex-col gap-1">
                       <div className="flex items-start justify-between">
-                        <Link to={`/games/${game.id}`} className="text-xl font-semibold text-red-700 hover:underline">
+                        <Link to={`/games/${game.id}`} className="text-xl font-semibold text-gray-100 hover:underline">
                           {game.name}
                         </Link>
                         {admin && (
                           <div className="flex gap-2 ml-2 flex-shrink-0">
-                            <button onClick={() => startEdit(game)} className="text-red-700 hover:text-red-600 text-sm">編集</button>
-                            <button onClick={() => handleDelete(game.id)} className="text-red-600 hover:text-red-300 text-sm">削除</button>
+                            <button onClick={() => startEdit(game)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
+                            <button onClick={() => handleDelete(game.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
                           </div>
                         )}
                       </div>
@@ -259,7 +244,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">ゲーム関連ニュース</h2>
             {!newsLoading && news.length > 0 && (
-              <Link to="/news" className="text-red-500 hover:underline text-sm">
+              <Link to="/news" className="text-gray-100 hover:underline text-sm">
                 ニュース一覧はコチラ →
               </Link>
             )}
@@ -270,7 +255,7 @@ export default function HomePage() {
             <ul className="space-y-2">
               {news.map((item, i) => (
                 <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
-                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-red-400 transition line-clamp-2">
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-gray-300 transition line-clamp-2">
                     {item.title}
                   </a>
                   <div className="flex gap-3 mt-1 text-xs text-gray-500">

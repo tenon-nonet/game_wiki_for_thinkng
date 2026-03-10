@@ -12,6 +12,10 @@ public class GameResponse {
     private String name;
     private String description;
     private String imagePath;
+    private String platforms;
+    private String releaseDates;
+    private String awards;
+    private String staff;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

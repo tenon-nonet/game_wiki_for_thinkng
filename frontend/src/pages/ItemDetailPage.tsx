@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
 import { isLoggedIn, getUsername, isAdmin } from '../auth'
@@ -148,7 +148,7 @@ export default function ItemDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      <Link to="/items" className="text-red-700 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
 
       {/* 検索バー */}
       <form onSubmit={handleSearch} className="mt-4 bg-zinc-800 rounded-lg p-4 flex flex-col sm:flex-row flex-wrap gap-3 items-end">
@@ -213,18 +213,18 @@ export default function ItemDetailPage() {
               <div className="flex gap-2 flex-shrink-0">
                 <Link
                   to={`/items/${item.id}/edit`}
-                  className="text-red-700 hover:underline text-sm"
+                  className="text-gray-100 hover:underline text-sm"
                 >
                   編集
                 </Link>
-                <button onClick={handleDelete} className="text-red-600 hover:underline text-sm">
+                <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
                   削除
                 </button>
               </div>
             )}
           </div>
 
-          <Link to={`/games/${item.gameId}`} className="text-red-700 hover:underline text-sm">
+          <Link to={`/games/${item.gameId}`} className="text-gray-100 hover:underline text-sm">
             {item.gameName}
           </Link>
 
@@ -235,7 +235,7 @@ export default function ItemDetailPage() {
           {item.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {item.tags.map((t) => (
-                <span key={t.id} className="bg-red-950 text-red-200 text-sm px-3 py-1 rounded-full">
+                <span key={t.id} className="bg-red-950 text-white text-sm px-3 py-1 rounded-full">
                   {t.name}
                 </span>
               ))}
@@ -276,7 +276,7 @@ export default function ItemDetailPage() {
                     {related.tags
                       .filter((t) => item?.tags.some((it) => it.id === t.id))
                       .map((t) => (
-                        <span key={t.id} className="bg-red-950 text-red-200 text-xs px-1.5 py-0.5 rounded-full">
+                        <span key={t.id} className="bg-red-950 text-white text-xs px-1.5 py-0.5 rounded-full">
                           {t.name}
                         </span>
                       ))}
@@ -288,26 +288,26 @@ export default function ItemDetailPage() {
         </div>
       )}
 
-      {/* コメント・考察セクション */}
+      {/* コメントセクション */}
       <div className="mt-8">
-        <h2 className="text-lg font-bold text-gray-100 mb-4">考察・コメント</h2>
+        <h2 className="text-xl font-bold text-gray-100 mb-5">コメント</h2>
 
         {loggedIn && (
-          <form onSubmit={handleCommentSubmit} className="bg-zinc-800 rounded-lg p-4 mb-6">
+          <form onSubmit={handleCommentSubmit} className="bg-zinc-800 rounded-lg p-5 mb-6">
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              placeholder="考察・メモを書く..."
-              rows={3}
+              placeholder="コメントを書く..."
+              rows={4}
               required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm resize-none"
+              className="w-full border border-gray-600 rounded px-4 py-3 bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-base resize-none"
             />
-            {commentError && <p className="text-red-600 text-xs mt-1">{commentError}</p>}
-            <div className="flex justify-end mt-2">
+            {commentError && <p className="text-gray-100 text-sm mt-2">{commentError}</p>}
+            <div className="flex justify-end mt-3">
               <button
                 type="submit"
                 disabled={!commentText.trim()}
-                className="bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-1.5 rounded disabled:opacity-40"
+                className="bg-red-900 hover:bg-red-800 text-white text-base px-5 py-2 rounded disabled:opacity-40"
               >
                 投稿
               </button>
@@ -316,23 +316,23 @@ export default function ItemDetailPage() {
         )}
 
         {comments.length === 0 ? (
-          <p className="text-gray-500 text-sm">まだコメントはありません</p>
+          <p className="text-gray-500 text-base">まだコメントはありません</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {comments.map((c) => (
-              <li key={c.id} className="bg-zinc-800 rounded-lg px-4 py-3">
+              <li key={c.id} className="bg-zinc-800 rounded-lg px-5 py-4">
                 {/* コメントヘッダー */}
-                <div className="flex flex-wrap items-center justify-between mb-1 gap-1">
-                  <span className="text-red-700 text-xs font-medium">{c.username}</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between mb-2 gap-1">
+                  <span className="text-gray-100 text-sm font-semibold">{c.username}</span>
+                  <div className="flex items-center gap-3">
                     <span className="text-gray-500 text-xs">
                       {new Date(c.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {c.username === currentUser && editingId !== c.id && (
-                      <button onClick={() => startEdit(c)} className="text-red-700 hover:text-red-600 text-xs">編集</button>
+                      <button onClick={() => startEdit(c)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
                     )}
                     {(admin || c.username === currentUser) && (
-                      <button onClick={() => handleCommentDelete(c.id)} className="text-red-600 hover:text-red-300 text-xs">削除</button>
+                      <button onClick={() => handleCommentDelete(c.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
                     )}
                   </div>
                 </div>
@@ -343,32 +343,32 @@ export default function ItemDetailPage() {
                     <textarea
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
-                      rows={3}
+                      rows={4}
                       required
-                      className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm resize-none"
+                      className="w-full border border-gray-600 rounded px-4 py-3 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-base resize-none"
                     />
-                    {commentError && <p className="text-red-600 text-xs mt-1">{commentError}</p>}
+                    {commentError && <p className="text-gray-100 text-sm mt-2">{commentError}</p>}
                     <div className="flex gap-2 justify-end mt-2">
-                      <button type="submit" disabled={!editText.trim()} className="bg-red-900 hover:bg-red-800 text-white text-xs px-3 py-1.5 rounded disabled:opacity-40">保存</button>
-                      <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 text-xs px-3 py-1.5 rounded">キャンセル</button>
+                      <button type="submit" disabled={!editText.trim()} className="bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-2 rounded disabled:opacity-40">保存</button>
+                      <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 text-sm px-4 py-2 rounded">キャンセル</button>
                     </div>
                   </form>
                 ) : (
                   <>
-                    <p className="text-gray-200 text-sm whitespace-pre-wrap">{c.content}</p>
-                    <div className="flex items-center gap-3 mt-2">
+                    <p className="text-gray-100 text-base whitespace-pre-wrap leading-relaxed">{c.content}</p>
+                    <div className="flex items-center gap-4 mt-3">
                       <button
                         onClick={() => handleLike(c.id)}
                         disabled={!loggedIn}
-                        className={`flex items-center gap-1 text-xs transition ${c.likedByMe ? 'text-red-400' : 'text-gray-500 hover:text-red-400'} disabled:cursor-default`}
+                        className={`flex items-center gap-1.5 text-sm transition ${c.likedByMe ? 'text-white' : 'text-gray-500 hover:text-gray-300'} disabled:cursor-default`}
                       >
-                        <span>{c.likedByMe ? '♥' : '♡'}</span>
+                        <span className="text-base">{c.likedByMe ? '♥' : '♡'}</span>
                         {c.likeCount > 0 && <span>{c.likeCount}</span>}
                       </button>
                       {loggedIn && (
                         <button
                           onClick={() => setReplyToId(replyToId === c.id ? null : c.id)}
-                          className="text-xs text-gray-500 hover:text-gray-300 transition"
+                          className="text-sm text-gray-500 hover:text-gray-300 transition"
                         >
                           返信
                         </button>
@@ -379,46 +379,46 @@ export default function ItemDetailPage() {
 
                 {/* 返信フォーム */}
                 {replyToId === c.id && (
-                  <form onSubmit={(e) => handleReplySubmit(e, c.id)} className="mt-3 ml-4 border-l-2 border-zinc-600 pl-3">
+                  <form onSubmit={(e) => handleReplySubmit(e, c.id)} className="mt-4 ml-5 border-l-2 border-zinc-600 pl-4">
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder={`${c.username} への返信...`}
-                      rows={2}
+                      rows={3}
                       required
-                      className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm resize-none"
+                      className="w-full border border-gray-600 rounded px-4 py-3 bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-base resize-none"
                     />
-                    {commentError && <p className="text-red-600 text-xs mt-1">{commentError}</p>}
-                    <div className="flex gap-2 justify-end mt-1">
-                      <button type="submit" disabled={!replyText.trim()} className="bg-red-900 hover:bg-red-800 text-white text-xs px-3 py-1.5 rounded disabled:opacity-40">返信する</button>
-                      <button type="button" onClick={() => { setReplyToId(null); setReplyText('') }} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 text-xs px-3 py-1.5 rounded">キャンセル</button>
+                    {commentError && <p className="text-gray-100 text-sm mt-2">{commentError}</p>}
+                    <div className="flex gap-2 justify-end mt-2">
+                      <button type="submit" disabled={!replyText.trim()} className="bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-2 rounded disabled:opacity-40">返信する</button>
+                      <button type="button" onClick={() => { setReplyToId(null); setReplyText('') }} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 text-sm px-4 py-2 rounded">キャンセル</button>
                     </div>
                   </form>
                 )}
 
                 {/* 返信一覧 */}
                 {c.replies && c.replies.length > 0 && (
-                  <ul className="mt-3 ml-4 border-l-2 border-zinc-600 pl-3 space-y-2">
+                  <ul className="mt-4 ml-5 border-l-2 border-zinc-600 pl-4 space-y-3">
                     {c.replies.map((rep) => (
-                      <li key={rep.id} className="bg-zinc-700 rounded-lg px-3 py-2">
-                        <div className="flex flex-wrap items-center justify-between mb-1 gap-1">
-                          <span className="text-red-700 text-xs font-medium">{rep.username}</span>
-                          <div className="flex items-center gap-2">
+                      <li key={rep.id} className="bg-zinc-700 rounded-lg px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between mb-2 gap-1">
+                          <span className="text-gray-100 text-sm font-semibold">{rep.username}</span>
+                          <div className="flex items-center gap-3">
                             <span className="text-gray-500 text-xs">
                               {new Date(rep.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </span>
                             {(admin || rep.username === currentUser) && (
-                              <button onClick={() => handleCommentDelete(rep.id)} className="text-red-600 hover:text-red-300 text-xs">削除</button>
+                              <button onClick={() => handleCommentDelete(rep.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
                             )}
                           </div>
                         </div>
-                        <p className="text-gray-200 text-sm whitespace-pre-wrap">{rep.content}</p>
+                        <p className="text-gray-100 text-base whitespace-pre-wrap leading-relaxed">{rep.content}</p>
                         <button
                           onClick={() => handleLike(rep.id)}
                           disabled={!loggedIn}
-                          className={`flex items-center gap-1 text-xs mt-1 transition ${rep.likedByMe ? 'text-red-400' : 'text-gray-500 hover:text-red-400'} disabled:cursor-default`}
+                          className={`flex items-center gap-1.5 text-sm mt-2 transition ${rep.likedByMe ? 'text-white' : 'text-gray-500 hover:text-gray-300'} disabled:cursor-default`}
                         >
-                          <span>{rep.likedByMe ? '♥' : '♡'}</span>
+                          <span className="text-base">{rep.likedByMe ? '♥' : '♡'}</span>
                           {rep.likeCount > 0 && <span>{rep.likeCount}</span>}
                         </button>
                       </li>

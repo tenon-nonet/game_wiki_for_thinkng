@@ -26,6 +26,18 @@ public class Game {
 
     private String imagePath;
 
+    @Column(columnDefinition = "TEXT")
+    private String platforms;
+
+    @Column(columnDefinition = "TEXT")
+    private String releaseDates;
+
+    @Column(columnDefinition = "TEXT")
+    private String awards;
+
+    @Column(columnDefinition = "TEXT")
+    private String staff;
+
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int sortOrder = 0;
 

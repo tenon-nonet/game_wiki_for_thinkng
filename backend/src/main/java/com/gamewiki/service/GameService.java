@@ -43,6 +43,10 @@ public class GameService {
         Game game = new Game();
         game.setName(request.getName());
         game.setDescription(request.getDescription());
+        game.setPlatforms(request.getPlatforms());
+        game.setReleaseDates(request.getReleaseDates());
+        game.setAwards(request.getAwards());
+        game.setStaff(request.getStaff());
         if (image != null && !image.isEmpty()) {
             game.setImagePath(fileStorageService.store(image));
         }
@@ -53,6 +57,10 @@ public class GameService {
         Game game = getGame(id);
         game.setName(request.getName());
         game.setDescription(request.getDescription());
+        game.setPlatforms(request.getPlatforms());
+        game.setReleaseDates(request.getReleaseDates());
+        game.setAwards(request.getAwards());
+        game.setStaff(request.getStaff());
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(game.getImagePath());
             game.setImagePath(fileStorageService.store(image));
@@ -77,6 +85,10 @@ public class GameService {
         r.setName(game.getName());
         r.setDescription(game.getDescription());
         r.setImagePath(game.getImagePath());
+        r.setPlatforms(game.getPlatforms());
+        r.setReleaseDates(game.getReleaseDates());
+        r.setAwards(game.getAwards());
+        r.setStaff(game.getStaff());
         r.setCreatedAt(game.getCreatedAt());
         r.setUpdatedAt(game.getUpdatedAt());
         return r;

@@ -14,4 +14,8 @@ public class GameRequest {
     private String name;
 
     private String description;
+    private String platforms;
+    private String releaseDates;
+    private String awards;
+    private String staff;
 }

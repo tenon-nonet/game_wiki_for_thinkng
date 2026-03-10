@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getItems, getGames, getTags, updateItemOrder } from '../api'
 import { isLoggedIn } from '../auth'
@@ -141,7 +141,7 @@ export default function ItemsPage() {
       {items.length === 0 ? (
         <p className="text-gray-500 text-center py-12">アイテムがありません</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {items.map((item, index) => (
             <div
               key={item.id}
@@ -166,14 +166,14 @@ export default function ItemsPage() {
                 )}
                 <div className="p-3 sm:p-4 flex flex-col justify-center min-w-0">
                   <p className="font-semibold text-gray-100 text-sm sm:text-base line-clamp-2">{item.name}</p>
-                  <p className="text-xs sm:text-sm text-red-700 mb-1">{item.gameName}</p>
+                  <p className="text-xs sm:text-sm text-gray-100 mb-1">{item.gameName}</p>
                   {item.description && (
                     <p className="text-gray-400 text-xs line-clamp-2 sm:line-clamp-3">{item.description}</p>
                   )}
                   {item.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {item.tags.map((t) => (
-                        <span key={t.id} className="bg-red-950 text-red-200 text-xs px-2 py-0.5 rounded-full">
+                        <span key={t.id} className="bg-red-950 text-white text-xs px-2 py-0.5 rounded-full">
                           {t.name}
                         </span>
                       ))}

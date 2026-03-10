@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, getNews } from '../api'
 
@@ -27,7 +27,7 @@ export default function AllNewsListPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      <Link to="/" className="text-red-700 hover:underline text-sm">← トップへ戻る</Link>
+      <Link to="/" className="text-gray-100 hover:underline text-sm">← トップへ戻る</Link>
 
       <h1 className="text-xl sm:text-2xl font-bold text-gray-100 mt-4 mb-6">ゲーム関連ニュース一覧</h1>
 
@@ -40,7 +40,7 @@ export default function AllNewsListPage() {
           <ul className="space-y-2">
             {pageItems.map((item, i) => (
               <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
-                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-red-400 transition line-clamp-2">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-gray-300 transition line-clamp-2">
                   {item.title}
                 </a>
                 <div className="flex gap-3 mt-1 text-xs text-gray-500">

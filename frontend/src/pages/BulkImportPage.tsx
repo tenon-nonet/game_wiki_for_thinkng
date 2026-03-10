@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import JSZip from 'jszip'
 import { getGames, getTags, analyzeImageText, createItem } from '../api'
@@ -147,12 +147,12 @@ export default function BulkImportPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link to="/items" className="text-red-700 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
 
       <div className="bg-zinc-800 rounded-lg shadow p-6 mt-4">
         <h1 className="text-xl font-bold text-gray-100 mb-6">画像一括取り込み</h1>
 
-        {globalError && <p className="text-red-600 text-sm mb-4">{globalError}</p>}
+        {globalError && <p className="text-gray-100 text-sm mb-4">{globalError}</p>}
 
         {phase === 'done' ? (
           <div className="text-center py-8">
@@ -185,7 +185,7 @@ export default function BulkImportPage() {
                   className="text-sm text-gray-400 disabled:opacity-50"
                 />
                 {entries.length > 0 && (
-                  <p className="text-xs text-red-700 mt-1">{entries.length}件の画像を検出</p>
+                  <p className="text-xs text-gray-100 mt-1">{entries.length}件の画像を検出</p>
                 )}
               </div>
 
@@ -237,7 +237,7 @@ export default function BulkImportPage() {
             {phase === 'review' && entries.length > 0 && (
               <>
                 {analyzingCount > 0 && (
-                  <p className="text-red-700 text-sm animate-pulse mb-4">
+                  <p className="text-gray-100 text-sm animate-pulse mb-4">
                     解析中... ({entries.length - analyzingCount}/{entries.length} 完了)
                   </p>
                 )}
@@ -255,14 +255,14 @@ export default function BulkImportPage() {
                             placeholder="アイテム名 *"
                             className="flex-1 border border-gray-600 rounded px-2 py-1 bg-zinc-800 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-800"
                           />
-                          <button onClick={() => removeEntry(i)} className="text-red-600 hover:text-red-300 text-xs flex-shrink-0">
+                          <button onClick={() => removeEntry(i)} className="text-gray-100 hover:text-gray-300 text-xs flex-shrink-0">
                             削除
                           </button>
                         </div>
                         {entry.analyzing ? (
-                          <p className="text-red-700 text-xs animate-pulse">解析中...</p>
+                          <p className="text-gray-100 text-xs animate-pulse">解析中...</p>
                         ) : entry.error ? (
-                          <p className="text-red-600 text-xs">{entry.error}</p>
+                          <p className="text-gray-100 text-xs">{entry.error}</p>
                         ) : null}
                         <textarea
                           value={entry.description}

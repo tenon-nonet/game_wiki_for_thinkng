@@ -9,6 +9,10 @@ export interface Game {
   name: string
   description: string
   imagePath: string | null
+  platforms: string | null
+  releaseDates: string | null
+  awards: string | null
+  staff: string | null
   createdAt: string
   updatedAt: string
 }

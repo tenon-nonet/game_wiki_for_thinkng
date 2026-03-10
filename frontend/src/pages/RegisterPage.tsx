@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register } from '../api'
 import { saveAuth } from '../auth'
@@ -25,7 +25,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="bg-zinc-800 rounded-lg shadow p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-gray-100">新規登録</h1>
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">ユーザー名</label>
@@ -68,7 +68,7 @@ export default function RegisterPage() {
         </form>
         <p className="mt-4 text-sm text-gray-400 text-center">
           すでにアカウントをお持ちの方は{' '}
-          <Link to="/login" className="text-red-700 hover:underline">ログイン</Link>
+          <Link to="/login" className="text-gray-100 hover:underline">ログイン</Link>
         </p>
       </div>
     </div>

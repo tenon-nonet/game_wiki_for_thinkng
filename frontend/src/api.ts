@@ -23,16 +23,25 @@ export const getGames = (name?: string) =>
 export const getGame = (id: number) =>
   api.get<Game>(`/games/${id}`)
 
-export const createGame = (name: string, description: string, image?: File | null) => {
+export interface GameFormData {
+  name: string
+  description: string
+  platforms?: string
+  releaseDates?: string
+  awards?: string
+  staff?: string
+}
+
+export const createGame = (form: GameFormData, image?: File | null) => {
   const data = new FormData()
-  data.append('data', new Blob([JSON.stringify({ name, description })], { type: 'application/json' }))
+  data.append('data', new Blob([JSON.stringify(form)], { type: 'application/json' }))
   if (image) data.append('image', image)
   return api.post<Game>('/games', data, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
 
-export const updateGame = (id: number, name: string, description: string, image?: File | null) => {
+export const updateGame = (id: number, form: GameFormData, image?: File | null) => {
   const data = new FormData()
-  data.append('data', new Blob([JSON.stringify({ name, description })], { type: 'application/json' }))
+  data.append('data', new Blob([JSON.stringify(form)], { type: 'application/json' }))
   if (image) data.append('image', image)
   return api.put<Game>(`/games/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
