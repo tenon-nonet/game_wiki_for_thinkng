@@ -27,6 +27,9 @@ public class Comment {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
+    @Column(name = "parent_id")
+    private Long parentId;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }
