@@ -88,6 +88,10 @@ export const updateComment = (id: number, content: string) =>
 export const deleteComment = (id: number) =>
   api.delete(`/comments/${id}`)
 
+// News
+export const getNews = (q: string, limit?: number) =>
+  api.get<{ title: string; url: string; publishedAt: string; source: string }[]>('/news', { params: { q, ...(limit ? { limit } : {}) } })
+
 // Image Analysis
 export const analyzeImageText = (image: File) => {
   const data = new FormData()
