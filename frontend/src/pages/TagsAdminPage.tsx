@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { getGames, getTags, createTag, updateTag, deleteTag } from '../api'
 import type { Game, Tag } from '../types'
 
@@ -84,7 +84,7 @@ export default function TagsAdminPage() {
 
       {selectedGameId && (
         <>
-          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+          {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
 
           <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg p-4 mb-6 flex gap-2">
             <input
@@ -128,10 +128,10 @@ export default function TagsAdminPage() {
                   ) : (
                     <>
                       <span className="flex-1 text-gray-100 text-sm">{tag.name}</span>
-                      <button onClick={() => startEdit(tag)} className="text-red-700 hover:text-red-600 text-sm">
+                      <button onClick={() => startEdit(tag)} className="text-gray-100 hover:text-gray-300 text-sm">
                         編集
                       </button>
-                      <button onClick={() => handleDelete(tag.id)} className="text-red-600 hover:text-red-300 text-sm">
+                      <button onClick={() => handleDelete(tag.id)} className="text-gray-100 hover:text-gray-300 text-sm">
                         削除
                       </button>
                     </>

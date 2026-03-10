@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getItem, getGames, getTags, createTag, createItem, updateItem, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
@@ -117,14 +117,14 @@ export default function ItemFormPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link to="/items" className="text-red-700 hover:underline text-sm">← アイテム一覧</Link>
+      <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
 
       <div className="bg-zinc-800 rounded-lg shadow p-6 mt-4">
         <h1 className="text-xl font-bold text-gray-100 mb-6">
           {isEdit ? 'アイテム編集' : 'アイテム追加'}
         </h1>
 
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -156,7 +156,7 @@ export default function ItemFormPage() {
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
-              <span className="ml-2 text-xs text-red-700 font-normal">
+              <span className="ml-2 text-xs text-gray-100 font-normal">
                 ※ 画像を選択するとテキストを自動抽出して説明欄に入力します
               </span>
             </label>
@@ -179,7 +179,7 @@ export default function ItemFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               説明
               {analyzing && (
-                <span className="ml-2 text-xs text-red-700 animate-pulse">
+                <span className="ml-2 text-xs text-gray-100 animate-pulse">
                   画像からテキストを解析中...
                 </span>
               )}

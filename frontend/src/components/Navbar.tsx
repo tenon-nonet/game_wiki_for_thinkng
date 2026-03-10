@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearAuth, getUsername, isLoggedIn, isAdmin } from '../auth'
 
@@ -16,18 +16,18 @@ export default function Navbar() {
   return (
     <nav className="bg-zinc-900 text-white shadow">
       <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="text-lg sm:text-2xl font-bold text-red-700 hover:text-red-600 leading-tight">
+        <Link to="/" className="text-lg sm:text-2xl font-bold text-gray-100 hover:text-gray-300 leading-tight">
           <span className="hidden sm:inline">Archives for Enlightmenters</span>
           <span className="sm:hidden">啓蒙の書院</span>
         </Link>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/items" className="hover:text-red-600 text-base">アイテム</Link>
+          <Link to="/items" className="hover:text-gray-300 text-base">アイテム</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
-                <Link to="/tags" className="hover:text-red-600 text-base">タグ管理</Link>
+                <Link to="/tags" className="hover:text-gray-300 text-base">タグ管理</Link>
               )}
               <span className="text-gray-400 text-base">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
@@ -39,7 +39,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-red-600 text-base">ログイン</Link>
+              <Link to="/login" className="hover:text-gray-300 text-base">ログイン</Link>
               <Link
                 to="/register"
                 className="bg-red-900 hover:bg-red-800 text-base px-4 py-1.5 rounded"
@@ -71,11 +71,11 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-700 px-4 py-3 flex flex-col gap-3">
-          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-red-600 py-1">アイテム</Link>
+          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
-                <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-red-600 py-1">タグ管理</Link>
+                <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">タグ管理</Link>
               )}
               <span className="text-gray-400 py-1">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
@@ -87,7 +87,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-red-600 py-1">ログイン</Link>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ログイン</Link>
               <Link
                 to="/register"
                 onClick={() => setMenuOpen(false)}

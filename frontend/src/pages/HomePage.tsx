@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews } from '../api'
 import { isAdmin, isLoggedIn } from '../auth'
@@ -138,7 +138,7 @@ export default function HomePage() {
 
         {showForm && (
           <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p className="text-gray-100 text-sm">{error}</p>}
             <input
               type="text"
               placeholder="ゲーム名"
@@ -232,13 +232,13 @@ export default function HomePage() {
                     </Link>
                     <div className="p-5 flex flex-col gap-1">
                       <div className="flex items-start justify-between">
-                        <Link to={`/games/${game.id}`} className="text-xl font-semibold text-red-700 hover:underline">
+                        <Link to={`/games/${game.id}`} className="text-xl font-semibold text-gray-100 hover:underline">
                           {game.name}
                         </Link>
                         {admin && (
                           <div className="flex gap-2 ml-2 flex-shrink-0">
-                            <button onClick={() => startEdit(game)} className="text-red-700 hover:text-red-600 text-sm">編集</button>
-                            <button onClick={() => handleDelete(game.id)} className="text-red-600 hover:text-red-300 text-sm">削除</button>
+                            <button onClick={() => startEdit(game)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
+                            <button onClick={() => handleDelete(game.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
                           </div>
                         )}
                       </div>
@@ -259,7 +259,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">ゲーム関連ニュース</h2>
             {!newsLoading && news.length > 0 && (
-              <Link to="/news" className="text-red-500 hover:underline text-sm">
+              <Link to="/news" className="text-gray-100 hover:underline text-sm">
                 ニュース一覧はコチラ →
               </Link>
             )}
@@ -270,7 +270,7 @@ export default function HomePage() {
             <ul className="space-y-2">
               {news.map((item, i) => (
                 <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
-                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-red-400 transition line-clamp-2">
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-gray-300 transition line-clamp-2">
                     {item.title}
                   </a>
                   <div className="flex gap-3 mt-1 text-xs text-gray-500">

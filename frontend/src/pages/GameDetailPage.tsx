@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getGame, updateGame, deleteGame, getNews } from '../api'
 import { isAdmin } from '../auth'
@@ -55,7 +55,7 @@ export default function GameDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      <Link to="/games" className="text-red-700 hover:underline text-sm">← ゲーム一覧</Link>
+      <Link to="/games" className="text-gray-100 hover:underline text-sm">← ゲーム一覧</Link>
 
       <div className="bg-zinc-800 rounded-lg shadow mt-4 overflow-hidden">
         {!editing && game.imagePath && (
@@ -112,8 +112,8 @@ export default function GameDetailPage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-100">{game.name}</h1>
                 {admin && (
                   <div className="flex gap-2 flex-shrink-0">
-                    <button onClick={() => setEditing(true)} className="text-red-700 hover:underline text-sm">編集</button>
-                    <button onClick={handleDelete} className="text-red-600 hover:underline text-sm">削除</button>
+                    <button onClick={() => setEditing(true)} className="text-gray-100 hover:underline text-sm">編集</button>
+                    <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">削除</button>
                   </div>
                 )}
               </div>
@@ -135,7 +135,7 @@ export default function GameDetailPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-100">関連ニュース</h2>
           {!newsLoading && news.length > 0 && (
-            <Link to={`/games/${game.id}/news`} className="text-red-500 hover:underline text-sm">
+            <Link to={`/games/${game.id}/news`} className="text-gray-100 hover:underline text-sm">
               関連ニュース一覧はコチラ →
             </Link>
           )}
@@ -148,7 +148,7 @@ export default function GameDetailPage() {
           <ul className="space-y-2">
             {news.map((item, i) => (
               <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
-                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-red-400 transition line-clamp-2">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-gray-300 transition line-clamp-2">
                   {item.title}
                 </a>
                 <div className="flex gap-3 mt-1 text-xs text-gray-500">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder } from '../api'
 import { isAdmin, isLoggedIn } from '../auth'
@@ -111,7 +111,7 @@ export default function GamesPage() {
 
       {showForm && (
         <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && <p className="text-gray-100 text-sm">{error}</p>}
           <input
             type="text"
             placeholder="ゲーム名"
@@ -205,13 +205,13 @@ export default function GamesPage() {
                   )}
                   <div className="p-5 sm:p-8">
                     <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
-                      <Link to={`/games/${game.id}`} className="text-xl sm:text-2xl font-bold text-gray-100 hover:text-red-700 transition">
+                      <Link to={`/games/${game.id}`} className="text-xl sm:text-2xl font-bold text-gray-100 hover:text-gray-300 transition">
                         {game.name}
                       </Link>
                       {admin && (
                         <div className="flex gap-2 flex-shrink-0">
-                          <button onClick={() => startEdit(game)} className="text-red-700 hover:text-red-600 text-sm">編集</button>
-                          <button onClick={() => handleDelete(game.id)} className="text-red-600 hover:text-red-300 text-sm">削除</button>
+                          <button onClick={() => startEdit(game)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
+                          <button onClick={() => handleDelete(game.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
                         </div>
                       )}
                     </div>
