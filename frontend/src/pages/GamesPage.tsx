@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder } from '../api'
 import type { GameFormData } from '../api'
-import { isAdmin, isLoggedIn } from '../auth'
+import { isAdmin } from '../auth'
 import type { Game } from '../types'
 
 export default function GamesPage() {
@@ -21,7 +21,6 @@ export default function GamesPage() {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const admin = isAdmin()
-  const loggedIn = isLoggedIn()
 
   const load = async (q?: string) => {
     const res = await getGames(q)
@@ -108,7 +107,7 @@ export default function GamesPage() {
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">ゲーム一覧</h1>
-        {loggedIn && (
+        {admin && (
           <button
             onClick={() => setShowForm(!showForm)}
             className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm whitespace-nowrap"

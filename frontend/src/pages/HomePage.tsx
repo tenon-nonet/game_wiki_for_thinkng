@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews } from '../api'
-import { isAdmin, isLoggedIn } from '../auth'
+import { isAdmin } from '../auth'
 import type { Game } from '../types'
 
 export default function HomePage() {
@@ -17,7 +17,6 @@ export default function HomePage() {
   const [editImage, setEditImage] = useState<File | null>(null)
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const admin = isAdmin()
-  const loggedIn = isLoggedIn()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [news, setNews] = useState<{ title: string; url: string; publishedAt: string; source: string }[]>([])
@@ -109,17 +108,16 @@ export default function HomePage() {
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       {/* ゲーム一覧 */}
       <section>
-        <div className="flex items-center justify-between mb-6 gap-3">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">ゲーム一覧</h2>
-          {loggedIn && (
+        {admin && (
+          <div className="flex justify-end mb-6">
             <button
               onClick={() => setShowForm(!showForm)}
               className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded text-sm whitespace-nowrap"
             >
               + ゲーム追加
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {showForm && (
           <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">

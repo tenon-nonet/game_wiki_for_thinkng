@@ -165,8 +165,8 @@ export default function ItemsPage() {
                   </div>
                 )}
                 <div className="p-3 sm:p-4 flex flex-col justify-center min-w-0">
-                  <p className="font-semibold text-gray-100 text-sm sm:text-base line-clamp-2">{item.name}</p>
-                  <p className="text-xs sm:text-sm text-gray-100 mb-1">{item.gameName}</p>
+                  <p className="text-xs sm:text-sm text-gray-400 mb-0.5">{item.gameName}</p>
+                  <p className="font-semibold text-gray-100 text-sm sm:text-base line-clamp-2 mb-1">{item.name}</p>
                   {item.description && (
                     <p className="text-gray-400 text-xs line-clamp-2 sm:line-clamp-3">{item.description}</p>
                   )}

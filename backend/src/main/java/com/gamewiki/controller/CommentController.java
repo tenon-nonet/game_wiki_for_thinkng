@@ -27,7 +27,6 @@ public class CommentController {
     }
 
     @PostMapping("/api/items/{itemId}/comments")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CommentResponse> create(
             @PathVariable Long itemId,
             @RequestBody Map<String, String> body,
@@ -36,8 +35,9 @@ public class CommentController {
         if (content == null || content.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
+        String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
         Long parentId = body.get("parentId") != null ? Long.parseLong(body.get("parentId")) : null;
-        return ResponseEntity.ok(commentService.create(itemId, content.trim(), userDetails.getUsername(), parentId));
+        return ResponseEntity.ok(commentService.create(itemId, content.trim(), username, parentId));
     }
 
     @PutMapping("/api/comments/{id}")
@@ -65,10 +65,10 @@ public class CommentController {
     }
 
     @PostMapping("/api/comments/{id}/like")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CommentResponse> toggleLike(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(commentService.toggleLike(id, userDetails.getUsername()));
+        String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
+        return ResponseEntity.ok(commentService.toggleLike(id, username));
     }
 }
