@@ -44,3 +44,15 @@ export interface Item {
   createdAt: string
   updatedAt: string
 }
+
+export interface Boss {
+  id: number
+  name: string
+  description: string
+  imagePath: string | null
+  gameId: number
+  gameName: string
+  tags: Tag[]
+  createdAt: string
+  updatedAt: string
+}

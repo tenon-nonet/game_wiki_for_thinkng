@@ -12,6 +12,9 @@ import TagsAdminPage from './pages/TagsAdminPage'
 import BulkImportPage from './pages/BulkImportPage'
 import NewsListPage from './pages/NewsListPage'
 import AllNewsListPage from './pages/AllNewsListPage'
+import BossesPage from './pages/BossesPage'
+import BossDetailPage from './pages/BossDetailPage'
+import BossFormPage from './pages/BossFormPage'
 
 export default function App() {
   return (
@@ -30,6 +33,10 @@ export default function App() {
           <Route path="/items/bulk-import" element={<BulkImportPage />} />
           <Route path="/items/:id" element={<ItemDetailPage />} />
           <Route path="/items/:id/edit" element={<ItemFormPage />} />
+          <Route path="/bosses" element={<BossesPage />} />
+          <Route path="/bosses/new" element={<BossFormPage />} />
+          <Route path="/bosses/:id" element={<BossDetailPage />} />
+          <Route path="/bosses/:id/edit" element={<BossFormPage />} />
           <Route path="/tags" element={<TagsAdminPage />} />
           <Route path="/news" element={<AllNewsListPage />} />
         </Routes>
