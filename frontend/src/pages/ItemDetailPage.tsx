@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getItem, deleteItem, getComments, createComment, updateComment, deleteComment } from '../api'
+import { getItem, getItems, deleteItem, getComments, createComment, updateComment, deleteComment } from '../api'
 import { isLoggedIn, getUsername, isAdmin } from '../auth'
 import type { Item, Comment } from '../types'
 
@@ -8,6 +8,7 @@ export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [item, setItem] = useState<Item | null>(null)
+  const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
   const [commentError, setCommentError] = useState('')
@@ -18,8 +19,21 @@ export default function ItemDetailPage() {
   const admin = isAdmin()
 
   useEffect(() => {
-    getItem(Number(id)).then((res) => setItem(res.data))
-    getComments(Number(id)).then((res) => setComments(res.data))
+    const itemId = Number(id)
+    getItem(itemId).then((res) => {
+      const loaded = res.data
+      setItem(loaded)
+      if (loaded.tags.length > 0) {
+        getItems(loaded.gameId).then((r) => {
+          const tagIds = new Set(loaded.tags.map((t) => t.id))
+          const related = r.data.filter(
+            (i) => i.id !== itemId && i.tags.some((t) => tagIds.has(t.id))
+          )
+          setRelatedItems(related)
+        })
+      }
+    })
+    getComments(itemId).then((res) => setComments(res.data))
   }, [id])
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
@@ -129,6 +143,46 @@ export default function ItemDetailPage() {
           </p>
         </div>
       </div>
+
+      {/* 関連アイテム */}
+      {relatedItems.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-bold text-gray-100 mb-4">関連アイテム</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {relatedItems.map((related) => (
+              <Link
+                key={related.id}
+                to={`/items/${related.id}`}
+                className="group bg-zinc-800 rounded-lg overflow-hidden hover:ring-1 hover:ring-red-700 transition"
+              >
+                {related.imagePath ? (
+                  <img
+                    src={`/uploads/${related.imagePath}`}
+                    alt={related.name}
+                    className="w-full h-32 object-contain bg-zinc-900"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-zinc-700 flex items-center justify-center text-gray-500 text-xs">
+                    画像なし
+                  </div>
+                )}
+                <div className="p-2">
+                  <p className="text-gray-100 text-sm font-medium line-clamp-1">{related.name}</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {related.tags
+                      .filter((t) => item?.tags.some((it) => it.id === t.id))
+                      .map((t) => (
+                        <span key={t.id} className="bg-red-950 text-red-200 text-xs px-1.5 py-0.5 rounded-full">
+                          {t.name}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* コメント・考察セクション */}
       <div className="mt-8">
