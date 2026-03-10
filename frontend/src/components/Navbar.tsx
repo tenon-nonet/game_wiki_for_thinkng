@@ -9,7 +9,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     clearAuth()
-    navigate('/login')
+    navigate('/')
     setMenuOpen(false)
   }
 
@@ -40,13 +40,8 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-gray-300 text-base">ログイン</Link>
-              <Link
-                to="/register"
-                className="bg-red-900 hover:bg-red-800 text-base px-4 py-1.5 rounded"
-              >
-                登録
-              </Link>
+              <span className="text-gray-500 text-sm">名もなき褪せ人</span>
+              <Link to="/login" className="text-gray-400 hover:text-gray-200 text-sm">ログイン</Link>
             </>
           )}
         </div>
@@ -89,14 +84,8 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ログイン</Link>
-              <Link
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className="bg-red-900 hover:bg-red-800 text-center px-4 py-2 rounded"
-              >
-                登録
-              </Link>
+              <span className="text-gray-500 text-sm py-1">名もなき褪せ人</span>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="text-gray-400 hover:text-gray-200 text-sm py-1">ログイン</Link>
             </>
           )}
         </div>
