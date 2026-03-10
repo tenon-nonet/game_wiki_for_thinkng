@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder } from '../api'
+import type { GameFormData } from '../api'
 import { isAdmin, isLoggedIn } from '../auth'
 import type { Game } from '../types'
 
@@ -8,12 +9,13 @@ export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([])
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', description: '' })
+  const emptyForm = (): GameFormData => ({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '' })
+  const [form, setForm] = useState<GameFormData>(emptyForm())
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editForm, setEditForm] = useState({ name: '', description: '' })
+  const [editForm, setEditForm] = useState<GameFormData>(emptyForm())
   const [editImage, setEditImage] = useState<File | null>(null)
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -37,8 +39,8 @@ export default function GamesPage() {
     e.preventDefault()
     setError('')
     try {
-      await createGame(form.name, form.description, image)
-      setForm({ name: '', description: '' })
+      await createGame(form, image)
+      setForm(emptyForm())
       setImage(null)
       setPreview(null)
       setShowForm(false)
@@ -50,14 +52,21 @@ export default function GamesPage() {
 
   const startEdit = (game: Game) => {
     setEditingId(game.id)
-    setEditForm({ name: game.name, description: game.description || '' })
+    setEditForm({
+      name: game.name,
+      description: game.description || '',
+      platforms: game.platforms || '',
+      releaseDates: game.releaseDates || '',
+      awards: game.awards || '',
+      staff: game.staff || '',
+    })
     setEditImage(null)
     setEditPreview(null)
   }
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>, game: Game) => {
     e.preventDefault()
-    await updateGame(game.id, editForm.name, editForm.description, editImage)
+    await updateGame(game.id, editForm, editImage)
     setEditingId(null)
     load()
   }
@@ -127,6 +136,34 @@ export default function GamesPage() {
             rows={2}
             className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
+          <input
+            type="text"
+            placeholder="プラットフォーム (例: PS5, PC, Xbox)"
+            value={form.platforms}
+            onChange={(e) => setForm({ ...form, platforms: e.target.value })}
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+          />
+          <textarea
+            placeholder={"発売日 (例:\n本編: 2022/2/25\nDLC1: 2023/3/21)"}
+            value={form.releaseDates}
+            onChange={(e) => setForm({ ...form, releaseDates: e.target.value })}
+            rows={3}
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+          />
+          <textarea
+            placeholder={"受賞歴 (1行1件)"}
+            value={form.awards}
+            onChange={(e) => setForm({ ...form, awards: e.target.value })}
+            rows={2}
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+          />
+          <textarea
+            placeholder={"主要スタッフ (例:\nディレクター: 宮崎英高\nプロデューサー: XXX)"}
+            value={form.staff}
+            onChange={(e) => setForm({ ...form, staff: e.target.value })}
+            rows={3}
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+          />
           <div>
             <label className="block text-sm text-gray-300 mb-1">画像</label>
             {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />}
@@ -156,7 +193,7 @@ export default function GamesPage() {
       {games.length === 0 ? (
         <p className="text-gray-500 text-sm">まだゲームが登録されていません</p>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {games.map((game, index) => (
             <div
               key={game.id}
@@ -181,6 +218,34 @@ export default function GamesPage() {
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     rows={4}
                     className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  />
+                  <input
+                    type="text"
+                    placeholder="プラットフォーム"
+                    value={editForm.platforms}
+                    onChange={(e) => setEditForm({ ...editForm, platforms: e.target.value })}
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  />
+                  <textarea
+                    placeholder="発売日"
+                    value={editForm.releaseDates}
+                    onChange={(e) => setEditForm({ ...editForm, releaseDates: e.target.value })}
+                    rows={3}
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  />
+                  <textarea
+                    placeholder="受賞歴"
+                    value={editForm.awards}
+                    onChange={(e) => setEditForm({ ...editForm, awards: e.target.value })}
+                    rows={2}
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  />
+                  <textarea
+                    placeholder="主要スタッフ"
+                    value={editForm.staff}
+                    onChange={(e) => setEditForm({ ...editForm, staff: e.target.value })}
+                    rows={3}
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                   />
                   <div>
                     <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
@@ -216,6 +281,32 @@ export default function GamesPage() {
                       )}
                     </div>
                     {game.description && <p className="text-gray-300 mb-4 whitespace-pre-wrap">{game.description}</p>}
+                    <dl className="text-sm space-y-2 mb-4">
+                      {game.platforms && (
+                        <div>
+                          <dt className="text-gray-500 text-xs mb-0.5">プラットフォーム</dt>
+                          <dd className="text-gray-200">{game.platforms}</dd>
+                        </div>
+                      )}
+                      {game.releaseDates && (
+                        <div>
+                          <dt className="text-gray-500 text-xs mb-0.5">発売日</dt>
+                          <dd className="text-gray-200 whitespace-pre-wrap">{game.releaseDates}</dd>
+                        </div>
+                      )}
+                      {game.awards && (
+                        <div>
+                          <dt className="text-gray-500 text-xs mb-0.5">受賞歴</dt>
+                          <dd className="text-gray-200 whitespace-pre-wrap">{game.awards}</dd>
+                        </div>
+                      )}
+                      {game.staff && (
+                        <div>
+                          <dt className="text-gray-500 text-xs mb-0.5">主要スタッフ</dt>
+                          <dd className="text-gray-200 whitespace-pre-wrap">{game.staff}</dd>
+                        </div>
+                      )}
+                    </dl>
                     <p className="text-xs text-gray-500 mb-4">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
                     <div className="flex items-center justify-between">
                       <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">

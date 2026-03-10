@@ -47,7 +47,7 @@ export default function HomePage() {
     e.preventDefault()
     setError('')
     try {
-      await createGame(form.name, form.description, image)
+      await createGame(form, image)
       setForm({ name: '', description: '' })
       setImage(null)
       setPreview(null)
@@ -67,7 +67,7 @@ export default function HomePage() {
 
   const handleUpdate = async (e: React.FormEvent, game: Game) => {
     e.preventDefault()
-    await updateGame(game.id, editForm.name, editForm.description, editImage)
+    await updateGame(game.id, editForm, editImage)
     setEditingId(null)
     load()
   }

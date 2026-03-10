@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getGame, updateGame, deleteGame, getNews } from '../api'
+import type { GameFormData } from '../api'
 import { isAdmin } from '../auth'
 import type { Game } from '../types'
 
@@ -11,7 +12,7 @@ export default function GameDetailPage() {
   const navigate = useNavigate()
   const [game, setGame] = useState<Game | null>(null)
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ name: '', description: '' })
+  const [form, setForm] = useState<GameFormData>({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '' })
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [news, setNews] = useState<NewsItem[]>([])
@@ -21,7 +22,14 @@ export default function GameDetailPage() {
   useEffect(() => {
     getGame(Number(id)).then((res) => {
       setGame(res.data)
-      setForm({ name: res.data.name, description: res.data.description || '' })
+      setForm({
+        name: res.data.name,
+        description: res.data.description || '',
+        platforms: res.data.platforms || '',
+        releaseDates: res.data.releaseDates || '',
+        awards: res.data.awards || '',
+        staff: res.data.staff || '',
+      })
       setNewsLoading(true)
       getNews(res.data.name, 5).then((r) => {
         setNews(r.data)
@@ -38,7 +46,7 @@ export default function GameDetailPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await updateGame(Number(id), form.name, form.description, image)
+    const res = await updateGame(Number(id), form, image)
     setGame(res.data)
     setEditing(false)
     setImage(null)
@@ -82,6 +90,34 @@ export default function GameDetailPage() {
                 rows={4}
                 className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
               />
+              <input
+                type="text"
+                placeholder="プラットフォーム (例: PS5, PC, Xbox)"
+                value={form.platforms}
+                onChange={(e) => setForm({ ...form, platforms: e.target.value })}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+              />
+              <textarea
+                placeholder={"発売日 (例:\n本編: 2022/2/25\nDLC1: 2023/3/21)"}
+                value={form.releaseDates}
+                onChange={(e) => setForm({ ...form, releaseDates: e.target.value })}
+                rows={3}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+              />
+              <textarea
+                placeholder="受賞歴 (1行1件)"
+                value={form.awards}
+                onChange={(e) => setForm({ ...form, awards: e.target.value })}
+                rows={2}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+              />
+              <textarea
+                placeholder={"主要スタッフ (例:\nディレクター: 宮崎英高\nプロデューサー: XXX)"}
+                value={form.staff}
+                onChange={(e) => setForm({ ...form, staff: e.target.value })}
+                rows={3}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+              />
               <div>
                 <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
                 {(preview || game.imagePath) && (
@@ -118,6 +154,32 @@ export default function GameDetailPage() {
                 )}
               </div>
               {game.description && <p className="text-gray-300 mb-4">{game.description}</p>}
+              <dl className="text-sm space-y-3 mb-4">
+                {game.platforms && (
+                  <div>
+                    <dt className="text-gray-500 text-xs mb-0.5">プラットフォーム</dt>
+                    <dd className="text-gray-200">{game.platforms}</dd>
+                  </div>
+                )}
+                {game.releaseDates && (
+                  <div>
+                    <dt className="text-gray-500 text-xs mb-0.5">発売日</dt>
+                    <dd className="text-gray-200 whitespace-pre-wrap">{game.releaseDates}</dd>
+                  </div>
+                )}
+                {game.awards && (
+                  <div>
+                    <dt className="text-gray-500 text-xs mb-0.5">受賞歴</dt>
+                    <dd className="text-gray-200 whitespace-pre-wrap">{game.awards}</dd>
+                  </div>
+                )}
+                {game.staff && (
+                  <div>
+                    <dt className="text-gray-500 text-xs mb-0.5">主要スタッフ</dt>
+                    <dd className="text-gray-200 whitespace-pre-wrap">{game.staff}</dd>
+                  </div>
+                )}
+              </dl>
               <p className="text-xs text-gray-500">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
             </>
           )}
