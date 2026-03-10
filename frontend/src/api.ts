@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Tag, Comment } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, Comment } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -89,6 +89,25 @@ export const deleteBoss = (id: number) =>
 
 export const updateBossOrder = (ids: number[]) =>
   api.put('/bosses/order', ids)
+
+// NPCs
+export const getNpcs = (gameId?: number, tag?: string, keyword?: string) =>
+  api.get<Npc[]>('/npcs', { params: { ...(gameId ? { gameId } : {}), ...(tag ? { tag } : {}), ...(keyword ? { keyword } : {}) } })
+
+export const getNpc = (id: number) =>
+  api.get<Npc>(`/npcs/${id}`)
+
+export const createNpc = (data: FormData) =>
+  api.post<Npc>('/npcs', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+
+export const updateNpc = (id: number, data: FormData) =>
+  api.put<Npc>(`/npcs/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+
+export const deleteNpc = (id: number) =>
+  api.delete(`/npcs/${id}`)
+
+export const updateNpcOrder = (ids: number[]) =>
+  api.put('/npcs/order', ids)
 
 // Tags
 export const getTags = (gameId: number, type?: string) =>
