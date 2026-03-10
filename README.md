@@ -1,6 +1,6 @@
 # Game Wiki for Thinking
 
-ゲーマーの「考察」を支援するゲーム情報 Wiki サービス。
+ゲーム情報Wiki
 
 ---
 
@@ -85,5 +85,3 @@ psql -U postgres -d gamewiki
 - [ ] Discordとなんか連携
 
 ---
-
-> しかし、全てにおいて、上品であれ。
