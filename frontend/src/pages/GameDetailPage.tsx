@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getGame, updateGame, deleteGame } from '../api'
+import { getGame, updateGame, deleteGame, getNews } from '../api'
 import { isAdmin } from '../auth'
 import type { Game } from '../types'
+
+type NewsItem = { title: string; url: string; publishedAt: string; source: string }
 
 export default function GameDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -12,12 +14,19 @@ export default function GameDetailPage() {
   const [form, setForm] = useState({ name: '', description: '' })
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [news, setNews] = useState<NewsItem[]>([])
+  const [newsLoading, setNewsLoading] = useState(true)
   const admin = isAdmin()
 
   useEffect(() => {
     getGame(Number(id)).then((res) => {
       setGame(res.data)
       setForm({ name: res.data.name, description: res.data.description || '' })
+      setNewsLoading(true)
+      getNews(res.data.name, 5).then((r) => {
+        setNews(r.data)
+        setNewsLoading(false)
+      }).catch(() => setNewsLoading(false))
     })
   }, [id])
 
@@ -119,6 +128,37 @@ export default function GameDetailPage() {
         <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
           アイテム一覧を見る →
         </Link>
+      </div>
+
+      {/* 関連ニュース */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-100">関連ニュース</h2>
+          {!newsLoading && news.length > 0 && (
+            <Link to={`/games/${game.id}/news`} className="text-red-500 hover:underline text-sm">
+              関連ニュース一覧はコチラ →
+            </Link>
+          )}
+        </div>
+        {newsLoading ? (
+          <p className="text-gray-500 text-sm">読み込み中...</p>
+        ) : news.length === 0 ? (
+          <p className="text-gray-500 text-sm">ニュースが見つかりませんでした</p>
+        ) : (
+          <ul className="space-y-2">
+            {news.map((item, i) => (
+              <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-red-400 transition line-clamp-2">
+                  {item.title}
+                </a>
+                <div className="flex gap-3 mt-1 text-xs text-gray-500">
+                  {item.source && <span>{item.source}</span>}
+                  {item.publishedAt && <span>{new Date(item.publishedAt).toLocaleDateString('ja-JP')}</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   )

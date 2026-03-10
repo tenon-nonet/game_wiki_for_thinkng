@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, createGame, updateGame, deleteGame, updateGameOrder } from '../api'
+import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews } from '../api'
 import { isAdmin, isLoggedIn } from '../auth'
 import type { Game } from '../types'
 
@@ -20,10 +20,20 @@ export default function HomePage() {
   const loggedIn = isLoggedIn()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [news, setNews] = useState<{ title: string; url: string; publishedAt: string; source: string }[]>([])
+  const [newsLoading, setNewsLoading] = useState(false)
 
   const load = async (q?: string) => {
     const res = await getGames(q)
     setGames(res.data)
+    if (!q && res.data.length > 0) {
+      setNewsLoading(true)
+      const query = res.data.map((g) => g.name).join(' OR ')
+      getNews(query, 5).then((r) => {
+        setNews(r.data)
+        setNewsLoading(false)
+      }).catch(() => setNewsLoading(false))
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -242,6 +252,37 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* ゲーム関連ニュース */}
+      {(newsLoading || news.length > 0) && (
+        <section className="mt-12 max-w-3xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">ゲーム関連ニュース</h2>
+            {!newsLoading && news.length > 0 && (
+              <Link to="/news" className="text-red-500 hover:underline text-sm">
+                ニュース一覧はコチラ →
+              </Link>
+            )}
+          </div>
+          {newsLoading ? (
+            <p className="text-gray-500 text-sm">読み込み中...</p>
+          ) : (
+            <ul className="space-y-2">
+              {news.map((item, i) => (
+                <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-red-400 transition line-clamp-2">
+                    {item.title}
+                  </a>
+                  <div className="flex gap-3 mt-1 text-xs text-gray-500">
+                    {item.source && <span>{item.source}</span>}
+                    {item.publishedAt && <span>{new Date(item.publishedAt).toLocaleDateString('ja-JP')}</span>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   )
 }

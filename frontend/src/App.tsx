@@ -10,6 +10,8 @@ import ItemDetailPage from './pages/ItemDetailPage'
 import ItemFormPage from './pages/ItemFormPage'
 import TagsAdminPage from './pages/TagsAdminPage'
 import BulkImportPage from './pages/BulkImportPage'
+import NewsListPage from './pages/NewsListPage'
+import AllNewsListPage from './pages/AllNewsListPage'
 
 export default function App() {
   return (
@@ -22,12 +24,14 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:id" element={<GameDetailPage />} />
+          <Route path="/games/:id/news" element={<NewsListPage />} />
           <Route path="/items" element={<ItemsPage />} />
           <Route path="/items/new" element={<ItemFormPage />} />
           <Route path="/items/bulk-import" element={<BulkImportPage />} />
           <Route path="/items/:id" element={<ItemDetailPage />} />
           <Route path="/items/:id/edit" element={<ItemFormPage />} />
           <Route path="/tags" element={<TagsAdminPage />} />
+          <Route path="/news" element={<AllNewsListPage />} />
         </Routes>
       </div>
     </BrowserRouter>
