@@ -113,7 +113,7 @@ public class BossService {
     private Set<Tag> resolveTags(Set<String> tagNames, Long gameId) {
         if (tagNames == null || tagNames.isEmpty()) return new HashSet<>();
         return tagNames.stream().map(name ->
-            tagRepository.findByNameAndGameId(name, gameId)
+            tagRepository.findByNameAndGameIdAndType(name, gameId, "BOSS")
                 .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + name))
         ).collect(Collectors.toSet());
     }

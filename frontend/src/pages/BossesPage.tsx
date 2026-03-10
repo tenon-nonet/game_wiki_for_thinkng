@@ -49,7 +49,7 @@ export default function BossesPage() {
 
   useEffect(() => {
     if (gameId) {
-      getTags(Number(gameId)).then((r) => setTags(r.data))
+      getTags(Number(gameId), 'BOSS').then((r) => setTags(r.data))
     } else {
       setTags([])
       setTag('')

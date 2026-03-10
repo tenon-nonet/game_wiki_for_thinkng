@@ -3,6 +3,7 @@ package com.gamewiki.service;
 import com.gamewiki.dto.TagResponse;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Tag;
+import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
@@ -18,20 +19,26 @@ public class TagService {
 
     private final TagRepository tagRepository;
     private final ItemRepository itemRepository;
+    private final BossRepository bossRepository;
     private final GameRepository gameRepository;
 
-    public List<TagResponse> findByGameId(Long gameId) {
-        return tagRepository.findByGameIdOrderByName(gameId).stream().map(this::toResponse).toList();
+    public List<TagResponse> findByGameId(Long gameId, String type) {
+        List<Tag> tags = (type != null && !type.isBlank())
+                ? tagRepository.findByGameIdAndTypeOrderByName(gameId, type)
+                : tagRepository.findByGameIdOrderByName(gameId);
+        return tags.stream().map(this::toResponse).toList();
     }
 
-    public TagResponse create(String name, Long gameId) {
-        if (tagRepository.existsByNameAndGameId(name, gameId)) {
+    public TagResponse create(String name, Long gameId, String type) {
+        String resolvedType = (type != null && !type.isBlank()) ? type : "ITEM";
+        if (tagRepository.existsByNameAndGameIdAndType(name, gameId, resolvedType)) {
             throw new IllegalArgumentException("Tag already exists: " + name);
         }
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found: " + gameId));
         Tag tag = new Tag();
         tag.setName(name);
+        tag.setType(resolvedType);
         tag.setGame(game);
         return toResponse(tagRepository.save(tag));
     }
@@ -40,7 +47,8 @@ public class TagService {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + id));
         Long gameId = tag.getGame() != null ? tag.getGame().getId() : null;
-        if (!tag.getName().equals(name) && gameId != null && tagRepository.existsByNameAndGameId(name, gameId)) {
+        if (!tag.getName().equals(name) && gameId != null
+                && tagRepository.existsByNameAndGameIdAndType(name, gameId, tag.getType())) {
             throw new IllegalArgumentException("Tag already exists: " + name);
         }
         tag.setName(name);
@@ -53,6 +61,8 @@ public class TagService {
                 .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + id));
         itemRepository.findAll().forEach(item -> item.getTags().remove(tag));
         itemRepository.flush();
+        bossRepository.findAll().forEach(boss -> boss.getTags().remove(tag));
+        bossRepository.flush();
         tagRepository.delete(tag);
     }
 
@@ -60,6 +70,7 @@ public class TagService {
         TagResponse r = new TagResponse();
         r.setId(tag.getId());
         r.setName(tag.getName());
+        r.setType(tag.getType());
         if (tag.getGame() != null) {
             r.setGameId(tag.getGame().getId());
         }

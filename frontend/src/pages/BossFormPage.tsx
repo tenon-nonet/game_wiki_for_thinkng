@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getBoss, getGames, getTags, createTag, createBoss, updateBoss, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
@@ -10,6 +10,7 @@ export default function BossFormPage() {
   const isEdit = !!id
   const admin = isAdmin()
 
+  const initialGameLoaded = useRef(false)
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [form, setForm] = useState({ name: '', description: '', gameId: '' })
@@ -31,19 +32,24 @@ export default function BossFormPage() {
           description: boss.description || '',
           gameId: String(boss.gameId),
         })
-        setSelectedTags(new Set(boss.tags.map((t) => t.id)))
         setExistingImage(boss.imagePath)
-        getTags(boss.gameId).then((r2) => setAllTags(r2.data))
+        getTags(boss.gameId, 'BOSS').then((r2) => {
+          setAllTags(r2.data)
+          setSelectedTags(new Set(boss.tags.map((t) => t.id)))
+        })
       })
     }
   }, [id])
 
   useEffect(() => {
-    if (form.gameId && !isEdit) {
-      setAllTags([])
-      setSelectedTags(new Set())
-      getTags(Number(form.gameId)).then((r) => setAllTags(r.data))
+    if (!form.gameId) return
+    if (isEdit && !initialGameLoaded.current) {
+      initialGameLoaded.current = true
+      return
     }
+    setAllTags([])
+    setSelectedTags(new Set())
+    getTags(Number(form.gameId), 'BOSS').then((r) => setAllTags(r.data))
   }, [form.gameId])
 
   const toggleTag = (id: number) => {
@@ -58,7 +64,7 @@ export default function BossFormPage() {
     const name = newTag.trim()
     if (!name || !form.gameId) return
     try {
-      const res = await createTag(name, Number(form.gameId))
+      const res = await createTag(name, Number(form.gameId), 'BOSS')
       setAllTags((prev) => [...prev, res.data])
       setSelectedTags((prev) => new Set(prev).add(res.data.id))
       setNewTag('')
