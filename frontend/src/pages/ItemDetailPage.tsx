@@ -126,7 +126,6 @@ export default function ItemDetailPage() {
   }
 
   const handleLike = async (commentId: number) => {
-    if (!loggedIn) return
     try {
       const res = await toggleCommentLike(commentId)
       setComments((prev) => prev.map((c) => {
@@ -217,9 +216,11 @@ export default function ItemDetailPage() {
                 >
                   編集
                 </Link>
-                <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
-                  削除
-                </button>
+                {admin && (
+                  <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
+                    削除
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -292,8 +293,7 @@ export default function ItemDetailPage() {
       <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-100 mb-5">コメント</h2>
 
-        {loggedIn && (
-          <form onSubmit={handleCommentSubmit} className="bg-zinc-800 rounded-lg p-5 mb-6">
+        <form onSubmit={handleCommentSubmit} className="bg-zinc-800 rounded-lg p-5 mb-6">
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
@@ -312,8 +312,7 @@ export default function ItemDetailPage() {
                 投稿
               </button>
             </div>
-          </form>
-        )}
+        </form>
 
         {comments.length === 0 ? (
           <p className="text-gray-500 text-base">まだコメントはありません</p>
@@ -359,20 +358,18 @@ export default function ItemDetailPage() {
                     <div className="flex items-center gap-4 mt-3">
                       <button
                         onClick={() => handleLike(c.id)}
-                        disabled={!loggedIn}
+
                         className={`flex items-center gap-1.5 text-sm transition ${c.likedByMe ? 'text-white' : 'text-gray-500 hover:text-gray-300'} disabled:cursor-default`}
                       >
                         <span className="text-base">{c.likedByMe ? '♥' : '♡'}</span>
                         {c.likeCount > 0 && <span>{c.likeCount}</span>}
                       </button>
-                      {loggedIn && (
-                        <button
-                          onClick={() => setReplyToId(replyToId === c.id ? null : c.id)}
-                          className="text-sm text-gray-500 hover:text-gray-300 transition"
-                        >
-                          返信
-                        </button>
-                      )}
+                      <button
+                        onClick={() => setReplyToId(replyToId === c.id ? null : c.id)}
+                        className="text-sm text-gray-500 hover:text-gray-300 transition"
+                      >
+                        返信
+                      </button>
                     </div>
                   </>
                 )}
@@ -415,7 +412,7 @@ export default function ItemDetailPage() {
                         <p className="text-gray-100 text-base whitespace-pre-wrap leading-relaxed">{rep.content}</p>
                         <button
                           onClick={() => handleLike(rep.id)}
-                          disabled={!loggedIn}
+  
                           className={`flex items-center gap-1.5 text-sm mt-2 transition ${rep.likedByMe ? 'text-white' : 'text-gray-500 hover:text-gray-300'} disabled:cursor-default`}
                         >
                           <span className="text-base">{rep.likedByMe ? '♥' : '♡'}</span>
