@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,4 +15,5 @@ public class CommentResponse {
     private LocalDateTime createdAt;
     private long likeCount;
     private boolean likedByMe;
+    private List<CommentResponse> replies;
 }

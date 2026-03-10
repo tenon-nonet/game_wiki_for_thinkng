@@ -79,8 +79,8 @@ export const deleteTag = (id: number) =>
 export const getComments = (itemId: number) =>
   api.get<Comment[]>(`/items/${itemId}/comments`)
 
-export const createComment = (itemId: number, content: string) =>
-  api.post<Comment>(`/items/${itemId}/comments`, { content })
+export const createComment = (itemId: number, content: string, parentId?: number) =>
+  api.post<Comment>(`/items/${itemId}/comments`, { content, ...(parentId ? { parentId: String(parentId) } : {}) })
 
 export const updateComment = (id: number, content: string) =>
   api.put<Comment>(`/comments/${id}`, { content })

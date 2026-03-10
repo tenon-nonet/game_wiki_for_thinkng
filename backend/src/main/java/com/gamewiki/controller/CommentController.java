@@ -36,7 +36,8 @@ public class CommentController {
         if (content == null || content.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(commentService.create(itemId, content.trim(), userDetails.getUsername()));
+        Long parentId = body.get("parentId") != null ? Long.parseLong(body.get("parentId")) : null;
+        return ResponseEntity.ok(commentService.create(itemId, content.trim(), userDetails.getUsername(), parentId));
     }
 
     @PutMapping("/api/comments/{id}")

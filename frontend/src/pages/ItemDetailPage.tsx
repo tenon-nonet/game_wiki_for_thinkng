@@ -14,6 +14,8 @@ export default function ItemDetailPage() {
   const [commentError, setCommentError] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editText, setEditText] = useState('')
+  const [replyToId, setReplyToId] = useState<number | null>(null)
+  const [replyText, setReplyText] = useState('')
   const [games, setGames] = useState<Game[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [searchGameId, setSearchGameId] = useState('')
@@ -99,9 +101,27 @@ export default function ItemDetailPage() {
     if (!confirm('このコメントを削除しますか？')) return
     try {
       await deleteComment(commentId)
-      setComments((prev) => prev.filter((c) => c.id !== commentId))
+      setComments((prev) => prev
+        .filter((c) => c.id !== commentId)
+        .map((c) => ({ ...c, replies: c.replies.filter((r) => r.id !== commentId) }))
+      )
     } catch {
       setCommentError('コメントの削除に失敗しました')
+    }
+  }
+
+  const handleReplySubmit = async (e: React.FormEvent, parentId: number) => {
+    e.preventDefault()
+    setCommentError('')
+    try {
+      const res = await createComment(Number(id), replyText.trim(), parentId)
+      setComments((prev) => prev.map((c) =>
+        c.id === parentId ? { ...c, replies: [...(c.replies || []), res.data] } : c
+      ))
+      setReplyText('')
+      setReplyToId(null)
+    } catch {
+      setCommentError('返信の投稿に失敗しました')
     }
   }
 
@@ -109,7 +129,10 @@ export default function ItemDetailPage() {
     if (!loggedIn) return
     try {
       const res = await toggleCommentLike(commentId)
-      setComments((prev) => prev.map((c) => c.id === commentId ? res.data : c))
+      setComments((prev) => prev.map((c) => {
+        if (c.id === commentId) return { ...res.data, replies: c.replies }
+        return { ...c, replies: c.replies.map((r) => r.id === commentId ? res.data : r) }
+      }))
     } catch {
       // ignore
     }
@@ -298,6 +321,7 @@ export default function ItemDetailPage() {
           <ul className="space-y-3">
             {comments.map((c) => (
               <li key={c.id} className="bg-zinc-800 rounded-lg px-4 py-3">
+                {/* コメントヘッダー */}
                 <div className="flex flex-wrap items-center justify-between mb-1 gap-1">
                   <span className="text-red-700 text-xs font-medium">{c.username}</span>
                   <div className="flex items-center gap-2">
@@ -305,17 +329,15 @@ export default function ItemDetailPage() {
                       {new Date(c.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {c.username === currentUser && editingId !== c.id && (
-                      <button onClick={() => startEdit(c)} className="text-red-700 hover:text-red-600 text-xs">
-                        編集
-                      </button>
+                      <button onClick={() => startEdit(c)} className="text-red-700 hover:text-red-600 text-xs">編集</button>
                     )}
                     {(admin || c.username === currentUser) && (
-                      <button onClick={() => handleCommentDelete(c.id)} className="text-red-600 hover:text-red-300 text-xs">
-                        削除
-                      </button>
+                      <button onClick={() => handleCommentDelete(c.id)} className="text-red-600 hover:text-red-300 text-xs">削除</button>
                     )}
                   </div>
                 </div>
+
+                {/* コメント本文 or 編集フォーム */}
                 {editingId === c.id ? (
                   <form onSubmit={handleCommentUpdate} className="mt-1">
                     <textarea
@@ -334,17 +356,74 @@ export default function ItemDetailPage() {
                 ) : (
                   <>
                     <p className="text-gray-200 text-sm whitespace-pre-wrap">{c.content}</p>
-                    <div className="mt-2">
+                    <div className="flex items-center gap-3 mt-2">
                       <button
                         onClick={() => handleLike(c.id)}
                         disabled={!loggedIn}
-                        className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition ${c.likedByMe ? 'text-red-400' : 'text-gray-500 hover:text-red-400'} disabled:cursor-default`}
+                        className={`flex items-center gap-1 text-xs transition ${c.likedByMe ? 'text-red-400' : 'text-gray-500 hover:text-red-400'} disabled:cursor-default`}
                       >
                         <span>{c.likedByMe ? '♥' : '♡'}</span>
-                        <span>{c.likeCount > 0 ? c.likeCount : ''}</span>
+                        {c.likeCount > 0 && <span>{c.likeCount}</span>}
                       </button>
+                      {loggedIn && (
+                        <button
+                          onClick={() => setReplyToId(replyToId === c.id ? null : c.id)}
+                          className="text-xs text-gray-500 hover:text-gray-300 transition"
+                        >
+                          返信
+                        </button>
+                      )}
                     </div>
                   </>
+                )}
+
+                {/* 返信フォーム */}
+                {replyToId === c.id && (
+                  <form onSubmit={(e) => handleReplySubmit(e, c.id)} className="mt-3 ml-4 border-l-2 border-zinc-600 pl-3">
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder={`${c.username} への返信...`}
+                      rows={2}
+                      required
+                      className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm resize-none"
+                    />
+                    {commentError && <p className="text-red-600 text-xs mt-1">{commentError}</p>}
+                    <div className="flex gap-2 justify-end mt-1">
+                      <button type="submit" disabled={!replyText.trim()} className="bg-red-900 hover:bg-red-800 text-white text-xs px-3 py-1.5 rounded disabled:opacity-40">返信する</button>
+                      <button type="button" onClick={() => { setReplyToId(null); setReplyText('') }} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 text-xs px-3 py-1.5 rounded">キャンセル</button>
+                    </div>
+                  </form>
+                )}
+
+                {/* 返信一覧 */}
+                {c.replies && c.replies.length > 0 && (
+                  <ul className="mt-3 ml-4 border-l-2 border-zinc-600 pl-3 space-y-2">
+                    {c.replies.map((rep) => (
+                      <li key={rep.id} className="bg-zinc-700 rounded-lg px-3 py-2">
+                        <div className="flex flex-wrap items-center justify-between mb-1 gap-1">
+                          <span className="text-red-700 text-xs font-medium">{rep.username}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500 text-xs">
+                              {new Date(rep.createdAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            {(admin || rep.username === currentUser) && (
+                              <button onClick={() => handleCommentDelete(rep.id)} className="text-red-600 hover:text-red-300 text-xs">削除</button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-gray-200 text-sm whitespace-pre-wrap">{rep.content}</p>
+                        <button
+                          onClick={() => handleLike(rep.id)}
+                          disabled={!loggedIn}
+                          className={`flex items-center gap-1 text-xs mt-1 transition ${rep.likedByMe ? 'text-red-400' : 'text-gray-500 hover:text-red-400'} disabled:cursor-default`}
+                        >
+                          <span>{rep.likedByMe ? '♥' : '♡'}</span>
+                          {rep.likeCount > 0 && <span>{rep.likeCount}</span>}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </li>
             ))}

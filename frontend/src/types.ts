@@ -26,6 +26,7 @@ export interface Comment {
   createdAt: string
   likeCount: number
   likedByMe: boolean
+  replies: Comment[]
 }
 
 export interface Item {
