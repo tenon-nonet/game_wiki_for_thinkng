@@ -18,8 +18,10 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<List<TagResponse>> findAll(@RequestParam Long gameId) {
-        return ResponseEntity.ok(tagService.findByGameId(gameId));
+    public ResponseEntity<List<TagResponse>> findAll(
+            @RequestParam Long gameId,
+            @RequestParam(required = false) String type) {
+        return ResponseEntity.ok(tagService.findByGameId(gameId, type));
     }
 
     @PostMapping
@@ -31,7 +33,8 @@ public class TagController {
             return ResponseEntity.badRequest().build();
         }
         Long gameId = Long.valueOf(gameIdObj.toString());
-        return ResponseEntity.ok(tagService.create(name, gameId));
+        String type = body.get("type") != null ? body.get("type").toString() : null;
+        return ResponseEntity.ok(tagService.create(name, gameId, type));
     }
 
     @PutMapping("/{id}")

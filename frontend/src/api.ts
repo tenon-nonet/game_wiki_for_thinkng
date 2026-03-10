@@ -91,11 +91,11 @@ export const updateBossOrder = (ids: number[]) =>
   api.put('/bosses/order', ids)
 
 // Tags
-export const getTags = (gameId: number) =>
-  api.get<Tag[]>('/tags', { params: { gameId } })
+export const getTags = (gameId: number, type?: string) =>
+  api.get<Tag[]>('/tags', { params: { gameId, ...(type ? { type } : {}) } })
 
-export const createTag = (name: string, gameId: number) =>
-  api.post<Tag>('/tags', { name, gameId })
+export const createTag = (name: string, gameId: number, type?: string) =>
+  api.post<Tag>('/tags', { name, gameId, ...(type ? { type } : {}) })
 
 export const updateTag = (id: number, name: string) =>
   api.put<Tag>(`/tags/${id}`, { name })

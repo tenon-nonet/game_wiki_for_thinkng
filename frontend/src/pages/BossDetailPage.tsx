@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getBoss, getBosses, deleteBoss } from '../api'
+import { getBoss, deleteBoss, getItems } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
-import type { Boss } from '../types'
+import type { Boss, Item } from '../types'
 
 export default function BossDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [boss, setBoss] = useState<Boss | null>(null)
-  const [relatedBosses, setRelatedBosses] = useState<Boss[]>([])
+  const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
   const admin = isAdmin()
 
@@ -18,12 +18,15 @@ export default function BossDetailPage() {
       const loaded = res.data
       setBoss(loaded)
       if (loaded.tags.length > 0) {
-        getBosses(loaded.gameId).then((r) => {
-          const tagIds = new Set(loaded.tags.map((t) => t.id))
-          const related = r.data.filter(
-            (b) => b.id !== bossId && b.tags.some((t) => tagIds.has(t.id))
-          )
-          setRelatedBosses(related)
+        // ボスタグ名をキーワードとしてアイテムの名前・説明文に部分一致検索
+        getItems(loaded.gameId).then((r) => {
+          const bossTagNames = loaded.tags.map((t) => t.name.toLowerCase())
+          const related = r.data.filter((item) => {
+            const name = item.name.toLowerCase()
+            const desc = (item.description || '').toLowerCase()
+            return bossTagNames.some((kw) => name.includes(kw) || desc.includes(kw))
+          })
+          setRelatedItems(related)
         })
       }
     })
@@ -98,21 +101,21 @@ export default function BossDetailPage() {
         </div>
       </div>
 
-      {/* 関連ボス */}
-      {relatedBosses.length > 0 && (
+      {/* 関連アイテム */}
+      {relatedItems.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-bold text-gray-100 mb-4">関連ボス</h2>
+          <h2 className="text-lg font-bold text-gray-100 mb-4">関連アイテム</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {relatedBosses.map((related) => (
+            {relatedItems.map((item) => (
               <Link
-                key={related.id}
-                to={`/bosses/${related.id}`}
+                key={item.id}
+                to={`/items/${item.id}`}
                 className="group bg-zinc-800 rounded-lg overflow-hidden hover:ring-1 hover:ring-red-700 transition"
               >
-                {related.imagePath ? (
+                {item.imagePath ? (
                   <img
-                    src={`/uploads/${related.imagePath}`}
-                    alt={related.name}
+                    src={`/uploads/${item.imagePath}`}
+                    alt={item.name}
                     className="w-full h-32 object-contain bg-zinc-900"
                   />
                 ) : (
@@ -121,13 +124,16 @@ export default function BossDetailPage() {
                   </div>
                 )}
                 <div className="p-2">
-                  <p className="text-gray-100 text-sm font-medium line-clamp-1">{related.name}</p>
+                  <p className="text-gray-100 text-sm font-medium line-clamp-1">{item.name}</p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {related.tags
-                      .filter((t) => boss?.tags.some((bt) => bt.id === t.id))
-                      .map((t) => (
-                        <span key={t.id} className="bg-red-950 text-white text-xs px-1.5 py-0.5 rounded-full">
-                          {t.name}
+                    {boss.tags
+                      .filter((bt) => {
+                        const kw = bt.name.toLowerCase()
+                        return item.name.toLowerCase().includes(kw) || (item.description || '').toLowerCase().includes(kw)
+                      })
+                      .map((bt) => (
+                        <span key={bt.id} className="bg-red-950 text-white text-xs px-1.5 py-0.5 rounded-full">
+                          {bt.name}
                         </span>
                       ))}
                   </div>

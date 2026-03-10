@@ -21,6 +21,7 @@ export interface Tag {
   id: number
   name: string
   gameId: number
+  type?: string
 }
 
 export interface Comment {

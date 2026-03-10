@@ -9,4 +9,5 @@ public class TagResponse {
     private Long id;
     private String name;
     private Long gameId;
+    private String type;
 }
