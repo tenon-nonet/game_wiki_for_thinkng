@@ -24,6 +24,8 @@ export interface Comment {
   content: string
   username: string
   createdAt: string
+  likeCount: number
+  likedByMe: boolean
 }
 
 export interface Item {

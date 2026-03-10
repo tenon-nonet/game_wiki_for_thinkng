@@ -19,8 +19,11 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping("/api/items/{itemId}/comments")
-    public ResponseEntity<List<CommentResponse>> list(@PathVariable Long itemId) {
-        return ResponseEntity.ok(commentService.findByItemId(itemId));
+    public ResponseEntity<List<CommentResponse>> list(
+            @PathVariable Long itemId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        return ResponseEntity.ok(commentService.findByItemId(itemId, username));
     }
 
     @PostMapping("/api/items/{itemId}/comments")
@@ -58,5 +61,13 @@ public class CommentController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         commentService.delete(id, userDetails.getUsername(), isAdmin);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/api/comments/{id}/like")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<CommentResponse> toggleLike(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(commentService.toggleLike(id, userDetails.getUsername()));
     }
 }

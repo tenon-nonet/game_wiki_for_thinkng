@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment } from '../api'
+import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
 import { isLoggedIn, getUsername, isAdmin } from '../auth'
 import type { Item, Comment, Game, Tag } from '../types'
 
@@ -102,6 +102,16 @@ export default function ItemDetailPage() {
       setComments((prev) => prev.filter((c) => c.id !== commentId))
     } catch {
       setCommentError('コメントの削除に失敗しました')
+    }
+  }
+
+  const handleLike = async (commentId: number) => {
+    if (!loggedIn) return
+    try {
+      const res = await toggleCommentLike(commentId)
+      setComments((prev) => prev.map((c) => c.id === commentId ? res.data : c))
+    } catch {
+      // ignore
     }
   }
 
@@ -322,7 +332,19 @@ export default function ItemDetailPage() {
                     </div>
                   </form>
                 ) : (
-                  <p className="text-gray-200 text-sm whitespace-pre-wrap">{c.content}</p>
+                  <>
+                    <p className="text-gray-200 text-sm whitespace-pre-wrap">{c.content}</p>
+                    <div className="mt-2">
+                      <button
+                        onClick={() => handleLike(c.id)}
+                        disabled={!loggedIn}
+                        className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition ${c.likedByMe ? 'text-red-400' : 'text-gray-500 hover:text-red-400'} disabled:cursor-default`}
+                      >
+                        <span>{c.likedByMe ? '♥' : '♡'}</span>
+                        <span>{c.likeCount > 0 ? c.likeCount : ''}</span>
+                      </button>
+                    </div>
+                  </>
                 )}
               </li>
             ))}

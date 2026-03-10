@@ -88,6 +88,9 @@ export const updateComment = (id: number, content: string) =>
 export const deleteComment = (id: number) =>
   api.delete(`/comments/${id}`)
 
+export const toggleCommentLike = (id: number) =>
+  api.post<Comment>(`/comments/${id}/like`)
+
 // News
 export const getNews = (q: string, limit?: number) =>
   api.get<{ title: string; url: string; publishedAt: string; source: string }[]>('/news', { params: { q, ...(limit ? { limit } : {}) } })
