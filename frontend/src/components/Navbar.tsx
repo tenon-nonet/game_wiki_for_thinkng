@@ -23,7 +23,8 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/items" className="hover:text-gray-300 text-base">アイテム</Link>
+          <Link to="/games" className="hover:text-gray-300 text-base">ゲーム一覧</Link>
+          <Link to="/items" className="hover:text-gray-300 text-base">アイテム一覧</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
@@ -71,7 +72,8 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-700 px-4 py-3 flex flex-col gap-3">
-          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム</Link>
+          <Link to="/games" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ゲーム一覧</Link>
+          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム一覧</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
