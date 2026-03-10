@@ -66,6 +66,7 @@ export interface Npc {
   gameId: number
   gameName: string
   tags: Tag[]
+  dialogues: string[]
   createdAt: string
   updatedAt: string
 }

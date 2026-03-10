@@ -4,6 +4,7 @@ import com.gamewiki.dto.NpcRequest;
 import com.gamewiki.dto.NpcResponse;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Npc;
+import com.gamewiki.entity.NpcDialogue;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
@@ -72,6 +73,7 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        setDialogues(npc, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
             npc.setImagePath(fileStorageService.store(image));
@@ -90,6 +92,8 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.getDialogues().clear();
+        setDialogues(npc, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(npc.getImagePath());
@@ -110,6 +114,19 @@ public class NpcService {
                 .orElseThrow(() -> new IllegalArgumentException("Npc not found: " + id));
     }
 
+    private void setDialogues(Npc npc, List<String> texts) {
+        if (texts == null) return;
+        for (int i = 0; i < texts.size(); i++) {
+            String text = texts.get(i);
+            if (text == null || text.isBlank()) continue;
+            NpcDialogue d = new NpcDialogue();
+            d.setNpc(npc);
+            d.setText(text.trim());
+            d.setOrderIndex(i);
+            npc.getDialogues().add(d);
+        }
+    }
+
     private Set<Tag> resolveTags(Set<String> tagNames, Long gameId) {
         if (tagNames == null || tagNames.isEmpty()) return new HashSet<>();
         return tagNames.stream().map(name ->
@@ -127,6 +144,7 @@ public class NpcService {
         r.setGameId(npc.getGame().getId());
         r.setGameName(npc.getGame().getName());
         r.setTags(npc.getTags().stream().map(tagService::toResponse).collect(Collectors.toSet()));
+        r.setDialogues(npc.getDialogues().stream().map(NpcDialogue::getText).toList());
         r.setCreatedAt(npc.getCreatedAt());
         r.setUpdatedAt(npc.getUpdatedAt());
         return r;

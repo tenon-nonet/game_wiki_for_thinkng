@@ -85,6 +85,22 @@ export default function NpcDetailPage() {
             <p className="text-gray-300 mt-4 whitespace-pre-wrap">{npc.description}</p>
           )}
 
+          {npc.dialogues?.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">セリフ</h2>
+              <div className="space-y-2">
+                {npc.dialogues.map((text, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <span className="text-xs text-gray-500 mt-1 w-12 shrink-0">#{i + 1}</span>
+                    <p className="text-gray-200 text-sm whitespace-pre-wrap bg-zinc-700 rounded px-4 py-2 flex-1">
+                      {text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {npc.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {npc.tags.map((t) => (

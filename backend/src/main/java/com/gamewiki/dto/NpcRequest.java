@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -22,4 +23,6 @@ public class NpcRequest {
     private Long gameId;
 
     private Set<String> tags;
+
+    private List<String> dialogues;
 }
