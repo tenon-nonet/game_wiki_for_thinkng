@@ -57,3 +57,15 @@ export interface Boss {
   createdAt: string
   updatedAt: string
 }
+
+export interface Npc {
+  id: number
+  name: string
+  description: string
+  imagePath: string | null
+  gameId: number
+  gameName: string
+  tags: Tag[]
+  createdAt: string
+  updatedAt: string
+}

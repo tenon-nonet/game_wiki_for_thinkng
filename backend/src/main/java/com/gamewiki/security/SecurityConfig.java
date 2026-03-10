@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/items/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/bosses/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/npcs/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/items/*/comments").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/items/*/comments").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/comments/*/like").permitAll()

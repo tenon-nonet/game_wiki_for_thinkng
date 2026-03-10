@@ -5,7 +5,7 @@ import type { Game, Tag } from '../types'
 export default function TagsAdminPage() {
   const [games, setGames] = useState<Game[]>([])
   const [selectedGameId, setSelectedGameId] = useState<string>('')
-  const [tagType, setTagType] = useState<'ITEM' | 'BOSS'>('ITEM')
+  const [tagType, setTagType] = useState<'ITEM' | 'BOSS' | 'NPC'>('ITEM')
   const [tags, setTags] = useState<Tag[]>([])
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -59,7 +59,7 @@ export default function TagsAdminPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('このタグを削除しますか？\n削除するとアイテム・ボスからも紐付けが外れます。')) return
+    if (!confirm('このタグを削除しますか？\n削除するとアイテム・ボス・NPCからも紐付けが外れます。')) return
     setError('')
     try {
       await deleteTag(id)
@@ -101,6 +101,12 @@ export default function TagsAdminPage() {
             >
               ボスタグ
             </button>
+            <button
+              onClick={() => setTagType('NPC')}
+              className={`px-5 py-2 rounded text-sm font-medium transition ${tagType === 'NPC' ? 'bg-red-900 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+            >
+              NPCタグ
+            </button>
           </div>
 
           {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
@@ -110,7 +116,7 @@ export default function TagsAdminPage() {
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder={`新規${tagType === 'BOSS' ? 'ボス' : 'アイテム'}タグ名`}
+              placeholder={`新規${tagType === 'BOSS' ? 'ボス' : tagType === 'NPC' ? 'NPC' : 'アイテム'}タグ名`}
               required
               className="flex-1 border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
@@ -123,7 +129,7 @@ export default function TagsAdminPage() {
           </form>
 
           {tags.length === 0 ? (
-            <p className="text-gray-500 text-sm">このゲームに{tagType === 'BOSS' ? 'ボス' : 'アイテム'}タグはありません</p>
+            <p className="text-gray-500 text-sm">このゲームに{tagType === 'BOSS' ? 'ボス' : tagType === 'NPC' ? 'NPC' : 'アイテム'}タグはありません</p>
           ) : (
             <ul className="space-y-2">
               {tags.map((tag) => (

@@ -6,6 +6,7 @@ import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
+import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class TagService {
     private final TagRepository tagRepository;
     private final ItemRepository itemRepository;
     private final BossRepository bossRepository;
+    private final NpcRepository npcRepository;
     private final GameRepository gameRepository;
 
     public List<TagResponse> findByGameId(Long gameId, String type) {
@@ -63,6 +65,8 @@ public class TagService {
         itemRepository.flush();
         bossRepository.findAll().forEach(boss -> boss.getTags().remove(tag));
         bossRepository.flush();
+        npcRepository.findAll().forEach(npc -> npc.getTags().remove(tag));
+        npcRepository.flush();
         tagRepository.delete(tag);
     }
 
