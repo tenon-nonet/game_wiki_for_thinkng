@@ -50,6 +50,13 @@ public class ItemController {
         return ResponseEntity.ok(itemService.update(id, request, image));
     }
 
+    @PutMapping("/order")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> updateOrder(@RequestBody List<Long> ids) {
+        itemService.updateOrder(ids);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

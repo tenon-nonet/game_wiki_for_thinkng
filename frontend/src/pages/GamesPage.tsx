@@ -218,7 +218,7 @@ export default function GamesPage() {
                     {game.description && <p className="text-gray-300 mb-4 whitespace-pre-wrap">{game.description}</p>}
                     <p className="text-xs text-gray-500 mb-4">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
                     <div className="flex items-center justify-between">
-                      <Link to={`/items?gameId=${game.id}`} className="bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-2 rounded transition">
+                      <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
                         アイテムを見る
                       </Link>
                     </div>

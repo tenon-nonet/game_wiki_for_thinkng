@@ -59,6 +59,9 @@ export const updateItem = (id: number, data: FormData) =>
 export const deleteItem = (id: number) =>
   api.delete(`/items/${id}`)
 
+export const updateItemOrder = (ids: number[]) =>
+  api.put('/items/order', ids)
+
 // Tags
 export const getTags = (gameId: number) =>
   api.get<Tag[]>('/tags', { params: { gameId } })

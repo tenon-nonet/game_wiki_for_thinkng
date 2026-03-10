@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getItems, getGames, getTags } from '../api'
+import { getItems, getGames, getTags, updateItemOrder } from '../api'
 import { isLoggedIn } from '../auth'
 import type { Item, Game, Tag } from '../types'
 
@@ -12,7 +12,36 @@ export default function ItemsPage() {
   const [gameId, setGameId] = useState<string>(searchParams.get('gameId') || '')
   const [tag, setTag] = useState<string>(searchParams.get('tag') || '')
   const [keyword, setKeyword] = useState<string>(searchParams.get('keyword') || '')
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const loggedIn = isLoggedIn()
+
+  const handleDragStart = (index: number) => setDragIndex(index)
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    setDragOverIndex(index)
+  }
+
+  const handleDrop = async (index: number) => {
+    if (dragIndex === null || dragIndex === index) {
+      setDragIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+    const newItems = [...items]
+    const [moved] = newItems.splice(dragIndex, 1)
+    newItems.splice(index, 0, moved)
+    setItems(newItems)
+    setDragIndex(null)
+    setDragOverIndex(null)
+    await updateItemOrder(newItems.map((i) => i.id))
+  }
+
+  const handleDragEnd = () => {
+    setDragIndex(null)
+    setDragOverIndex(null)
+  }
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
@@ -113,46 +142,52 @@ export default function ItemsPage() {
         <p className="text-gray-500 text-center py-12">アイテムがありません</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-          {items.map((item) => (
-            <Link
+          {items.map((item, index) => (
+            <div
               key={item.id}
-              to={`/items/${item.id}`}
-              className="group relative bg-zinc-800 rounded-lg shadow hover:shadow-md transition overflow-hidden"
+              draggable={loggedIn}
+              onDragStart={() => loggedIn && handleDragStart(index)}
+              onDragOver={(e) => loggedIn && handleDragOver(e, index)}
+              onDrop={() => loggedIn && handleDrop(index)}
+              onDragEnd={handleDragEnd}
+              className={`group relative bg-zinc-800 rounded-lg shadow hover:shadow-md transition overflow-hidden ${loggedIn ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
             >
-              {item.imagePath ? (
-                <img
-                  src={`/uploads/${item.imagePath}`}
-                  alt={item.name}
-                  className="w-full h-52 object-contain bg-zinc-900"
-                />
-              ) : (
-                <div className="w-full h-52 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">
-                  画像なし
-                </div>
-              )}
-              <div className="p-4">
-                <p className="font-semibold text-gray-100 text-base">{item.name}</p>
-                <p className="text-sm text-red-700 mb-1">{item.gameName}</p>
-                {item.description && (
-                  <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
-                )}
-                {item.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {item.tags.map((t) => (
-                      <span key={t.id} className="bg-red-950 text-red-200 text-xs px-2 py-0.5 rounded-full">
-                        {t.name}
-                      </span>
-                    ))}
+              <Link to={`/items/${item.id}`} className="block">
+                {item.imagePath ? (
+                  <img
+                    src={`/uploads/${item.imagePath}`}
+                    alt={item.name}
+                    className="w-full h-52 object-contain bg-zinc-900"
+                  />
+                ) : (
+                  <div className="w-full h-52 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">
+                    画像なし
                   </div>
                 )}
-              </div>
-              {item.description && (
-                <div className="absolute inset-0 bg-zinc-900/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center p-4 pointer-events-none">
-                  <p className="text-gray-100 font-semibold text-sm mb-2">{item.name}</p>
-                  <p className="text-gray-300 text-xs leading-relaxed line-clamp-[10]">{item.description}</p>
+                <div className="p-4">
+                  <p className="font-semibold text-gray-100 text-base">{item.name}</p>
+                  <p className="text-sm text-red-700 mb-1">{item.gameName}</p>
+                  {item.description && (
+                    <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
+                  )}
+                  {item.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {item.tags.map((t) => (
+                        <span key={t.id} className="bg-red-950 text-red-200 text-xs px-2 py-0.5 rounded-full">
+                          {t.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </Link>
+                {item.description && (
+                  <div className="absolute inset-0 bg-zinc-900/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center p-4 pointer-events-none">
+                    <p className="text-gray-100 font-semibold text-sm mb-2">{item.name}</p>
+                    <p className="text-gray-300 text-xs leading-relaxed line-clamp-[10]">{item.description}</p>
+                  </div>
+                )}
+              </Link>
+            </div>
           ))}
         </div>
       )}

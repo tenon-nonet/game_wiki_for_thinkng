@@ -100,12 +100,12 @@ export default function HomePage() {
       {/* ヘッダー */}
       <div className="text-center mb-8 sm:mb-12">
         <div className="max-w-3xl mx-auto bg-zinc-800 rounded-xl p-5 sm:p-8 text-left space-y-3 text-base text-gray-300">
-          <p><span className="text-gray-100 font-medium">Enlightmenter's Archives</span> は、ゲームに登場するアイテムの情報をみんなで共有・編集できるWikiサービスです。</p>
+          <p><span className="text-gray-100 font-medium">Archives for Enlightmenters</span> は、ゲーム内アイテム等のテキスト情報を共有できる考察用Wiki</p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link to="/items" className="bg-red-900 hover:bg-red-800 text-white px-5 py-2.5 rounded text-base font-medium transition">
+            <Link to="/items" className="border border-white/40 hover:border-white/70 text-white bg-transparent px-5 py-2.5 rounded text-base font-medium transition">
               アイテム一覧を見る
             </Link>
-            <Link to="/games" className="bg-zinc-700 hover:bg-gray-600 text-gray-100 px-5 py-2.5 rounded text-base font-medium transition">
+            <Link to="/games" className="border border-white/40 hover:border-white/70 text-white bg-transparent px-5 py-2.5 rounded text-base font-medium transition">
               ゲーム一覧を見る
             </Link>
           </div>
@@ -233,7 +233,7 @@ export default function HomePage() {
                         )}
                       </div>
                       {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
-                      <Link to={`/items?gameId=${game.id}`} className="mt-3 inline-block bg-red-900 hover:bg-red-800 text-white text-sm px-4 py-2 rounded transition">アイテムを見る →</Link>
+                      <Link to={`/items?gameId=${game.id}`} className="mt-3 inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">アイテムを見る →</Link>
                     </div>
                   </>
                 )}
