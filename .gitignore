@@ -25,7 +25,6 @@ Thumbs.db
 *.env
 application-local.properties
 application-prod.properties
-backend/src/main/resources/application.properties
 
 # Claude
 .claude/
