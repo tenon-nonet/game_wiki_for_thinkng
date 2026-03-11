@@ -5,6 +5,7 @@ import com.gamewiki.dto.ItemResponse;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Item;
 import com.gamewiki.entity.Tag;
+import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
@@ -26,6 +27,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
+    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -65,6 +67,10 @@ public class ItemService {
     }
 
     public ItemResponse create(ItemRequest request, MultipartFile image) {
+        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "ITEM", request.getGameId())) {
+            throw new IllegalArgumentException("目録に登録されていないアイテムは作成できません。先に目録へ登録してください。");
+        }
+
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
 

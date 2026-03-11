@@ -101,10 +101,10 @@ export default function ItemsPage() {
               一括取り込み
             </Link>
             <Link
-              to="/items/new"
+              to="/catalog"
               className="bg-red-900 hover:bg-red-800 text-white px-3 py-2 rounded text-sm whitespace-nowrap"
             >
-              + アイテム追加
+              目録から登録
             </Link>
           </div>
         )}
