@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { getGames, getItems, getBosses, getNpcs, getCatalogEntries, createCatalogEntry, deleteCatalogEntry, bulkCreateCatalogEntries } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
 import type { Game, Item, Boss, Npc, CatalogEntry } from '../types'
@@ -14,10 +14,15 @@ const TAB_CONFIG: { key: TabType; label: string }[] = [
 
 const ITEM_CATEGORIES = ['武器', '防具', '消費アイテム', '素材', 'タリスマン', 'その他']
 
+const VALID_TABS: TabType[] = ['ITEM', 'BOSS', 'NPC']
+
 export default function CatalogPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [games, setGames] = useState<Game[]>([])
-  const [selectedGameId, setSelectedGameId] = useState<number>(0)
-  const [activeTab, setActiveTab] = useState<TabType>('ITEM')
+  const [selectedGameId, setSelectedGameId] = useState<number>(Number(searchParams.get('gameId')) || 0)
+  const [activeTab, setActiveTab] = useState<TabType>(
+    VALID_TABS.includes(searchParams.get('tab') as TabType) ? (searchParams.get('tab') as TabType) : 'ITEM'
+  )
 
   // Wiki エントリ
   const [items, setItems] = useState<Item[]>([])
@@ -43,25 +48,30 @@ export default function CatalogPage() {
 
   // 初回: ゲーム一覧取得
   useEffect(() => {
-    getGames().then((r) => {
-      setGames(r.data)
-      if (r.data.length > 0) setSelectedGameId(r.data[0].id)
-    })
+    getGames().then((r) => setGames(r.data))
   }, [])
+
+  // URLパラメータを状態に同期
+  useEffect(() => {
+    const params: Record<string, string> = {}
+    if (selectedGameId > 0) params.gameId = String(selectedGameId)
+    if (activeTab !== 'ITEM') params.tab = activeTab
+    setSearchParams(params, { replace: true })
+  }, [selectedGameId, activeTab])
 
   // ゲーム変更時: Wiki + 目録 を取得
   useEffect(() => {
-    if (!selectedGameId) return
-    getItems(selectedGameId).then((r) => setItems(r.data))
-    getBosses(selectedGameId).then((r) => setBosses(r.data))
-    getNpcs(selectedGameId).then((r) => setNpcs(r.data))
-    getCatalogEntries(selectedGameId).then((r) => setCatalogEntries(r.data))
+    const gid = selectedGameId > 0 ? selectedGameId : undefined
+    getItems(gid).then((r) => setItems(r.data))
+    getBosses(gid).then((r) => setBosses(r.data))
+    getNpcs(gid).then((r) => setNpcs(r.data))
+    getCatalogEntries(gid).then((r) => setCatalogEntries(r.data))
     setKeyword('')
   }, [selectedGameId])
 
   const loadCatalog = () => {
-    if (!selectedGameId) return
-    getCatalogEntries(selectedGameId).then((r) => setCatalogEntries(r.data))
+    const gid = selectedGameId > 0 ? selectedGameId : undefined
+    getCatalogEntries(gid).then((r) => setCatalogEntries(r.data))
   }
 
   // タブ対応の目録エントリ
@@ -168,10 +178,11 @@ export default function CatalogPage() {
   const currentEntries = filteredEntries(activeTab)
   const { registered, total } = progress(activeTab)
   const pct = total === 0 ? 0 : Math.round((registered / total) * 100)
+  const isAllGames = selectedGameId === 0
 
-  // ITEMタブ: カテゴリ別グループ化
+  // 特定ゲーム選択時: ITEMタブはカテゴリ別グループ化
   const groupedItemEntries = (() => {
-    if (activeTab !== 'ITEM') return null
+    if (activeTab !== 'ITEM' || isAllGames) return null
     const groups: { label: string; entries: CatalogEntry[] }[] = []
     const categoryOrder = [...ITEM_CATEGORIES, '未分類']
     const map = new Map<string, CatalogEntry[]>()
@@ -187,68 +198,56 @@ export default function CatalogPage() {
     return groups
   })()
 
-  const renderEntry = (entry: CatalogEntry) => {
-    const wiki = findWiki(entry.name, activeTab)
-    const done = !!wiki
-    return (
-      <div
-        key={entry.id}
-        className={`flex items-center justify-between px-4 py-2.5 rounded-lg border transition ${
-          done
-            ? 'border-zinc-700 bg-zinc-800 hover:border-red-800'
-            : 'border-zinc-800 bg-zinc-900'
-        }`}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`text-sm truncate ${done ? 'text-gray-100' : 'text-gray-100'}`}>
-            {entry.name}
-          </span>
-          {done ? (
-            <span className="shrink-0 text-xs bg-green-900 text-green-300 border border-green-700 rounded px-1.5 py-0.5">登録済</span>
-          ) : (
-            <span className="shrink-0 text-xs border border-zinc-700 text-zinc-500 rounded px-1.5 py-0.5">未登録</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0 ml-2">
-          {wiki ? (
-            <Link to={`/${wikiPath(activeTab)}/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
-          ) : isLoggedIn() ? (
-            <Link to={`${wikiNewPath(activeTab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
-          ) : (
-            <span className="text-xs text-zinc-600">未登録</span>
-          )}
-          {isAdmin() && (
-            <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-500 hover:text-red-400 transition" title="削除">×</button>
-          )}
-        </div>
-      </div>
-    )
-  }
+  // すべてのゲーム選択時: ゲーム名でグループ化
+  const groupedByGame = (() => {
+    if (!isAllGames) return null
+    const map = new Map<string, CatalogEntry[]>()
+    for (const entry of currentEntries) {
+      const key = entry.gameName
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(entry)
+    }
+    return Array.from(map.entries()).map(([gameName, entries]) => ({ gameName, entries }))
+  })()
 
-  const renderItemCard = (entry: CatalogEntry) => {
-    const wiki = findWikiItem(entry.name)
+  const renderCard = (entry: CatalogEntry, tab: TabType) => {
+    const wiki = findWiki(entry.name, tab)
     const done = !!wiki
+    const hasImage = done && !!wiki.imagePath
     const borderColor = done ? 'border-zinc-700 hover:border-red-800' : 'border-zinc-800'
     const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
     return (
-      <div key={entry.id} className={`relative flex flex-col gap-1 px-2.5 py-2 rounded border bg-zinc-900 transition ${borderColor} group`}>
-        <div className="flex items-start justify-between gap-1">
-          <span className={`text-xs leading-tight break-all ${done ? 'text-gray-100' : 'text-gray-100'}`}>
-            {entry.name}
-          </span>
-          <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
-        </div>
-        <div className="flex items-center gap-2">
-          {wiki ? (
-            <Link to={`/items/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
-          ) : isLoggedIn() ? (
-            <Link to={`/items/new?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
-          ) : (
-            <span className="text-xs text-zinc-600">未登録</span>
-          )}
-          {isAdmin() && (
-            <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-600 hover:text-red-400 transition ml-auto" title="削除">×</button>
-          )}
+      <div key={entry.id} className={`relative flex flex-col gap-1 rounded border bg-zinc-900 transition ${borderColor} group overflow-hidden`}>
+        {hasImage ? (
+          <img
+            src={`/uploads/${wiki.imagePath}`}
+            alt={entry.name}
+            className="w-full h-16 object-cover object-top"
+          />
+        ) : (
+          <div className="w-full h-16 flex items-center justify-center bg-zinc-800 text-zinc-600 text-xs">
+            画像未登録
+          </div>
+        )}
+        <div className="flex flex-col gap-1 px-2.5 py-2">
+          <div className="flex items-start justify-between gap-1">
+            <span className="text-xs leading-tight break-all text-gray-100">
+              {entry.name}
+            </span>
+            <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
+          </div>
+          <div className="flex items-center gap-2">
+            {wiki ? (
+              <Link to={`/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+            ) : isLoggedIn() ? (
+              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
+            ) : (
+              <span className="text-xs text-zinc-600">未登録</span>
+            )}
+            {isAdmin() && (
+              <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-600 hover:text-red-400 transition ml-auto" title="削除">×</button>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -268,6 +267,7 @@ export default function CatalogPage() {
           }}
           className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
         >
+          <option value={0}>すべて</option>
           {games.map((g) => (
             <option key={g.id} value={g.id}>
               {g.name}
@@ -321,7 +321,7 @@ export default function CatalogPage() {
         </div>
       </div>
 
-      {/* 操作パネル */}
+      {/* 操作パネル（特定ゲーム選択時のみ） */}
       {isLoggedIn() && selectedGameId > 0 && (
         <div className="mb-5 flex flex-wrap gap-2 items-start">
           {/* 単体追加 */}
@@ -409,7 +409,27 @@ export default function CatalogPage() {
       )}
 
       {/* エントリ一覧 */}
-      {activeTab === 'ITEM' && groupedItemEntries ? (
+      {isAllGames && groupedByGame ? (
+        // すべてのゲーム: ゲーム名でグループ化
+        <div className="space-y-8">
+          {groupedByGame.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">目録にエントリがありません</p>
+          ) : (
+            groupedByGame.map(({ gameName, entries }) => (
+              <div key={gameName}>
+                <h2 className="text-sm font-semibold text-gray-300 mb-3 px-1 border-b border-zinc-700 pb-1">
+                  {gameName}
+                  <span className="ml-2 text-zinc-500 font-normal text-xs">{entries.length}件</span>
+                </h2>
+                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
+                  {entries.map((e) => renderCard(e, activeTab))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : activeTab === 'ITEM' && groupedItemEntries ? (
+        // 特定ゲーム・ITEMタブ: カテゴリ別グループ化
         <div className="space-y-6">
           {groupedItemEntries.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
@@ -423,19 +443,23 @@ export default function CatalogPage() {
                   <span className="ml-2 text-zinc-600 font-normal normal-case">{group.entries.length}件</span>
                 </h2>
                 <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
-                  {group.entries.map(renderItemCard)}
+                  {group.entries.map((e) => renderCard(e, 'ITEM'))}
                 </div>
               </div>
             ))
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          {currentEntries.map(renderEntry)}
-          {currentEntries.length === 0 && (
+        // 特定ゲーム・BOSS/NPCタブ
+        <div>
+          {currentEntries.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
               {total === 0 ? '目録にエントリがありません' : '該当するデータがありません'}
             </p>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
+              {currentEntries.map((e) => renderCard(e, activeTab))}
+            </div>
           )}
         </div>
       )}

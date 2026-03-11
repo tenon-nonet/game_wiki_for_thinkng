@@ -22,10 +22,18 @@ public class CatalogEntryService {
 
     public List<CatalogEntryResponse> findAll(Long gameId, String type) {
         List<CatalogEntry> entries;
-        if (type != null && !type.isBlank()) {
-            entries = catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type);
+        if (gameId != null) {
+            if (type != null && !type.isBlank()) {
+                entries = catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type);
+            } else {
+                entries = catalogEntryRepository.findByGameIdOrderByTypeAscNameAsc(gameId);
+            }
         } else {
-            entries = catalogEntryRepository.findByGameIdOrderByTypeAscNameAsc(gameId);
+            if (type != null && !type.isBlank()) {
+                entries = catalogEntryRepository.findByTypeOrderByNameAsc(type);
+            } else {
+                entries = catalogEntryRepository.findAllByOrderByTypeAscNameAsc();
+            }
         }
         return entries.stream().map(this::toResponse).toList();
     }

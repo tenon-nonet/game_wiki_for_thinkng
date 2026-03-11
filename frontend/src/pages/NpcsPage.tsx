@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getNpcs, getGames, getTags, updateNpcOrder } from '../api'
+import { getNpcs, getGames, getTags, updateNpcOrder, getCatalogEntries } from '../api'
 import { isLoggedIn } from '../auth'
-import type { Npc, Game, Tag } from '../types'
+import type { Npc, Game, Tag, CatalogEntry } from '../types'
 
 export default function NpcsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [npcs, setNpcs] = useState<Npc[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [tags, setTags] = useState<Tag[]>([])
+  const [catalogEntries, setCatalogEntries] = useState<CatalogEntry[]>([])
   const [gameId, setGameId] = useState<string>(searchParams.get('gameId') || '')
   const [tag, setTag] = useState<string>(searchParams.get('tag') || '')
   const [keyword, setKeyword] = useState<string>(searchParams.get('keyword') || '')
@@ -64,6 +65,7 @@ export default function NpcsPage() {
     setSearchParams(params, { replace: true })
     getNpcs(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setNpcs(r.data))
+    getCatalogEntries(gameId ? Number(gameId) : undefined, 'NPC').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {
@@ -72,16 +74,25 @@ export default function NpcsPage() {
     setKeyword('')
   }
 
+  const unregisteredEntries = tag
+    ? []
+    : catalogEntries.filter((e) => {
+        const inWiki = npcs.some((n) => n.name.toLowerCase() === e.name.toLowerCase())
+        if (inWiki) return false
+        if (keyword && !e.name.toLowerCase().includes(keyword.toLowerCase())) return false
+        return true
+      })
+
   return (
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">NPC一覧</h1>
         {loggedIn && (
           <Link
-            to="/npcs/new"
+            to="/catalog"
             className="bg-red-900 hover:bg-red-800 text-white px-3 py-2 rounded text-sm whitespace-nowrap"
           >
-            + NPC追加
+            目録から登録
           </Link>
         )}
       </div>
@@ -130,7 +141,7 @@ export default function NpcsPage() {
         )}
       </div>
 
-      {npcs.length === 0 ? (
+      {npcs.length === 0 && unregisteredEntries.length === 0 ? (
         <p className="text-gray-500 text-center py-12">NPCが登録されていません</p>
       ) : (
         <div className="grid grid-cols-4 gap-3">
@@ -172,6 +183,24 @@ export default function NpcsPage() {
                   )}
                 </div>
               </Link>
+            </div>
+          ))}
+          {unregisteredEntries.map((entry) => (
+            <div key={`catalog-${entry.id}`} className="bg-zinc-900 border border-zinc-700 rounded-xl shadow overflow-hidden opacity-60">
+              {loggedIn ? (
+                <Link to={`/npcs/new?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}`} className="block h-full">
+                  <div className="w-full h-48 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs">未登録</div>
+                  <div className="p-3 flex flex-col gap-1">
+                    <p className="font-semibold text-gray-300 text-sm line-clamp-2">{entry.name}</p>
+                    <p className="text-zinc-500 text-xs">クリックして登録</p>
+                  </div>
+                </Link>
+              ) : (
+                <div>
+                  <div className="w-full h-48 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs">未登録</div>
+                  <div className="p-3"><p className="font-semibold text-gray-300 text-sm line-clamp-2">{entry.name}</p></div>
+                </div>
+              )}
             </div>
           ))}
         </div>

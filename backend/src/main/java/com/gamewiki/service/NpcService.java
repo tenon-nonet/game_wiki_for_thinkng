@@ -6,6 +6,7 @@ import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Npc;
 import com.gamewiki.entity.NpcDialogue;
 import com.gamewiki.entity.Tag;
+import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
@@ -26,6 +27,7 @@ public class NpcService {
     private final NpcRepository npcRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
+    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -65,6 +67,10 @@ public class NpcService {
     }
 
     public NpcResponse create(NpcRequest request, MultipartFile image) {
+        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "NPC", request.getGameId())) {
+            throw new IllegalArgumentException("目録に登録されていないNPCは作成できません。先に目録へ登録してください。");
+        }
+
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
 

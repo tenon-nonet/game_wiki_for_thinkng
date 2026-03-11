@@ -23,7 +23,7 @@ public class CatalogEntryController {
 
     @GetMapping
     public ResponseEntity<List<CatalogEntryResponse>> findAll(
-            @RequestParam Long gameId,
+            @RequestParam(required = false) Long gameId,
             @RequestParam(required = false) String type) {
         return ResponseEntity.ok(catalogEntryService.findAll(gameId, type));
     }

@@ -23,11 +23,11 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/games" className="hover:text-gray-300 text-base">ゲーム一覧</Link>
+          <Link to="/catalog" className="hover:text-gray-300 text-base">目録</Link>
+          <Link to="/items" className="hover:text-gray-300 text-base">アイテム一覧</Link>
           <Link to="/bosses" className="hover:text-gray-300 text-base">ボス一覧</Link>
           <Link to="/npcs" className="hover:text-gray-300 text-base">NPC一覧</Link>
-          <Link to="/items" className="hover:text-gray-300 text-base">アイテム一覧</Link>
-          <Link to="/catalog" className="hover:text-gray-300 text-base">目録</Link>
+          <Link to="/games" className="hover:text-gray-300 text-base">ゲーム一覧</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
