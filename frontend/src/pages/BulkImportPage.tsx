@@ -13,7 +13,6 @@ interface Entry {
   error: string
 }
 
-const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 export default function BulkImportPage() {
   const navigate = useNavigate()
