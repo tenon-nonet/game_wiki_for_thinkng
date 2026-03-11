@@ -65,11 +65,7 @@ export default function NpcsPage() {
     setSearchParams(params, { replace: true })
     getNpcs(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setNpcs(r.data))
-    if (gameId) {
-      getCatalogEntries(Number(gameId), 'NPC').then((r) => setCatalogEntries(r.data))
-    } else {
-      setCatalogEntries([])
-    }
+    getCatalogEntries(gameId ? Number(gameId) : undefined, 'NPC').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {

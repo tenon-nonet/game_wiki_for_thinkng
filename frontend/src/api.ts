@@ -143,8 +143,8 @@ export const getNews = (q: string, limit?: number) =>
   api.get<{ title: string; url: string; publishedAt: string; source: string }[]>('/news', { params: { q, ...(limit ? { limit } : {}) } })
 
 // Catalog
-export const getCatalogEntries = (gameId: number, type?: string) =>
-  api.get('/catalog', { params: { gameId, ...(type ? { type } : {}) } })
+export const getCatalogEntries = (gameId?: number, type?: string) =>
+  api.get('/catalog', { params: { ...(gameId ? { gameId } : {}), ...(type ? { type } : {}) } })
 
 export const createCatalogEntry = (data: { name: string; type: string; gameId: number; category?: string }) =>
   api.post('/catalog', data)

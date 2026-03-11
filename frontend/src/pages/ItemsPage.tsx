@@ -65,11 +65,7 @@ export default function ItemsPage() {
     setSearchParams(params, { replace: true })
     getItems(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setItems(r.data))
-    if (gameId) {
-      getCatalogEntries(Number(gameId), 'ITEM').then((r) => setCatalogEntries(r.data))
-    } else {
-      setCatalogEntries([])
-    }
+    getCatalogEntries(gameId ? Number(gameId) : undefined, 'ITEM').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {

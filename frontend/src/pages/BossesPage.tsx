@@ -65,11 +65,7 @@ export default function BossesPage() {
     setSearchParams(params, { replace: true })
     getBosses(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setBosses(r.data))
-    if (gameId) {
-      getCatalogEntries(Number(gameId), 'BOSS').then((r) => setCatalogEntries(r.data))
-    } else {
-      setCatalogEntries([])
-    }
+    getCatalogEntries(gameId ? Number(gameId) : undefined, 'BOSS').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {
