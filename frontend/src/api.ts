@@ -10,8 +10,8 @@ api.interceptors.request.use((config) => {
 })
 
 // Auth
-export const register = (username: string, password: string, email: string) =>
-  api.post<AuthResponse>('/auth/register', { username, password, email })
+export const register = (username: string, password: string) =>
+  api.post<AuthResponse>('/auth/register', { username, password })
 
 export const login = (username: string, password: string) =>
   api.post<AuthResponse>('/auth/login', { username, password })
