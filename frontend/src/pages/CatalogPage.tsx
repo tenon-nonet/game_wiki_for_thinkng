@@ -43,25 +43,22 @@ export default function CatalogPage() {
 
   // 初回: ゲーム一覧取得
   useEffect(() => {
-    getGames().then((r) => {
-      setGames(r.data)
-      if (r.data.length > 0) setSelectedGameId(r.data[0].id)
-    })
+    getGames().then((r) => setGames(r.data))
   }, [])
 
   // ゲーム変更時: Wiki + 目録 を取得
   useEffect(() => {
-    if (!selectedGameId) return
-    getItems(selectedGameId).then((r) => setItems(r.data))
-    getBosses(selectedGameId).then((r) => setBosses(r.data))
-    getNpcs(selectedGameId).then((r) => setNpcs(r.data))
-    getCatalogEntries(selectedGameId).then((r) => setCatalogEntries(r.data))
+    const gid = selectedGameId > 0 ? selectedGameId : undefined
+    getItems(gid).then((r) => setItems(r.data))
+    getBosses(gid).then((r) => setBosses(r.data))
+    getNpcs(gid).then((r) => setNpcs(r.data))
+    getCatalogEntries(gid).then((r) => setCatalogEntries(r.data))
     setKeyword('')
   }, [selectedGameId])
 
   const loadCatalog = () => {
-    if (!selectedGameId) return
-    getCatalogEntries(selectedGameId).then((r) => setCatalogEntries(r.data))
+    const gid = selectedGameId > 0 ? selectedGameId : undefined
+    getCatalogEntries(gid).then((r) => setCatalogEntries(r.data))
   }
 
   // タブ対応の目録エントリ
@@ -168,10 +165,11 @@ export default function CatalogPage() {
   const currentEntries = filteredEntries(activeTab)
   const { registered, total } = progress(activeTab)
   const pct = total === 0 ? 0 : Math.round((registered / total) * 100)
+  const isAllGames = selectedGameId === 0
 
-  // ITEMタブ: カテゴリ別グループ化
+  // 特定ゲーム選択時: ITEMタブはカテゴリ別グループ化
   const groupedItemEntries = (() => {
-    if (activeTab !== 'ITEM') return null
+    if (activeTab !== 'ITEM' || isAllGames) return null
     const groups: { label: string; entries: CatalogEntry[] }[] = []
     const categoryOrder = [...ITEM_CATEGORIES, '未分類']
     const map = new Map<string, CatalogEntry[]>()
@@ -185,6 +183,18 @@ export default function CatalogPage() {
       if (entries && entries.length > 0) groups.push({ label: cat, entries })
     }
     return groups
+  })()
+
+  // すべてのゲーム選択時: ゲーム名でグループ化
+  const groupedByGame = (() => {
+    if (!isAllGames) return null
+    const map = new Map<string, CatalogEntry[]>()
+    for (const entry of currentEntries) {
+      const key = entry.gameName
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(entry)
+    }
+    return Array.from(map.entries()).map(([gameName, entries]) => ({ gameName, entries }))
   })()
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
@@ -244,6 +254,7 @@ export default function CatalogPage() {
           }}
           className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
         >
+          <option value={0}>すべて</option>
           {games.map((g) => (
             <option key={g.id} value={g.id}>
               {g.name}
@@ -297,7 +308,7 @@ export default function CatalogPage() {
         </div>
       </div>
 
-      {/* 操作パネル */}
+      {/* 操作パネル（特定ゲーム選択時のみ） */}
       {isLoggedIn() && selectedGameId > 0 && (
         <div className="mb-5 flex flex-wrap gap-2 items-start">
           {/* 単体追加 */}
@@ -385,7 +396,27 @@ export default function CatalogPage() {
       )}
 
       {/* エントリ一覧 */}
-      {activeTab === 'ITEM' && groupedItemEntries ? (
+      {isAllGames && groupedByGame ? (
+        // すべてのゲーム: ゲーム名でグループ化
+        <div className="space-y-8">
+          {groupedByGame.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">目録にエントリがありません</p>
+          ) : (
+            groupedByGame.map(({ gameName, entries }) => (
+              <div key={gameName}>
+                <h2 className="text-sm font-semibold text-gray-300 mb-3 px-1 border-b border-zinc-700 pb-1">
+                  {gameName}
+                  <span className="ml-2 text-zinc-500 font-normal text-xs">{entries.length}件</span>
+                </h2>
+                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
+                  {entries.map((e) => renderCard(e, activeTab))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : activeTab === 'ITEM' && groupedItemEntries ? (
+        // 特定ゲーム・ITEMタブ: カテゴリ別グループ化
         <div className="space-y-6">
           {groupedItemEntries.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
@@ -406,6 +437,7 @@ export default function CatalogPage() {
           )}
         </div>
       ) : (
+        // 特定ゲーム・BOSS/NPCタブ
         <div>
           {currentEntries.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
