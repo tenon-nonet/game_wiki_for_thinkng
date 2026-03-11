@@ -6,22 +6,19 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Getter
 @Setter
-public class ItemRequest {
+public class CatalogEntryRequest {
 
     @NotBlank
     @Size(max = 100)
     private String name;
 
-    private String description;
+    @NotBlank
+    private String type;
 
     @NotNull
     private Long gameId;
-
-    private Set<String> tags;
 
     private String category;
 }

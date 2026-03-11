@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getNpc, getGames, getTags, createTag, createNpc, updateNpc, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
 import type { Game, Tag } from '../types'
@@ -7,13 +7,18 @@ import type { Game, Tag } from '../types'
 export default function NpcFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
 
   const initialGameLoaded = useRef(false)
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
-  const [form, setForm] = useState({ name: '', description: '', gameId: '' })
+  const [form, setForm] = useState({
+    name: searchParams.get('name') ?? '',
+    description: '',
+    gameId: searchParams.get('gameId') ?? '',
+  })
   const [dialogues, setDialogues] = useState<string[]>([''])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')

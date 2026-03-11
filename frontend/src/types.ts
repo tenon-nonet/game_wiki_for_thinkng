@@ -42,6 +42,7 @@ export interface Item {
   gameId: number
   gameName: string
   tags: Tag[]
+  category: string | null
   createdAt: string
   updatedAt: string
 }
@@ -56,6 +57,17 @@ export interface Boss {
   tags: Tag[]
   createdAt: string
   updatedAt: string
+}
+
+export interface CatalogEntry {
+  id: number
+  name: string
+  type: string
+  category: string | null
+  gameId: number
+  gameName: string
+  createdBy: string
+  createdAt: string
 }
 
 export interface Npc {

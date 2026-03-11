@@ -27,6 +27,7 @@ export default function Navbar() {
           <Link to="/bosses" className="hover:text-gray-300 text-base">ボス一覧</Link>
           <Link to="/npcs" className="hover:text-gray-300 text-base">NPC一覧</Link>
           <Link to="/items" className="hover:text-gray-300 text-base">アイテム一覧</Link>
+          <Link to="/catalog" className="hover:text-gray-300 text-base">目録</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (
@@ -73,6 +74,7 @@ export default function Navbar() {
           <Link to="/bosses" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ボス一覧</Link>
           <Link to="/npcs" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">NPC一覧</Link>
           <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム一覧</Link>
+          <Link to="/catalog" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">目録</Link>
           {loggedIn ? (
             <>
               {isAdmin() && (

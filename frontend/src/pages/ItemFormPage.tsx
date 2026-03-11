@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getItem, getGames, getTags, createTag, createItem, updateItem, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
 import type { Game, Tag } from '../types'
@@ -7,12 +7,18 @@ import type { Game, Tag } from '../types'
 export default function ItemFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
 
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
-  const [form, setForm] = useState({ name: '', description: '', gameId: '' })
+  const [form, setForm] = useState({
+    name: searchParams.get('name') ?? '',
+    description: '',
+    gameId: searchParams.get('gameId') ?? '',
+    category: '',
+  })
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
@@ -30,6 +36,7 @@ export default function ItemFormPage() {
           name: item.name,
           description: item.description || '',
           gameId: String(item.gameId),
+          category: item.category || '',
         })
         setSelectedTags(new Set(item.tags.map((t) => t.id)))
         setExistingImage(item.imagePath)
@@ -97,6 +104,7 @@ export default function ItemFormPage() {
       name: form.name,
       description: form.description,
       gameId: Number(form.gameId),
+      category: form.category || null,
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
@@ -150,6 +158,23 @@ export default function ItemFormPage() {
               {games.map((g) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-1">カテゴリ</label>
+            <select
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+            >
+              <option value="">未分類</option>
+              <option value="武器">武器</option>
+              <option value="防具">防具</option>
+              <option value="消費アイテム">消費アイテム</option>
+              <option value="素材">素材</option>
+              <option value="タリスマン">タリスマン</option>
+              <option value="その他">その他</option>
             </select>
           </div>
 

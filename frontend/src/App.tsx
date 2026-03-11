@@ -18,6 +18,7 @@ import BossFormPage from './pages/BossFormPage'
 import NpcsPage from './pages/NpcsPage'
 import NpcDetailPage from './pages/NpcDetailPage'
 import NpcFormPage from './pages/NpcFormPage'
+import CatalogPage from './pages/CatalogPage'
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/npcs/new" element={<NpcFormPage />} />
           <Route path="/npcs/:id" element={<NpcDetailPage />} />
           <Route path="/npcs/:id/edit" element={<NpcFormPage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/tags" element={<TagsAdminPage />} />
           <Route path="/news" element={<AllNewsListPage />} />
         </Routes>
