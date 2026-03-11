@@ -24,7 +24,6 @@ Thumbs.db
 # Env / secrets
 *.env
 application-local.properties
-application-prod.properties
 
 # Claude
 .claude/
