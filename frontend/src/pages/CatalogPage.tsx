@@ -187,62 +187,24 @@ export default function CatalogPage() {
     return groups
   })()
 
-  const renderEntry = (entry: CatalogEntry) => {
-    const wiki = findWiki(entry.name, activeTab)
-    const done = !!wiki
-    return (
-      <div
-        key={entry.id}
-        className={`flex items-center justify-between px-4 py-2.5 rounded-lg border transition ${
-          done
-            ? 'border-zinc-700 bg-zinc-800 hover:border-red-800'
-            : 'border-zinc-800 bg-zinc-900'
-        }`}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`text-sm truncate ${done ? 'text-gray-100' : 'text-gray-100'}`}>
-            {entry.name}
-          </span>
-          {done ? (
-            <span className="shrink-0 text-xs bg-green-900 text-green-300 border border-green-700 rounded px-1.5 py-0.5">登録済</span>
-          ) : (
-            <span className="shrink-0 text-xs border border-zinc-700 text-zinc-500 rounded px-1.5 py-0.5">未登録</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0 ml-2">
-          {wiki ? (
-            <Link to={`/${wikiPath(activeTab)}/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
-          ) : isLoggedIn() ? (
-            <Link to={`${wikiNewPath(activeTab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
-          ) : (
-            <span className="text-xs text-zinc-600">未登録</span>
-          )}
-          {isAdmin() && (
-            <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-500 hover:text-red-400 transition" title="削除">×</button>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  const renderItemCard = (entry: CatalogEntry) => {
-    const wiki = findWikiItem(entry.name)
+  const renderCard = (entry: CatalogEntry, tab: TabType) => {
+    const wiki = findWiki(entry.name, tab)
     const done = !!wiki
     const borderColor = done ? 'border-zinc-700 hover:border-red-800' : 'border-zinc-800'
     const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
     return (
       <div key={entry.id} className={`relative flex flex-col gap-1 px-2.5 py-2 rounded border bg-zinc-900 transition ${borderColor} group`}>
         <div className="flex items-start justify-between gap-1">
-          <span className={`text-xs leading-tight break-all ${done ? 'text-gray-100' : 'text-gray-100'}`}>
+          <span className="text-xs leading-tight break-all text-gray-100">
             {entry.name}
           </span>
           <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
         </div>
         <div className="flex items-center gap-2">
           {wiki ? (
-            <Link to={`/items/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+            <Link to={`/${wikiPath(tab)}/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
           ) : isLoggedIn() ? (
-            <Link to={`/items/new?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
+            <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
           ) : (
             <span className="text-xs text-zinc-600">未登録</span>
           )}
@@ -423,19 +385,22 @@ export default function CatalogPage() {
                   <span className="ml-2 text-zinc-600 font-normal normal-case">{group.entries.length}件</span>
                 </h2>
                 <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
-                  {group.entries.map(renderItemCard)}
+                  {group.entries.map((e) => renderCard(e, 'ITEM'))}
                 </div>
               </div>
             ))
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          {currentEntries.map(renderEntry)}
-          {currentEntries.length === 0 && (
+        <div>
+          {currentEntries.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
               {total === 0 ? '目録にエントリがありません' : '該当するデータがありません'}
             </p>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
+              {currentEntries.map((e) => renderCard(e, activeTab))}
+            </div>
           )}
         </div>
       )}
