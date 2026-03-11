@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
 import { isLoggedIn, getUsername, isAdmin } from '../auth'
 import type { Item, Comment, Game, Tag } from '../types'
@@ -7,6 +7,9 @@ import type { Item, Comment, Game, Tag } from '../types'
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const fromCatalog = searchParams.get('from') === 'catalog'
+  const catalogUrl = `/catalog${searchParams.get('gameId') ? `?gameId=${searchParams.get('gameId')}&tab=${searchParams.get('tab') ?? 'ITEM'}` : ''}`
   const [item, setItem] = useState<Item | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const [comments, setComments] = useState<Comment[]>([])
@@ -147,7 +150,10 @@ export default function ItemDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
+      <div className="flex items-center gap-4">
+        <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
+        {fromCatalog && <Link to={catalogUrl} className="text-gray-400 hover:underline text-sm">← 目録</Link>}
+      </div>
 
       {/* 検索バー */}
       <form onSubmit={handleSearch} className="mt-4 bg-zinc-800 rounded-lg p-4 flex flex-col sm:flex-row flex-wrap gap-3 items-end">

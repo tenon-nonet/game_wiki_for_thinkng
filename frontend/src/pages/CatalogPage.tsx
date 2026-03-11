@@ -238,7 +238,7 @@ export default function CatalogPage() {
           </div>
           <div className="flex items-center gap-2">
             {wiki ? (
-              <Link to={`/${wikiPath(tab)}/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+              <Link to={`/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
             ) : isLoggedIn() ? (
               <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
             ) : (

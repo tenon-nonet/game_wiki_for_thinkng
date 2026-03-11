@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getNpc, deleteNpc, getItems } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
 import type { Npc, Item } from '../types'
@@ -7,6 +7,9 @@ import type { Npc, Item } from '../types'
 export default function NpcDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const fromCatalog = searchParams.get('from') === 'catalog'
+  const catalogUrl = `/catalog${searchParams.get('gameId') ? `?gameId=${searchParams.get('gameId')}&tab=${searchParams.get('tab') ?? 'NPC'}` : ''}`
   const [npc, setNpc] = useState<Npc | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
@@ -42,7 +45,10 @@ export default function NpcDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      <Link to="/npcs" className="text-gray-100 hover:underline text-sm">← NPC一覧</Link>
+      <div className="flex items-center gap-4">
+        <Link to="/npcs" className="text-gray-100 hover:underline text-sm">← NPC一覧</Link>
+        {fromCatalog && <Link to={catalogUrl} className="text-gray-400 hover:underline text-sm">← 目録</Link>}
+      </div>
 
       <div className="bg-zinc-800 rounded-lg shadow mt-4 overflow-hidden">
         {npc.imagePath ? (
