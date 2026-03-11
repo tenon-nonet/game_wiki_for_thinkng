@@ -16,6 +16,7 @@ public class ItemResponse {
     private Long gameId;
     private String gameName;
     private Set<TagResponse> tags;
+    private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

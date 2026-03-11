@@ -142,6 +142,19 @@ export const toggleCommentLike = (id: number) =>
 export const getNews = (q: string, limit?: number) =>
   api.get<{ title: string; url: string; publishedAt: string; source: string }[]>('/news', { params: { q, ...(limit ? { limit } : {}) } })
 
+// Catalog
+export const getCatalogEntries = (gameId: number, type?: string) =>
+  api.get('/catalog', { params: { gameId, ...(type ? { type } : {}) } })
+
+export const createCatalogEntry = (data: { name: string; type: string; gameId: number; category?: string }) =>
+  api.post('/catalog', data)
+
+export const deleteCatalogEntry = (id: number) =>
+  api.delete(`/catalog/${id}`)
+
+export const bulkCreateCatalogEntries = (data: { names: string[]; type: string; gameId: number; category?: string }) =>
+  api.post<{ added: number; skipped: number }>('/catalog/bulk', data)
+
 // Image Analysis
 export const analyzeImageText = (image: File) => {
   const data = new FormData()

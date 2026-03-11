@@ -71,6 +71,7 @@ public class ItemService {
         Item item = new Item();
         item.setName(request.getName());
         item.setDescription(request.getDescription());
+        item.setCategory(request.getCategory());
         item.setGame(game);
         item.setTags(resolveTags(request.getTags(), request.getGameId()));
 
@@ -89,6 +90,7 @@ public class ItemService {
 
         item.setName(request.getName());
         item.setDescription(request.getDescription());
+        item.setCategory(request.getCategory());
         item.setGame(game);
         item.setTags(resolveTags(request.getTags(), request.getGameId()));
 
@@ -128,6 +130,7 @@ public class ItemService {
         r.setGameId(item.getGame().getId());
         r.setGameName(item.getGame().getName());
         r.setTags(item.getTags().stream().map(tagService::toResponse).collect(Collectors.toSet()));
+        r.setCategory(item.getCategory());
         r.setCreatedAt(item.getCreatedAt());
         r.setUpdatedAt(item.getUpdatedAt());
         return r;

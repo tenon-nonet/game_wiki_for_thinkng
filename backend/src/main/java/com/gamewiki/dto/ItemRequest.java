@@ -22,4 +22,6 @@ public class ItemRequest {
     private Long gameId;
 
     private Set<String> tags;
+
+    private String category;
 }

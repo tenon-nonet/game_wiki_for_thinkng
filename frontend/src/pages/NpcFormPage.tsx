@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getNpc, getGames, getTags, createTag, createNpc, updateNpc, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
 import type { Game, Tag } from '../types'
@@ -7,13 +7,19 @@ import type { Game, Tag } from '../types'
 export default function NpcFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
 
   const initialGameLoaded = useRef(false)
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
-  const [form, setForm] = useState({ name: '', description: '', gameId: '' })
+  const [form, setForm] = useState({
+    name: searchParams.get('name') ?? '',
+    description: '',
+    gameId: searchParams.get('gameId') ?? '',
+  })
+  const [dialogues, setDialogues] = useState<string[]>([''])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
@@ -33,6 +39,7 @@ export default function NpcFormPage() {
           gameId: String(npc.gameId),
         })
         setExistingImage(npc.imagePath)
+        setDialogues(npc.dialogues?.length ? npc.dialogues : [''])
         getTags(npc.gameId, 'NPC').then((r2) => {
           setAllTags(r2.data)
           setSelectedTags(new Set(npc.tags.map((t) => t.id)))
@@ -104,6 +111,7 @@ export default function NpcFormPage() {
       description: form.description,
       gameId: Number(form.gameId),
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
+      dialogues: dialogues.filter((d) => d.trim() !== ''),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -198,6 +206,44 @@ export default function NpcFormPage() {
               placeholder={analyzing ? '解析中...' : ''}
               className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-2">セリフ</label>
+            <div className="space-y-2">
+              {dialogues.map((d, i) => (
+                <div key={i} className="flex gap-2 items-start">
+                  <span className="text-gray-500 text-sm mt-2 w-16 shrink-0">セリフ {i + 1}</span>
+                  <textarea
+                    value={d}
+                    onChange={(e) => {
+                      const next = [...dialogues]
+                      next[i] = e.target.value
+                      setDialogues(next)
+                    }}
+                    rows={2}
+                    className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
+                    placeholder={`セリフ ${i + 1}`}
+                  />
+                  {dialogues.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setDialogues(dialogues.filter((_, j) => j !== i))}
+                      className="text-gray-500 hover:text-red-400 text-lg mt-1"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setDialogues([...dialogues, ''])}
+              className="mt-2 text-sm text-gray-400 hover:text-gray-200 border border-gray-600 rounded px-3 py-1 hover:border-gray-400 transition"
+            >
+              ＋ セリフを追加
+            </button>
           </div>
 
           <div>

@@ -28,6 +28,9 @@ public class Item {
 
     private String imagePath;
 
+    @Column(length = 50)
+    private String category;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", nullable = false)
     private Game game;
