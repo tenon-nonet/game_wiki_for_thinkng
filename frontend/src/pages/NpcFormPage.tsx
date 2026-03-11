@@ -129,6 +129,20 @@ export default function NpcFormPage() {
     }
   }
 
+  if (!isEdit && (!form.name || !form.gameId)) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <Link to="/npcs" className="text-gray-100 hover:underline text-sm">← NPC一覧</Link>
+        <div className="bg-zinc-800 rounded-lg shadow p-6 mt-4 text-center space-y-4">
+          <p className="text-gray-300">NPCは目録から登録してください。</p>
+          <Link to="/catalog" className="inline-block bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm">
+            目録へ
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <Link to="/npcs" className="text-gray-100 hover:underline text-sm">← NPC一覧</Link>

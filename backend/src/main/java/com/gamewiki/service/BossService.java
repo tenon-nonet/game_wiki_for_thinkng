@@ -6,6 +6,7 @@ import com.gamewiki.entity.Boss;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
+import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class BossService {
     private final BossRepository bossRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
+    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -64,6 +66,10 @@ public class BossService {
     }
 
     public BossResponse create(BossRequest request, MultipartFile image) {
+        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "BOSS", request.getGameId())) {
+            throw new IllegalArgumentException("目録に登録されていないボスは作成できません。先に目録へ登録してください。");
+        }
+
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
 
