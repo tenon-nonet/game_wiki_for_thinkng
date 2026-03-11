@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { getGames, getItems, getBosses, getNpcs, getCatalogEntries, createCatalogEntry, deleteCatalogEntry, bulkCreateCatalogEntries } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
 import type { Game, Item, Boss, Npc, CatalogEntry } from '../types'
@@ -14,10 +14,15 @@ const TAB_CONFIG: { key: TabType; label: string }[] = [
 
 const ITEM_CATEGORIES = ['武器', '防具', '消費アイテム', '素材', 'タリスマン', 'その他']
 
+const VALID_TABS: TabType[] = ['ITEM', 'BOSS', 'NPC']
+
 export default function CatalogPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [games, setGames] = useState<Game[]>([])
-  const [selectedGameId, setSelectedGameId] = useState<number>(0)
-  const [activeTab, setActiveTab] = useState<TabType>('ITEM')
+  const [selectedGameId, setSelectedGameId] = useState<number>(Number(searchParams.get('gameId')) || 0)
+  const [activeTab, setActiveTab] = useState<TabType>(
+    VALID_TABS.includes(searchParams.get('tab') as TabType) ? (searchParams.get('tab') as TabType) : 'ITEM'
+  )
 
   // Wiki エントリ
   const [items, setItems] = useState<Item[]>([])
@@ -45,6 +50,14 @@ export default function CatalogPage() {
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
   }, [])
+
+  // URLパラメータを状態に同期
+  useEffect(() => {
+    const params: Record<string, string> = {}
+    if (selectedGameId > 0) params.gameId = String(selectedGameId)
+    if (activeTab !== 'ITEM') params.tab = activeTab
+    setSearchParams(params, { replace: true })
+  }, [selectedGameId, activeTab])
 
   // ゲーム変更時: Wiki + 目録 を取得
   useEffect(() => {

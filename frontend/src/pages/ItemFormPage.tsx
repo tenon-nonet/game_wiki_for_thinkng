@@ -142,7 +142,7 @@ export default function ItemFormPage() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center gap-4">
         <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
-        {!isEdit && <Link to="/catalog" className="text-gray-400 hover:underline text-sm">← 目録</Link>}
+        {!isEdit && <Link to={`/catalog${form.gameId ? `?gameId=${form.gameId}&tab=ITEM` : ''}`} className="text-gray-400 hover:underline text-sm">← 目録</Link>}
       </div>
 
       <div className="bg-zinc-800 rounded-lg shadow p-6 mt-4">
