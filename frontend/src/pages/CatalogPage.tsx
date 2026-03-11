@@ -190,27 +190,41 @@ export default function CatalogPage() {
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
     const wiki = findWiki(entry.name, tab)
     const done = !!wiki
+    const hasImage = done && !!wiki.imagePath
     const borderColor = done ? 'border-zinc-700 hover:border-red-800' : 'border-zinc-800'
     const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
     return (
-      <div key={entry.id} className={`relative flex flex-col gap-1 px-2.5 py-2 rounded border bg-zinc-900 transition ${borderColor} group`}>
-        <div className="flex items-start justify-between gap-1">
-          <span className="text-xs leading-tight break-all text-gray-100">
-            {entry.name}
-          </span>
-          <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
-        </div>
-        <div className="flex items-center gap-2">
-          {wiki ? (
-            <Link to={`/${wikiPath(tab)}/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
-          ) : isLoggedIn() ? (
-            <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
-          ) : (
-            <span className="text-xs text-zinc-600">未登録</span>
-          )}
-          {isAdmin() && (
-            <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-600 hover:text-red-400 transition ml-auto" title="削除">×</button>
-          )}
+      <div key={entry.id} className={`relative flex flex-col gap-1 rounded border bg-zinc-900 transition ${borderColor} group overflow-hidden`}>
+        {hasImage ? (
+          <img
+            src={`/uploads/${wiki.imagePath}`}
+            alt={entry.name}
+            className="w-full h-16 object-cover object-top"
+          />
+        ) : (
+          <div className="w-full h-16 flex items-center justify-center bg-zinc-800 text-zinc-600 text-xs">
+            画像未登録
+          </div>
+        )}
+        <div className="flex flex-col gap-1 px-2.5 py-2">
+          <div className="flex items-start justify-between gap-1">
+            <span className="text-xs leading-tight break-all text-gray-100">
+              {entry.name}
+            </span>
+            <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
+          </div>
+          <div className="flex items-center gap-2">
+            {wiki ? (
+              <Link to={`/${wikiPath(tab)}/${wiki.id}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+            ) : isLoggedIn() ? (
+              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
+            ) : (
+              <span className="text-xs text-zinc-600">未登録</span>
+            )}
+            {isAdmin() && (
+              <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-600 hover:text-red-400 transition ml-auto" title="削除">×</button>
+            )}
+          </div>
         </div>
       </div>
     )
