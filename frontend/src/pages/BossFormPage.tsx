@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getBoss, getGames, getTags, createTag, createBoss, updateBoss, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
+import { defaultDialogueLabel, parseDialogueLines, serializeDialogueEntries, type DialogueEntry } from '../dialogues'
 import type { Game, Tag } from '../types'
 
 export default function BossFormPage() {
@@ -16,9 +17,11 @@ export default function BossFormPage() {
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [form, setForm] = useState({
     name: searchParams.get('name') ?? '',
-    description: '',
     gameId: searchParams.get('gameId') ?? '',
   })
+  const [dialogues, setDialogues] = useState<DialogueEntry[]>([
+    { label: defaultDialogueLabel(0), text: '' },
+  ])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
@@ -34,9 +37,9 @@ export default function BossFormPage() {
         const boss = r.data
         setForm({
           name: boss.name,
-          description: boss.description || '',
           gameId: String(boss.gameId),
         })
+        setDialogues(parseDialogueLines(boss.description ? boss.description.split(/\r?\n/) : []))
         setExistingImage(boss.imagePath)
         getTags(boss.gameId, 'BOSS').then((r2) => {
           setAllTags(r2.data)
@@ -88,7 +91,11 @@ export default function BossFormPage() {
         const res = await analyzeImageText(file)
         const extracted = res.data.text.trim()
         if (extracted) {
-          setForm((prev) => ({ ...prev, description: extracted }))
+          setDialogues((prev) => (
+            prev.some((entry) => entry.text.trim())
+              ? prev
+              : [{ label: defaultDialogueLabel(0), text: extracted }]
+          ))
         }
       } catch (err: any) {
         const msg = err.response?.data?.error || err.message || '不明なエラー'
@@ -104,9 +111,10 @@ export default function BossFormPage() {
     setError('')
 
     const data = new FormData()
+    const description = serializeDialogueEntries(dialogues).join('\n')
     const json = JSON.stringify({
       name: form.name,
-      description: form.description,
+      description,
       gameId: Number(form.gameId),
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
     })
@@ -185,7 +193,7 @@ export default function BossFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                ※ 画像を選択するとテキストを自動抽出して説明欄に入力します
+                添付すると自動で文字を入力しますが、結構間違えます
               </span>
             </label>
             {(preview || existingImage) && (
@@ -205,21 +213,58 @@ export default function BossFormPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">
-              説明
+              セリフ
               {analyzing && (
                 <span className="ml-2 text-xs text-gray-100 animate-pulse">
                   画像からテキストを解析中...
                 </span>
               )}
             </label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={4}
-              disabled={analyzing}
-              placeholder={analyzing ? '解析中...' : ''}
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
-            />
+            <div className="space-y-2">
+              {dialogues.map((d, i) => (
+                <div key={i} className="flex gap-2 items-start">
+                  <input
+                    type="text"
+                    value={d.label}
+                    onChange={(e) => {
+                      const next = [...dialogues]
+                      next[i] = { ...next[i], label: e.target.value }
+                      setDialogues(next)
+                    }}
+                    className="w-24 shrink-0 border border-gray-600 rounded px-2 py-2 bg-zinc-700 text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-800"
+                    placeholder={defaultDialogueLabel(i)}
+                  />
+                  <textarea
+                    value={d.text}
+                    onChange={(e) => {
+                      const next = [...dialogues]
+                      next[i] = { ...next[i], text: e.target.value }
+                      setDialogues(next)
+                    }}
+                    rows={2}
+                    disabled={analyzing}
+                    placeholder={analyzing && i === 0 ? '解析中...' : defaultDialogueLabel(i)}
+                    className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm disabled:bg-zinc-800 disabled:text-gray-500"
+                  />
+                  {dialogues.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setDialogues(dialogues.filter((_, j) => j !== i))}
+                      className="text-gray-500 hover:text-red-400 text-lg mt-1"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setDialogues([...dialogues, { label: defaultDialogueLabel(dialogues.length), text: '' }])}
+              className="mt-2 text-sm text-gray-400 hover:text-gray-200 border border-gray-600 rounded px-3 py-1 hover:border-gray-400 transition"
+            >
+              ＋ セリフを追加
+            </button>
           </div>
 
           <div>

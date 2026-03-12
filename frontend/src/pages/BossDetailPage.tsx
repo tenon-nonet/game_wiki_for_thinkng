@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getBoss, deleteBoss, getItems } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
+import { parseDialogueLines } from '../dialogues'
 import type { Boss, Item } from '../types'
 
 export default function BossDetailPage() {
@@ -14,6 +15,7 @@ export default function BossDetailPage() {
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
   const admin = isAdmin()
+  const dialogues = parseDialogueLines(boss?.description ? boss.description.split(/\r?\n/) : [])
 
   useEffect(() => {
     const bossId = Number(id)
@@ -87,8 +89,20 @@ export default function BossDetailPage() {
             {boss.gameName}
           </Link>
 
-          {boss.description && (
-            <p className="text-gray-300 mt-4 whitespace-pre-wrap">{boss.description}</p>
+          {dialogues.some((entry) => entry.text) && (
+            <div className="mt-6">
+              <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">セリフ</h2>
+              <div className="space-y-2">
+                {dialogues.filter((entry) => entry.text).map((entry, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <span className="text-xs text-gray-500 mt-1 w-20 shrink-0">{entry.label}</span>
+                    <p className="text-gray-200 text-sm whitespace-pre-wrap bg-zinc-700 rounded px-4 py-2 flex-1">
+                      {entry.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {boss.tags.length > 0 && (

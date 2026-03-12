@@ -6,7 +6,6 @@ import type { Game } from '../types'
 
 export default function HomePage() {
   const [games, setGames] = useState<Game[]>([])
-  const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', description: '' })
   const [image, setImage] = useState<File | null>(null)
@@ -36,11 +35,6 @@ export default function HomePage() {
   }
 
   useEffect(() => { load() }, [])
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    load(search || undefined)
-  }
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -149,24 +143,10 @@ export default function HomePage() {
           </form>
         )}
 
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6 max-w-xl w-full">
-          <input
-            type="text"
-            placeholder="ゲームを検索..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-          />
-          <button type="submit" className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded text-sm">検索</button>
-          {search && (
-            <button type="button" onClick={() => { setSearch(''); load() }} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm">クリア</button>
-          )}
-        </form>
-
         {games.length === 0 ? (
           <p className="text-gray-500 text-sm">まだゲームが登録されていません</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {games.map((game, index) => (
               <div
                 key={game.id}
@@ -208,7 +188,7 @@ export default function HomePage() {
                   <>
                     <Link to={`/games/${game.id}`} className="block overflow-hidden">
                       {game.imagePath ? (
-                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-zinc-900 transition-transform duration-500 ease-out group-hover:scale-125" />
+                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-zinc-900 transition-all duration-300 ease-out group-hover:opacity-75 group-hover:blur-[2px]" />
                       ) : (
                         <div className="w-full h-64 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
                       )}
@@ -226,7 +206,32 @@ export default function HomePage() {
                         )}
                       </div>
                       {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
-                      <Link to={`/items?gameId=${game.id}`} className="mt-3 inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">アイテムを見る →</Link>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link
+                          to={`/items?gameId=${game.id}`}
+                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                        >
+                          アイテム一覧 →
+                        </Link>
+                        <Link
+                          to={`/bosses?gameId=${game.id}`}
+                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                        >
+                          ボス一覧 →
+                        </Link>
+                        <Link
+                          to={`/npcs?gameId=${game.id}`}
+                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                        >
+                          NPC一覧 →
+                        </Link>
+                        <Link
+                          to={`/games/${game.id}`}
+                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                        >
+                          ゲーム詳細 →
+                        </Link>
+                      </div>
                     </div>
                   </>
                 )}

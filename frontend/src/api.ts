@@ -136,6 +136,9 @@ export const createTagAttribute = (name: string, gameId: number) =>
 export const deleteTagAttribute = (id: number) =>
   api.delete(`/tag-attributes/${id}`)
 
+export const updateTagAttributeOrder = (ids: number[]) =>
+  api.put('/tag-attributes/order', ids)
+
 // Comments
 export const getComments = (itemId: number) =>
   api.get<Comment[]>(`/items/${itemId}/comments`)

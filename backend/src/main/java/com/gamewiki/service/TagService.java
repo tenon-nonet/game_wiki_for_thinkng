@@ -26,8 +26,8 @@ public class TagService {
 
     public List<TagResponse> findByGameId(Long gameId, String type) {
         List<Tag> tags = (type != null && !type.isBlank())
-                ? tagRepository.findByGameIdAndTypeOrderByName(gameId, type)
-                : tagRepository.findByGameIdOrderByName(gameId);
+                ? tagRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type)
+                : tagRepository.findByGameIdOrderByNameAsc(gameId);
         return tags.stream().map(this::toResponse).toList();
     }
 

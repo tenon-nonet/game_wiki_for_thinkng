@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
-    List<Tag> findByGameIdOrderByName(Long gameId);
-    List<Tag> findByGameIdAndTypeOrderByName(Long gameId, String type);
+    List<Tag> findByGameIdOrderByNameAsc(Long gameId);
+    List<Tag> findByGameIdAndTypeOrderByNameAsc(Long gameId, String type);
     Optional<Tag> findByNameAndGameId(String name, Long gameId);
     Optional<Tag> findByNameAndGameIdAndType(String name, Long gameId, String type);
     boolean existsByNameAndGameId(String name, Long gameId);

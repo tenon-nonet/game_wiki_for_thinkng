@@ -34,6 +34,13 @@ public class TagAttributeController {
         return ResponseEntity.ok(tagAttributeService.create(name, gameId));
     }
 
+    @PutMapping("/order")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateOrder(@RequestBody List<Long> ids) {
+        tagAttributeService.updateOrder(ids);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

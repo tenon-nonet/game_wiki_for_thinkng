@@ -7,6 +7,7 @@ import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagAttributeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,8 +19,18 @@ public class TagAttributeService {
     private final GameRepository gameRepository;
 
     public List<TagAttributeResponse> findByGameId(Long gameId) {
-        return tagAttributeRepository.findByGameIdOrderByName(gameId)
+        return tagAttributeRepository.findByGameIdOrderBySortOrderAscNameAsc(gameId)
                 .stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public void updateOrder(List<Long> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            TagAttribute attr = tagAttributeRepository.findById(ids.get(i))
+                    .orElseThrow(() -> new IllegalArgumentException("TagAttribute not found"));
+            attr.setSortOrder(i);
+            tagAttributeRepository.save(attr);
+        }
     }
 
     public TagAttributeResponse create(String name, Long gameId) {
@@ -31,6 +42,7 @@ public class TagAttributeService {
         TagAttribute attr = new TagAttribute();
         attr.setName(name);
         attr.setGame(game);
+        attr.setSortOrder(tagAttributeRepository.countByGameId(gameId));
         return toResponse(tagAttributeRepository.save(attr));
     }
 
