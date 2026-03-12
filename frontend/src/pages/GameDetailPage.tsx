@@ -13,6 +13,7 @@ export default function GameDetailPage() {
   const [game, setGame] = useState<Game | null>(null)
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<GameFormData>({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '' })
+  const [categoriesText, setCategoriesText] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [news, setNews] = useState<NewsItem[]>([])
@@ -30,6 +31,7 @@ export default function GameDetailPage() {
         awards: res.data.awards || '',
         staff: res.data.staff || '',
       })
+      setCategoriesText(res.data.categories?.join('\n') || '')
       setNewsLoading(true)
       getNews(res.data.name, 5).then((r) => {
         setNews(r.data)
@@ -46,7 +48,8 @@ export default function GameDetailPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await updateGame(Number(id), form, image)
+    const categories = categoriesText.split('\n').map((s) => s.trim()).filter(Boolean)
+    const res = await updateGame(Number(id), { ...form, categories }, image)
     setGame(res.data)
     setEditing(false)
     setImage(null)
@@ -76,48 +79,75 @@ export default function GameDetailPage() {
 
         <div className="p-5 sm:p-8">
           {editing ? (
-            <form onSubmit={handleUpdate} className="space-y-3">
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-xl font-bold"
-              />
-              <textarea
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={4}
-                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-              />
-              <input
-                type="text"
-                placeholder="プラットフォーム (例: PS5, PC, Xbox)"
-                value={form.platforms}
-                onChange={(e) => setForm({ ...form, platforms: e.target.value })}
-                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-              />
-              <textarea
-                placeholder={"発売日 (例:\n本編: 2022/2/25\nDLC1: 2023/3/21)"}
-                value={form.releaseDates}
-                onChange={(e) => setForm({ ...form, releaseDates: e.target.value })}
-                rows={3}
-                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-              />
-              <textarea
-                placeholder="受賞歴 (1行1件)"
-                value={form.awards}
-                onChange={(e) => setForm({ ...form, awards: e.target.value })}
-                rows={2}
-                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-              />
-              <textarea
-                placeholder={"主要スタッフ (例:\nディレクター: 宮崎英高\nプロデューサー: XXX)"}
-                value={form.staff}
-                onChange={(e) => setForm({ ...form, staff: e.target.value })}
-                rows={3}
-                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-              />
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">ゲーム名</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-xl font-bold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">説明</label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={4}
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">プラットフォーム</label>
+                <input
+                  type="text"
+                  placeholder="例: PS5, PC, Xbox"
+                  value={form.platforms}
+                  onChange={(e) => setForm({ ...form, platforms: e.target.value })}
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">発売日</label>
+                <textarea
+                  placeholder={"例:\n本編: 2022/2/25\nDLC1: 2023/3/21"}
+                  value={form.releaseDates}
+                  onChange={(e) => setForm({ ...form, releaseDates: e.target.value })}
+                  rows={3}
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">受賞歴 (1行1件)</label>
+                <textarea
+                  value={form.awards}
+                  onChange={(e) => setForm({ ...form, awards: e.target.value })}
+                  rows={2}
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">主要スタッフ</label>
+                <textarea
+                  placeholder={"例:\nディレクター: 宮崎英高\nプロデューサー: XXX"}
+                  value={form.staff}
+                  onChange={(e) => setForm({ ...form, staff: e.target.value })}
+                  rows={3}
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">アイテムカテゴリ (1行1件)</label>
+                <textarea
+                  placeholder={"例:\n武器\n防具\n消費アイテム"}
+                  value={categoriesText}
+                  onChange={(e) => setCategoriesText(e.target.value)}
+                  rows={4}
+                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                />
+              </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
                 {(preview || game.imagePath) && (

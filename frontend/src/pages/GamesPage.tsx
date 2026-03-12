@@ -1,6 +1,6 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, createGame, updateGame, deleteGame, updateGameOrder } from '../api'
+import { getGames, createGame, updateGameOrder } from '../api'
 import type { GameFormData } from '../api'
 import { isAdmin } from '../auth'
 import type { Game } from '../types'
@@ -15,11 +15,6 @@ export default function GamesPage() {
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState('')
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editForm, setEditForm] = useState<GameFormData>(emptyForm())
-  const [editCategoriesText, setEditCategoriesText] = useState('')
-  const [editImage, setEditImage] = useState<File | null>(null)
-  const [editPreview, setEditPreview] = useState<string | null>(null)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const admin = isAdmin()
@@ -51,35 +46,6 @@ export default function GamesPage() {
     } catch (err: any) {
       setError(err.response?.data?.error || '追加に失敗しました')
     }
-  }
-
-  const startEdit = (game: Game) => {
-    setEditingId(game.id)
-    setEditForm({
-      name: game.name,
-      description: game.description || '',
-      platforms: game.platforms || '',
-      releaseDates: game.releaseDates || '',
-      awards: game.awards || '',
-      staff: game.staff || '',
-    })
-    setEditCategoriesText(game.categories?.join('\n') || '')
-    setEditImage(null)
-    setEditPreview(null)
-  }
-
-  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>, game: Game) => {
-    e.preventDefault()
-    const categories = editCategoriesText.split('\n').map((s) => s.trim()).filter(Boolean)
-    await updateGame(game.id, { ...editForm, categories }, editImage)
-    setEditingId(null)
-    load()
-  }
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('削除しますか？')) return
-    await deleteGame(id)
-    load()
   }
 
   const handleDragStart = (index: number) => setDragIndex(index)
@@ -216,125 +182,43 @@ export default function GamesPage() {
               onDrop={() => admin && handleDrop(index)}
               onDragEnd={handleDragEnd}
             >
-              {editingId === game.id ? (
-                <form onSubmit={(e) => handleUpdate(e, game)} className="p-5 sm:p-8 space-y-3">
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    required
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-xl font-bold"
+              <Link to={`/games/${game.id}`} className="block">
+                {game.imagePath ? (
+                  <img
+                    src={`/uploads/${game.imagePath}`}
+                    alt={game.name}
+                    className="w-full max-h-96 object-contain bg-zinc-900"
                   />
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    rows={4}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-                  />
-                  <input
-                    type="text"
-                    placeholder="プラットフォーム"
-                    value={editForm.platforms}
-                    onChange={(e) => setEditForm({ ...editForm, platforms: e.target.value })}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-                  />
-                  <textarea
-                    placeholder="発売日"
-                    value={editForm.releaseDates}
-                    onChange={(e) => setEditForm({ ...editForm, releaseDates: e.target.value })}
-                    rows={3}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-                  />
-                  <textarea
-                    placeholder="受賞歴"
-                    value={editForm.awards}
-                    onChange={(e) => setEditForm({ ...editForm, awards: e.target.value })}
-                    rows={2}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-                  />
-                  <textarea
-                    placeholder="主要スタッフ"
-                    value={editForm.staff}
-                    onChange={(e) => setEditForm({ ...editForm, staff: e.target.value })}
-                    rows={3}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-                  />
-                  <textarea
-                    placeholder={"アイテムカテゴリ (1行1件、例:\n武器\n防具\n消費アイテム)"}
-                    value={editCategoriesText}
-                    onChange={(e) => setEditCategoriesText(e.target.value)}
-                    rows={4}
-                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-                  />
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
-                    {(editPreview || game.imagePath) && (
-                      <img src={editPreview || `/uploads/${game.imagePath}`} alt="preview" className="w-24 h-24 object-cover rounded mb-2 border border-gray-600" />
-                    )}
-                    <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setEditImage(f); setEditPreview(f ? URL.createObjectURL(f) : null) }} className="text-sm text-gray-400" />
-                  </div>
-                  <div className="flex gap-2">
-                    <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm">保存</button>
-                    <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm">キャンセル</button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  {game.imagePath && (
-                    <img
-                      src={`/uploads/${game.imagePath}`}
-                      alt={game.name}
-                      className="w-full max-h-96 object-contain bg-zinc-900"
-                    />
+                ) : (
+                  <div className="w-full h-40 bg-zinc-900 flex items-center justify-center text-zinc-600 text-sm">画像未登録</div>
+                )}
+              </Link>
+              <div className="p-5 sm:p-8">
+                <div className="mb-3">
+                  <Link to={`/games/${game.id}`} className="text-xl sm:text-2xl font-bold text-gray-100 hover:text-gray-300 transition">
+                    {game.name}
+                  </Link>
+                </div>
+                {game.description && <p className="text-gray-300 mb-4 whitespace-pre-wrap">{game.description}</p>}
+                <dl className="text-sm space-y-2 mb-4">
+                  {game.platforms && (
+                    <div>
+                      <dt className="text-gray-500 text-xs mb-0.5">プラットフォーム</dt>
+                      <dd className="text-gray-200">{game.platforms}</dd>
+                    </div>
                   )}
-                  <div className="p-5 sm:p-8">
-                    <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
-                      <Link to={`/games/${game.id}`} className="text-xl sm:text-2xl font-bold text-gray-100 hover:text-gray-300 transition">
-                        {game.name}
-                      </Link>
-                      {admin && (
-                        <div className="flex gap-2 flex-shrink-0">
-                          <button onClick={() => startEdit(game)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
-                          <button onClick={() => handleDelete(game.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
-                        </div>
-                      )}
+                  {game.releaseDates && (
+                    <div>
+                      <dt className="text-gray-500 text-xs mb-0.5">発売日</dt>
+                      <dd className="text-gray-200 whitespace-pre-wrap">{game.releaseDates}</dd>
                     </div>
-                    {game.description && <p className="text-gray-300 mb-4 whitespace-pre-wrap">{game.description}</p>}
-                    <dl className="text-sm space-y-2 mb-4">
-                      {game.platforms && (
-                        <div>
-                          <dt className="text-gray-500 text-xs mb-0.5">プラットフォーム</dt>
-                          <dd className="text-gray-200">{game.platforms}</dd>
-                        </div>
-                      )}
-                      {game.releaseDates && (
-                        <div>
-                          <dt className="text-gray-500 text-xs mb-0.5">発売日</dt>
-                          <dd className="text-gray-200 whitespace-pre-wrap">{game.releaseDates}</dd>
-                        </div>
-                      )}
-                      {game.awards && (
-                        <div>
-                          <dt className="text-gray-500 text-xs mb-0.5">受賞歴</dt>
-                          <dd className="text-gray-200 whitespace-pre-wrap">{game.awards}</dd>
-                        </div>
-                      )}
-                      {game.staff && (
-                        <div>
-                          <dt className="text-gray-500 text-xs mb-0.5">主要スタッフ</dt>
-                          <dd className="text-gray-200 whitespace-pre-wrap">{game.staff}</dd>
-                        </div>
-                      )}
-                    </dl>
-                    <p className="text-xs text-gray-500 mb-4">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
-                    <div className="flex items-center justify-between">
-                      <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
-                        アイテムを見る
-                      </Link>
-                    </div>
-                  </div>
-                </>
-              )}
+                  )}
+                </dl>
+                <p className="text-xs text-gray-500 mb-4">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
+                <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
+                  アイテムを見る
+                </Link>
+              </div>
             </div>
           ))}
         </div>
