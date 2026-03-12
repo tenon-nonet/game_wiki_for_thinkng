@@ -228,7 +228,17 @@ export default function CatalogPage() {
       if (!categoryMap.has(category)) categoryMap.set(category, [])
       categoryMap.get(category)!.push(entry)
     }
-    return Array.from(gameMap.entries()).map(([gameName, categoryMap]) => {
+    const gameOrderMap = new Map(games.map((g, idx) => [g.name, idx]))
+    return Array.from(gameMap.entries())
+      .sort(([a], [b]) => {
+        const ai = gameOrderMap.get(a)
+        const bi = gameOrderMap.get(b)
+        if (ai !== undefined && bi !== undefined) return ai - bi
+        if (ai !== undefined) return -1
+        if (bi !== undefined) return 1
+        return a.localeCompare(b, 'ja')
+      })
+      .map(([gameName, categoryMap]) => {
       const game = games.find((g) => g.name === gameName)
       const orderedCategories = game?.categories ? [...game.categories, '未分類'] : ['未分類']
       const categories: { label: string; entries: CatalogEntry[] }[] = []
@@ -252,7 +262,17 @@ export default function CatalogPage() {
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(entry)
     }
-    return Array.from(map.entries()).map(([gameName, entries]) => ({ gameName, entries }))
+    const gameOrderMap = new Map(games.map((g, idx) => [g.name, idx]))
+    return Array.from(map.entries())
+      .sort(([a], [b]) => {
+        const ai = gameOrderMap.get(a)
+        const bi = gameOrderMap.get(b)
+        if (ai !== undefined && bi !== undefined) return ai - bi
+        if (ai !== undefined) return -1
+        if (bi !== undefined) return 1
+        return a.localeCompare(b, 'ja')
+      })
+      .map(([gameName, entries]) => ({ gameName, entries }))
   })()
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
@@ -376,6 +396,7 @@ export default function CatalogPage() {
 
         {isAdmin() && selectedGameId > 0 && (
           <div className="ml-2 sm:ml-4 flex flex-wrap items-center gap-1.5">
+            <span className="text-sm text-gray-400 mr-1">目録追加</span>
             {activeTab === 'ITEM' && (
               <select
                 value={newCategory}
