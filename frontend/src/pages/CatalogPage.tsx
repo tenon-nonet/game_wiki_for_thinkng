@@ -280,12 +280,9 @@ export default function CatalogPage() {
     const done = isRegistered(entry, tab)
     const hasImage = !!wiki?.imagePath
     const borderColor = 'border-zinc-700 hover:border-red-800'
-    const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
-    const editPath = wiki ? `/${wikiPath(tab)}/${wiki.id}/edit?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
     const detailPath = wiki ? `/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
     const newPath = `${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`
-    const formPath = wiki ? editPath : newPath
-    const cardPath = wiki && done ? detailPath : isLoggedIn() ? formPath : ''
+    const cardPath = wiki ? detailPath : isLoggedIn() ? newPath : ''
     return (
       <div
         key={entry.id}
@@ -310,7 +307,6 @@ export default function CatalogPage() {
             <span className="text-xs leading-tight break-all text-gray-100">
               {entry.name}
             </span>
-            <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
           </div>
           <div className="flex items-center gap-2">
             {wiki && done ? (

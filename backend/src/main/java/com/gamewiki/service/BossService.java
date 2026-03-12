@@ -3,12 +3,14 @@ package com.gamewiki.service;
 import com.gamewiki.dto.BossRequest;
 import com.gamewiki.dto.BossResponse;
 import com.gamewiki.entity.Boss;
+import com.gamewiki.entity.CatalogEntry;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
+import com.gamewiki.util.NameNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,9 +68,10 @@ public class BossService {
     }
 
     public BossResponse create(BossRequest request, MultipartFile image) {
-        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "BOSS", request.getGameId())) {
+        if (!existsCatalogEntry(request.getName(), request.getGameId(), "BOSS")) {
             throw new IllegalArgumentException("目録に登録されていないボスは作成できません。先に目録へ登録してください。");
         }
+        ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -88,6 +91,7 @@ public class BossService {
 
     public BossResponse update(Long id, BossRequest request, MultipartFile image) {
         Boss boss = getBoss(id);
+        ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -136,5 +140,25 @@ public class BossService {
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
         return r;
+    }
+
+    private boolean existsCatalogEntry(String name, Long gameId, String type) {
+        String target = NameNormalizer.normalize(name);
+        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+    }
+
+    private void ensureNoDuplicateBoss(String name, Long gameId, Long selfId) {
+        String target = NameNormalizer.normalize(name);
+        boolean duplicated = bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
+                .filter(boss -> selfId == null || !boss.getId().equals(selfId))
+                .map(Boss::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+        if (duplicated) {
+            throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 }

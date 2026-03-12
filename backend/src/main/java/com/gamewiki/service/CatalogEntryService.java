@@ -7,11 +7,14 @@ import com.gamewiki.entity.CatalogEntry;
 import com.gamewiki.entity.Game;
 import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
+import com.gamewiki.util.NameNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +42,7 @@ public class CatalogEntryService {
     }
 
     public CatalogEntryResponse create(CatalogEntryRequest request, String username) {
-        if (catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), request.getType(), request.getGameId())) {
+        if (existsByNormalizedName(request.getName(), request.getType(), request.getGameId())) {
             throw new IllegalArgumentException("既に登録されています");
         }
 
@@ -60,11 +63,20 @@ public class CatalogEntryService {
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
 
+        Set<String> existingNames = catalogEntryRepository
+                .findByGameIdAndTypeOrderByNameAsc(request.getGameId(), request.getType())
+                .stream()
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .collect(java.util.stream.Collectors.toSet());
+        Set<String> seenInRequest = new HashSet<>();
+
         int added = 0, skipped = 0;
         for (String rawName : request.getNames()) {
             String name = rawName == null ? "" : rawName.trim();
             if (name.isBlank()) continue;
-            if (catalogEntryRepository.existsByNameAndTypeAndGameId(name, request.getType(), request.getGameId())) {
+            String normalized = NameNormalizer.normalize(name);
+            if (existingNames.contains(normalized) || !seenInRequest.add(normalized)) {
                 skipped++;
                 continue;
             }
@@ -75,6 +87,7 @@ public class CatalogEntryService {
             entry.setGame(game);
             entry.setCreatedBy(username);
             catalogEntryRepository.save(entry);
+            existingNames.add(normalized);
             added++;
         }
         return Map.of("added", added, "skipped", skipped);
@@ -97,5 +110,13 @@ public class CatalogEntryService {
         r.setCreatedBy(entry.getCreatedBy());
         r.setCreatedAt(entry.getCreatedAt());
         return r;
+    }
+
+    private boolean existsByNormalizedName(String name, String type, Long gameId) {
+        String target = NameNormalizer.normalize(name);
+        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
     }
 }
