@@ -89,9 +89,15 @@ public class BossService {
         return toResponse(bossRepository.save(boss));
     }
 
+    @Transactional
     public BossResponse update(Long id, BossRequest request, MultipartFile image) {
         Boss boss = getBoss(id);
+        Long oldGameId = boss.getGame().getId();
+        String oldName = boss.getName();
+        CatalogEntry catalogEntry = findCatalogEntryByNormalizedName(oldName, oldGameId, "BOSS");
+
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
+        ensureNoDuplicateCatalogEntry(request.getName(), request.getGameId(), "BOSS", catalogEntry != null ? catalogEntry.getId() : null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -106,7 +112,21 @@ public class BossService {
             boss.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(bossRepository.save(boss));
+        Boss saved = bossRepository.save(boss);
+
+        if (catalogEntry == null) {
+            CatalogEntry newEntry = new CatalogEntry();
+            newEntry.setName(request.getName());
+            newEntry.setType("BOSS");
+            newEntry.setGame(game);
+            catalogEntryRepository.save(newEntry);
+        } else {
+            catalogEntry.setName(request.getName());
+            catalogEntry.setGame(game);
+            catalogEntryRepository.save(catalogEntry);
+        }
+
+        return toResponse(saved);
     }
 
     public void delete(Long id) {
@@ -148,6 +168,26 @@ public class BossService {
                 .map(CatalogEntry::getName)
                 .map(NameNormalizer::normalize)
                 .anyMatch(target::equals);
+    }
+
+    private CatalogEntry findCatalogEntryByNormalizedName(String name, Long gameId, String type) {
+        String target = NameNormalizer.normalize(name);
+        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .filter(e -> NameNormalizer.normalize(e.getName()).equals(target))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void ensureNoDuplicateCatalogEntry(String name, Long gameId, String type, Long excludeId) {
+        String target = NameNormalizer.normalize(name);
+        boolean duplicated = catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .filter(entry -> excludeId == null || !entry.getId().equals(excludeId))
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+        if (duplicated) {
+            throw new IllegalArgumentException("目録に同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 
     private void ensureNoDuplicateBoss(String name, Long gameId, Long selfId) {
