@@ -130,6 +130,10 @@ export default function CatalogPage() {
 
   // 目録エントリ追加
   const handleAdd = async () => {
+    if (!isAdmin()) {
+      setAddError('目録追加は管理者のみ実行できます')
+      return
+    }
     if (!newName.trim()) return
     setAddError('')
     setAdding(true)
@@ -162,6 +166,7 @@ export default function CatalogPage() {
   }
 
   const handleBulk = async () => {
+    if (!isAdmin()) return
     const names = bulkText.split('\n').map((s) => s.trim()).filter(Boolean)
     if (names.length === 0) return
     setBulking(true)
@@ -289,80 +294,63 @@ export default function CatalogPage() {
     <div className="w-full px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-100 mb-6">目録</h1>
 
-      {/* ゲーム選択 + キーワード絞り込み */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <select
-          value={selectedGameId}
-          onChange={(e) => {
-            setSelectedGameId(Number(e.target.value))
-            setKeyword('')
-          }}
-          className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
-        >
-          <option value={0}>すべて</option>
-          {games.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
+      {/* ゲーム選択 + キーワード絞り込み + タブ */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedGameId}
+            onChange={(e) => {
+              setSelectedGameId(Number(e.target.value))
+              setKeyword('')
+            }}
+            className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
+          >
+            <option value={0}>すべて</option>
+            {games.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <input
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          placeholder="名前で絞り込み..."
-          className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm w-52"
+          placeholder="アイテム名で絞り込み..."
+          className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm w-56"
         />
-      </div>
 
-      {/* タブ */}
-      <div className="flex gap-1 mb-6 bg-zinc-900 rounded-lg p-1 w-fit">
-        {TAB_CONFIG.map((tab) => {
-          const { registered: r, total: t } = progress(tab.key)
-          return (
-            <button
-              key={tab.key}
-              onClick={() => { setActiveTab(tab.key); setAddError('') }}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-                activeTab === tab.key
-                  ? 'bg-red-900 text-white'
-                  : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              {tab.label}
-              <span className={`ml-2 text-xs ${activeTab === tab.key ? 'text-red-200' : 'text-gray-600'}`}>
-                {r}/{t}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* 進捗バー */}
-      <div className="mb-5">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>登録済み {registered} / {total}</span>
-          <span>{pct}%</span>
+        <div className="flex gap-1 bg-zinc-900 rounded-lg p-1">
+          {TAB_CONFIG.map((tab) => {
+            const { registered: r, total: t } = progress(tab.key)
+            return (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key); setAddError('') }}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                  activeTab === tab.key
+                    ? 'bg-red-900 text-white'
+                    : 'text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-2 text-xs ${activeTab === tab.key ? 'text-red-200' : 'text-gray-600'}`}>
+                  {r}/{t}
+                </span>
+              </button>
+            )
+          })}
         </div>
-        <div className="w-full bg-zinc-800 rounded-full h-1.5">
-          <div
-            className="bg-red-800 h-1.5 rounded-full transition-all"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
 
-      {/* 操作パネル（特定ゲーム選択時のみ） */}
-      {isLoggedIn() && selectedGameId > 0 && (
-        <div className="mb-5 flex flex-wrap gap-2 items-start">
-          {/* 単体追加 */}
-          <div className="flex gap-1.5 items-center flex-1 min-w-0">
+        {isAdmin() && selectedGameId > 0 && (
+          <div className="ml-2 sm:ml-4 flex flex-wrap items-center gap-1.5">
             {activeTab === 'ITEM' && (
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="border border-gray-600 rounded px-2 py-1.5 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-800 text-xs shrink-0"
+                className="border border-gray-600 rounded px-2 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
               >
                 <option value="">カテゴリ</option>
                 {gameCategories.map((c) => (
@@ -376,18 +364,37 @@ export default function CatalogPage() {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
               placeholder="名称を入力..."
-              className="w-56 border border-gray-600 rounded px-3 py-1.5 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-800 text-xs"
+              className="w-56 border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
             />
             <button
               onClick={handleAdd}
               disabled={adding || !newName.trim()}
-              className="px-3 py-1.5 bg-red-900 hover:bg-red-800 text-white text-xs rounded disabled:opacity-50 transition shrink-0"
+              className="px-3 py-2 bg-red-900 hover:bg-red-800 text-white text-sm rounded disabled:opacity-50 transition"
             >
               追加
             </button>
             {addError && <span className="text-red-400 text-xs">{addError}</span>}
           </div>
+        )}
+      </div>
 
+      {/* 進捗バー */}
+      <div className="mb-5 w-full">
+        <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <span>登録済み {registered} / {total}</span>
+          <span>{pct}%</span>
+        </div>
+        <div className="w-full bg-zinc-800 rounded-full h-1.5">
+          <div
+            className="bg-red-800 h-1.5 rounded-full transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+
+      {/* 操作パネル（特定ゲーム選択時のみ） */}
+      {isAdmin() && selectedGameId > 0 && (
+        <div className="mb-5 flex flex-wrap gap-2 items-start">
           {/* 一括登録（管理者） */}
           {isAdmin() && (
             <div className="relative">
