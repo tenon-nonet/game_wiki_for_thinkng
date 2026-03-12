@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/games")
@@ -48,6 +49,15 @@ public class GameController {
             @Valid @RequestPart("data") GameRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.ok(gameService.update(id, request, image));
+    }
+
+    @PutMapping("/{id}/categories")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<GameResponse> updateCategories(
+            @PathVariable Long id,
+            @RequestBody Map<String, List<String>> body) {
+        List<String> categories = body.getOrDefault("categories", List.of());
+        return ResponseEntity.ok(gameService.updateCategories(id, categories));
     }
 
     @PutMapping("/order")

@@ -205,6 +205,7 @@ export default function GamesPage() {
                     <div>
                       <dt className="text-gray-500 text-xs mb-0.5">プラットフォーム</dt>
                       <dd className="text-gray-200">{game.platforms}</dd>
+
                     </div>
                   )}
                   {game.releaseDates && (

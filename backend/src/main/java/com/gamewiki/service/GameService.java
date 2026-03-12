@@ -71,6 +71,12 @@ public class GameService {
         return toResponse(gameRepository.save(game));
     }
 
+    public GameResponse updateCategories(Long id, List<String> categories) {
+        Game game = getGame(id);
+        game.setCategories(categoriesToString(categories));
+        return toResponse(gameRepository.save(game));
+    }
+
     public void delete(Long id) {
         Game game = getGame(id);
         fileStorageService.delete(game.getImagePath());

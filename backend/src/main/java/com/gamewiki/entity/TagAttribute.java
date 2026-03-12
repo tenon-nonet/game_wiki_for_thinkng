@@ -5,12 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tags", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name", "game_id", "type"})
+@Table(name = "tag_attributes", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "game_id"})
 })
 @Getter
 @Setter
-public class Tag {
+public class TagAttribute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,16 +19,10 @@ public class Tag {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, length = 10)
-    private String type = "ITEM";
-
-    @Column(length = 50)
-    private String attribute;
-
     @Column(name = "sort_order")
     private int sortOrder = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id")
+    @JoinColumn(name = "game_id", nullable = false)
     private Game game;
 }

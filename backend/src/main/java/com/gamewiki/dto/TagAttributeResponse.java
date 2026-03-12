@@ -5,10 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TagResponse {
+public class TagAttributeResponse {
     private Long id;
     private String name;
     private Long gameId;
-    private String type;
-    private String attribute;
 }

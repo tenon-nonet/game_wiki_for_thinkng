@@ -26,12 +26,12 @@ public class TagService {
 
     public List<TagResponse> findByGameId(Long gameId, String type) {
         List<Tag> tags = (type != null && !type.isBlank())
-                ? tagRepository.findByGameIdAndTypeOrderByName(gameId, type)
-                : tagRepository.findByGameIdOrderByName(gameId);
+                ? tagRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type)
+                : tagRepository.findByGameIdOrderByNameAsc(gameId);
         return tags.stream().map(this::toResponse).toList();
     }
 
-    public TagResponse create(String name, Long gameId, String type) {
+    public TagResponse create(String name, Long gameId, String type, String attribute) {
         String resolvedType = (type != null && !type.isBlank()) ? type : "ITEM";
         if (tagRepository.existsByNameAndGameIdAndType(name, gameId, resolvedType)) {
             throw new IllegalArgumentException("Tag already exists: " + name);
@@ -41,11 +41,12 @@ public class TagService {
         Tag tag = new Tag();
         tag.setName(name);
         tag.setType(resolvedType);
+        tag.setAttribute(attribute != null && !attribute.isBlank() ? attribute : null);
         tag.setGame(game);
         return toResponse(tagRepository.save(tag));
     }
 
-    public TagResponse update(Long id, String name) {
+    public TagResponse update(Long id, String name, String attribute) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + id));
         Long gameId = tag.getGame() != null ? tag.getGame().getId() : null;
@@ -54,6 +55,7 @@ public class TagService {
             throw new IllegalArgumentException("Tag already exists: " + name);
         }
         tag.setName(name);
+        tag.setAttribute(attribute != null && !attribute.isBlank() ? attribute : null);
         return toResponse(tagRepository.save(tag));
     }
 
@@ -75,6 +77,7 @@ public class TagService {
         r.setId(tag.getId());
         r.setName(tag.getName());
         r.setType(tag.getType());
+        r.setAttribute(tag.getAttribute());
         if (tag.getGame() != null) {
             r.setGameId(tag.getGame().getId());
         }
