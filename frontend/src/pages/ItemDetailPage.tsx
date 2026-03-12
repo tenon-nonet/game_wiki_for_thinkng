@@ -1,8 +1,8 @@
 ﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
+import { getItem, getItems, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
 import { isLoggedIn, getUsername, isAdmin } from '../auth'
-import type { Item, Comment, Game, Tag } from '../types'
+import type { Item, Comment } from '../types'
 
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -19,34 +19,15 @@ export default function ItemDetailPage() {
   const [editText, setEditText] = useState('')
   const [replyToId, setReplyToId] = useState<number | null>(null)
   const [replyText, setReplyText] = useState('')
-  const [games, setGames] = useState<Game[]>([])
-  const [tags, setTags] = useState<Tag[]>([])
-  const [searchGameId, setSearchGameId] = useState('')
-  const [searchTag, setSearchTag] = useState('')
-  const [searchKeyword, setSearchKeyword] = useState('')
   const loggedIn = isLoggedIn()
   const currentUser = getUsername()
   const admin = isAdmin()
-
-  useEffect(() => {
-    getGames().then((r) => setGames(r.data))
-  }, [])
-
-  useEffect(() => {
-    if (searchGameId) {
-      getTags(Number(searchGameId)).then((r) => setTags(r.data))
-    } else {
-      setTags([])
-      setSearchTag('')
-    }
-  }, [searchGameId])
 
   useEffect(() => {
     const itemId = Number(id)
     getItem(itemId).then((res) => {
       const loaded = res.data
       setItem(loaded)
-      setSearchGameId(String(loaded.gameId))
       if (loaded.tags.length > 0) {
         getItems(loaded.gameId).then((r) => {
           const tagIds = new Set(loaded.tags.map((t) => t.id))
@@ -59,15 +40,6 @@ export default function ItemDetailPage() {
     })
     getComments(itemId).then((res) => setComments(res.data))
   }, [id])
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams()
-    if (searchGameId) params.set('gameId', searchGameId)
-    if (searchTag) params.set('tag', searchTag)
-    if (searchKeyword) params.set('keyword', searchKeyword)
-    navigate(`/items?${params.toString()}`)
-  }
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,49 +126,6 @@ export default function ItemDetailPage() {
         <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
         {fromCatalog && <Link to={catalogUrl} className="text-gray-400 hover:underline text-sm">← 目録</Link>}
       </div>
-
-      {/* 検索バー */}
-      <form onSubmit={handleSearch} className="mt-4 bg-zinc-800 rounded-lg p-4 flex flex-col sm:flex-row flex-wrap gap-3 items-end">
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">ゲーム</label>
-          <select
-            value={searchGameId}
-            onChange={(e) => setSearchGameId(e.target.value)}
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-          >
-            <option value="">すべて</option>
-            {games.map((g) => (
-              <option key={g.id} value={g.id}>{g.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">タグ</label>
-          <select
-            value={searchTag}
-            onChange={(e) => setSearchTag(e.target.value)}
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-          >
-            <option value="">すべて</option>
-            {tags.map((t) => (
-              <option key={t.id} value={t.name}>{t.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">キーワード</label>
-          <input
-            type="text"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            placeholder="例: ルーン"
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
-          />
-        </div>
-        <button type="submit" className="border border-white/40 hover:border-white/70 text-white bg-transparent px-4 py-2 rounded text-sm transition">
-          検索
-        </button>
-      </form>
 
       <div className="bg-zinc-800 rounded-lg shadow mt-4 overflow-hidden">
         {item.imagePath ? (
