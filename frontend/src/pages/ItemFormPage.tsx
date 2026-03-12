@@ -17,7 +17,7 @@ export default function ItemFormPage() {
     name: searchParams.get('name') ?? '',
     description: '',
     gameId: searchParams.get('gameId') ?? '',
-    category: '',
+    category: searchParams.get('category') ?? '',
   })
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -47,6 +48,7 @@ public class GameService {
         game.setReleaseDates(request.getReleaseDates());
         game.setAwards(request.getAwards());
         game.setStaff(request.getStaff());
+        game.setCategories(categoriesToString(request.getCategories()));
         if (image != null && !image.isEmpty()) {
             game.setImagePath(fileStorageService.store(image));
         }
@@ -61,6 +63,7 @@ public class GameService {
         game.setReleaseDates(request.getReleaseDates());
         game.setAwards(request.getAwards());
         game.setStaff(request.getStaff());
+        game.setCategories(categoriesToString(request.getCategories()));
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(game.getImagePath());
             game.setImagePath(fileStorageService.store(image));
@@ -89,8 +92,19 @@ public class GameService {
         r.setReleaseDates(game.getReleaseDates());
         r.setAwards(game.getAwards());
         r.setStaff(game.getStaff());
+        r.setCategories(stringToCategories(game.getCategories()));
         r.setCreatedAt(game.getCreatedAt());
         r.setUpdatedAt(game.getUpdatedAt());
         return r;
+    }
+
+    private String categoriesToString(List<String> list) {
+        if (list == null || list.isEmpty()) return null;
+        return String.join(",", list.stream().filter(s -> s != null && !s.isBlank()).toList());
+    }
+
+    private List<String> stringToCategories(String s) {
+        if (s == null || s.isBlank()) return List.of();
+        return Arrays.stream(s.split(",")).map(String::trim).filter(e -> !e.isEmpty()).toList();
     }
 }

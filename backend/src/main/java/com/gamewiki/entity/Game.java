@@ -38,6 +38,9 @@ public class Game {
     @Column(columnDefinition = "TEXT")
     private String staff;
 
+    @Column(columnDefinition = "TEXT")
+    private String categories;
+
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int sortOrder = 0;
 
