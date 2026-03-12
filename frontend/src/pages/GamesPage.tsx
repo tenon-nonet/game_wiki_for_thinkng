@@ -11,11 +11,13 @@ export default function GamesPage() {
   const [showForm, setShowForm] = useState(false)
   const emptyForm = (): GameFormData => ({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '' })
   const [form, setForm] = useState<GameFormData>(emptyForm())
+  const [categoriesText, setCategoriesText] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editForm, setEditForm] = useState<GameFormData>(emptyForm())
+  const [editCategoriesText, setEditCategoriesText] = useState('')
   const [editImage, setEditImage] = useState<File | null>(null)
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -38,8 +40,10 @@ export default function GamesPage() {
     e.preventDefault()
     setError('')
     try {
-      await createGame(form, image)
+      const categories = categoriesText.split('\n').map((s) => s.trim()).filter(Boolean)
+      await createGame({ ...form, categories }, image)
       setForm(emptyForm())
+      setCategoriesText('')
       setImage(null)
       setPreview(null)
       setShowForm(false)
@@ -59,13 +63,15 @@ export default function GamesPage() {
       awards: game.awards || '',
       staff: game.staff || '',
     })
+    setEditCategoriesText(game.categories?.join('\n') || '')
     setEditImage(null)
     setEditPreview(null)
   }
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>, game: Game) => {
     e.preventDefault()
-    await updateGame(game.id, editForm, editImage)
+    const categories = editCategoriesText.split('\n').map((s) => s.trim()).filter(Boolean)
+    await updateGame(game.id, { ...editForm, categories }, editImage)
     setEditingId(null)
     load()
   }
@@ -163,6 +169,13 @@ export default function GamesPage() {
             rows={3}
             className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
+          <textarea
+            placeholder={"アイテムカテゴリ (1行1件、例:\n武器\n防具\n消費アイテム)"}
+            value={categoriesText}
+            onChange={(e) => setCategoriesText(e.target.value)}
+            rows={4}
+            className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+          />
           <div>
             <label className="block text-sm text-gray-300 mb-1">画像</label>
             {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />}
@@ -244,6 +257,13 @@ export default function GamesPage() {
                     value={editForm.staff}
                     onChange={(e) => setEditForm({ ...editForm, staff: e.target.value })}
                     rows={3}
+                    className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  />
+                  <textarea
+                    placeholder={"アイテムカテゴリ (1行1件、例:\n武器\n防具\n消費アイテム)"}
+                    value={editCategoriesText}
+                    onChange={(e) => setEditCategoriesText(e.target.value)}
+                    rows={4}
                     className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                   />
                   <div>

@@ -18,4 +18,5 @@ public class GameRequest {
     private String releaseDates;
     private String awards;
     private String staff;
+    private java.util.List<String> categories;
 }
