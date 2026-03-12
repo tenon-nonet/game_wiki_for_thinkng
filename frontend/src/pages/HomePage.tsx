@@ -98,6 +98,18 @@ export default function HomePage() {
     setDragOverIndex(null)
   }
 
+  const actionVariant: 'bold' | 'calm' = 'calm'
+  const primaryActionClassByVariant = {
+    bold: 'block w-full bg-gradient-to-r from-red-900 via-red-800 to-red-900 hover:from-red-800 hover:via-red-700 hover:to-red-800 text-white text-sm font-semibold tracking-wide px-4 py-2.5 rounded-md text-center transition',
+    calm: 'block w-full border border-white/25 hover:border-white/45 bg-zinc-900 hover:bg-zinc-800 text-gray-100 text-sm font-medium px-4 py-2 rounded-md text-center transition',
+  } as const
+  const secondaryActionClassByVariant = {
+    bold: 'inline-block border border-red-500/60 hover:border-red-300 text-red-100 hover:text-white bg-zinc-900/70 text-xs px-3 py-2 rounded-md text-center transition',
+    calm: 'inline-block border border-zinc-600/80 hover:border-zinc-400 text-gray-200 hover:text-white bg-transparent text-xs px-3 py-2 rounded-md text-center transition',
+  } as const
+  const primaryActionClass = primaryActionClassByVariant[actionVariant]
+  const secondaryActionClass = secondaryActionClassByVariant[actionVariant]
+
   return (
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       {/* ゲーム一覧 */}
@@ -186,18 +198,18 @@ export default function HomePage() {
                   </form>
                 ) : (
                   <>
-                    <Link to={`/games/${game.id}`} className="block overflow-hidden">
+                    <div className="block overflow-hidden">
                       {game.imagePath ? (
                         <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-zinc-900 transition-all duration-300 ease-out group-hover:opacity-75 group-hover:blur-[2px]" />
                       ) : (
                         <div className="w-full h-64 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
                       )}
-                    </Link>
+                    </div>
                     <div className="p-5 flex flex-col gap-1">
                       <div className="flex items-start justify-between">
-                        <Link to={`/games/${game.id}`} className="text-xl font-semibold text-gray-100 hover:underline">
+                        <span className="text-xl font-semibold text-gray-100">
                           {game.name}
-                        </Link>
+                        </span>
                         {admin && (
                           <div className="flex gap-2 ml-2 flex-shrink-0">
                             <button onClick={() => startEdit(game)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
@@ -206,31 +218,39 @@ export default function HomePage() {
                         )}
                       </div>
                       {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-4 space-y-2">
                         <Link
-                          to={`/items?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                          to={`/catalog?gameId=${game.id}`}
+                          className={primaryActionClass}
                         >
-                          アイテム一覧 →
+                          目録を見る
                         </Link>
-                        <Link
-                          to={`/bosses?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          ボス一覧 →
-                        </Link>
-                        <Link
-                          to={`/npcs?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          NPC一覧 →
-                        </Link>
-                        <Link
-                          to={`/games/${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          ゲーム詳細 →
-                        </Link>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            to={`/items?gameId=${game.id}`}
+                            className={secondaryActionClass}
+                          >
+                            アイテム図録を見る
+                          </Link>
+                          <Link
+                            to={`/bosses?gameId=${game.id}`}
+                            className={secondaryActionClass}
+                          >
+                            ボス図録を見る
+                          </Link>
+                          <Link
+                            to={`/npcs?gameId=${game.id}`}
+                            className={secondaryActionClass}
+                          >
+                            NPC図録を見る
+                          </Link>
+                          <Link
+                            to={`/games/${game.id}`}
+                            className={secondaryActionClass}
+                          >
+                            ゲーム詳細を見る
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </>
