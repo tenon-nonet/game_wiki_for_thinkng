@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
-import { getGames, getGame, getTags, createTag, updateTag, deleteTag, getTagAttributes, createTagAttribute, deleteTagAttribute, updateGameCategories } from '../api'
+import { getGames, getGame, getTags, createTag, updateTag, deleteTag, getTagAttributes, createTagAttribute, deleteTagAttribute, updateGameCategories, updateTagAttributeOrder, updateTagOrder } from '../api'
 import type { Game, Tag, TagAttribute } from '../types'
+
+function moveItem<T>(arr: T[], index: number, dir: -1 | 1): T[] {
+  const next = index + dir
+  if (next < 0 || next >= arr.length) return arr
+  const result = [...arr]
+  ;[result[index], result[next]] = [result[next], result[index]]
+  return result
+}
 
 export default function TagsAdminPage() {
   const [games, setGames] = useState<Game[]>([])
@@ -42,9 +50,10 @@ export default function TagsAdminPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedGameId) return
+    if (!newAttribute) { setError('属性を選択してください'); return }
     setError('')
     try {
-      await createTag(newName.trim(), Number(selectedGameId), tagType, newAttribute || undefined)
+      await createTag(newName.trim(), Number(selectedGameId), tagType, newAttribute)
       setNewName('')
       setNewAttribute('')
       loadTags()
@@ -63,9 +72,10 @@ export default function TagsAdminPage() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (editingId == null) return
+    if (!editAttribute) { setError('属性を選択してください'); return }
     setError('')
     try {
-      await updateTag(editingId, editName.trim(), editAttribute || undefined)
+      await updateTag(editingId, editName.trim(), editAttribute)
       setEditingId(null)
       loadTags()
     } catch {
@@ -82,6 +92,12 @@ export default function TagsAdminPage() {
     } catch {
       setError('タグの削除に失敗しました')
     }
+  }
+
+  const handleMoveTag = async (index: number, dir: -1 | 1) => {
+    const newTags = moveItem(tags, index, dir)
+    setTags(newTags)
+    await updateTagOrder(newTags.map((t) => t.id))
   }
 
   const handleCreateAttr = async (e: React.FormEvent) => {
@@ -108,7 +124,11 @@ export default function TagsAdminPage() {
     }
   }
 
-  const attrLabel = (attrValue: string) => attrValue || '未設定'
+  const handleMoveAttr = async (index: number, dir: -1 | 1) => {
+    const newAttrs = moveItem(attributes, index, dir)
+    setAttributes(newAttrs)
+    await updateTagAttributeOrder(newAttrs.map((a) => a.id))
+  }
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -133,6 +153,33 @@ export default function TagsAdminPage() {
       setError('カテゴリの削除に失敗しました')
     }
   }
+
+  const handleMoveCat = async (index: number, dir: -1 | 1) => {
+    if (!selectedGame) return
+    const cats = selectedGame.categories ?? []
+    const updated = moveItem(cats, index, dir)
+    try {
+      const res = await updateGameCategories(selectedGame.id, updated)
+      setSelectedGame(res.data)
+    } catch {
+      setError('カテゴリの並び替えに失敗しました')
+    }
+  }
+
+  const OrderButtons = ({ index, length, onMove }: { index: number; length: number; onMove: (dir: -1 | 1) => void }) => (
+    <div className="flex flex-col">
+      <button
+        onClick={() => onMove(-1)}
+        disabled={index === 0}
+        className="text-gray-500 hover:text-gray-300 disabled:opacity-30 leading-none text-xs px-0.5"
+      >▲</button>
+      <button
+        onClick={() => onMove(1)}
+        disabled={index === length - 1}
+        className="text-gray-500 hover:text-gray-300 disabled:opacity-30 leading-none text-xs px-0.5"
+      >▼</button>
+    </div>
+  )
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
@@ -171,19 +218,20 @@ export default function TagsAdminPage() {
             {(selectedGame?.categories ?? []).length === 0 ? (
               <p className="text-gray-500 text-xs">カテゴリがまだありません</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {(selectedGame?.categories ?? []).map((cat) => (
-                  <div key={cat} className="flex items-center gap-1 bg-zinc-700 rounded-full px-3 py-1">
-                    <span className="text-sm text-gray-200">{cat}</span>
+              <ul className="space-y-1">
+                {(selectedGame?.categories ?? []).map((cat, i, arr) => (
+                  <li key={cat} className="flex items-center gap-2 bg-zinc-700 rounded px-3 py-1.5">
+                    <OrderButtons index={i} length={arr.length} onMove={(dir) => handleMoveCat(i, dir)} />
+                    <span className="flex-1 text-sm text-gray-200">{cat}</span>
                     <button
                       onClick={() => handleDeleteCategory(cat)}
-                      className="text-zinc-500 hover:text-red-400 text-xs ml-1"
+                      className="text-zinc-500 hover:text-red-400 text-xs"
                     >
-                      ×
+                      削除
                     </button>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </div>
 
@@ -209,19 +257,20 @@ export default function TagsAdminPage() {
             {attributes.length === 0 ? (
               <p className="text-gray-500 text-xs">属性がまだありません</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {attributes.map((attr) => (
-                  <div key={attr.id} className="flex items-center gap-1 bg-zinc-700 rounded-full px-3 py-1">
-                    <span className="text-sm text-gray-200">{attr.name}</span>
+              <ul className="space-y-1">
+                {attributes.map((attr, i) => (
+                  <li key={attr.id} className="flex items-center gap-2 bg-zinc-700 rounded px-3 py-1.5">
+                    <OrderButtons index={i} length={attributes.length} onMove={(dir) => handleMoveAttr(i, dir)} />
+                    <span className="flex-1 text-sm text-gray-200">{attr.name}</span>
                     <button
                       onClick={() => handleDeleteAttr(attr.id, attr.name)}
-                      className="text-zinc-500 hover:text-red-400 text-xs ml-1"
+                      className="text-zinc-500 hover:text-red-400 text-xs"
                     >
-                      ×
+                      削除
                     </button>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </div>
 
@@ -255,12 +304,13 @@ export default function TagsAdminPage() {
               onChange={(e) => setNewAttribute(e.target.value)}
               className="border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
             >
-              <option value="">属性なし</option>
+              <option value="">属性を選択</option>
               {attributes.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
             </select>
             <button
               type="submit"
-              className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm whitespace-nowrap"
+              disabled={attributes.length === 0}
+              className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm whitespace-nowrap disabled:opacity-50"
             >
               追加
             </button>
@@ -271,7 +321,7 @@ export default function TagsAdminPage() {
             <p className="text-gray-500 text-sm">このゲームに{tagType === 'BOSS' ? 'ボス' : tagType === 'NPC' ? 'NPC' : 'アイテム'}タグはありません</p>
           ) : (
             <ul className="space-y-2">
-              {tags.map((tag) => (
+              {tags.map((tag, i) => (
                 <li key={tag.id} className="bg-zinc-800 rounded-lg px-4 py-3 flex items-center gap-3">
                   {editingId === tag.id ? (
                     <form onSubmit={handleUpdate} className="flex gap-2 flex-1 items-center">
@@ -287,7 +337,7 @@ export default function TagsAdminPage() {
                         onChange={(e) => setEditAttribute(e.target.value)}
                         className="border border-gray-600 rounded px-2 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
                       >
-                        <option value="">属性なし</option>
+                        <option value="">属性を選択</option>
                         {attributes.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
                       </select>
                       <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded text-sm">保存</button>
@@ -295,9 +345,10 @@ export default function TagsAdminPage() {
                     </form>
                   ) : (
                     <>
+                      <OrderButtons index={i} length={tags.length} onMove={(dir) => handleMoveTag(i, dir)} />
                       <span className="flex-1 text-gray-100 text-sm">{tag.name}</span>
                       {tag.attribute && (
-                        <span className="text-xs text-zinc-400 bg-zinc-700 rounded-full px-2 py-0.5">{attrLabel(tag.attribute)}</span>
+                        <span className="text-xs text-zinc-400 bg-zinc-700 rounded-full px-2 py-0.5">{tag.attribute}</span>
                       )}
                       <button onClick={() => startEdit(tag)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
                       <button onClick={() => handleDelete(tag.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { getItem, getGames, getTags, getTagAttributes, createTag, createItem, updateItem, analyzeImageText } from '../api'
-import { isAdmin } from '../auth'
+import { getItem, getGames, getTags, getTagAttributes, createItem, updateItem, analyzeImageText } from '../api'
 import type { Game, Tag, TagAttribute } from '../types'
 
 export default function ItemFormPage() {
@@ -9,7 +8,6 @@ export default function ItemFormPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isEdit = !!id
-  const admin = isAdmin()
 
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
@@ -22,9 +20,6 @@ export default function ItemFormPage() {
   })
   // 属性ごとに選択中タグID (max 1 per attribute)
   const [selectedByAttr, setSelectedByAttr] = useState<Record<string, number | null>>({})
-  // 属性なしタグは Set で管理（複数選択可）
-  const [selectedNoAttr, setSelectedNoAttr] = useState<Set<number>>(new Set())
-  const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [existingImage, setExistingImage] = useState<string | null>(null)
@@ -34,16 +29,12 @@ export default function ItemFormPage() {
   const initSelection = (tags: Tag[], attrs: TagAttribute[]) => {
     const byAttr: Record<string, number | null> = {}
     attrs.forEach((a) => { byAttr[a.name] = null })
-    const noAttr = new Set<number>()
     tags.forEach((t) => {
-      if (t.attribute) {
+      if (t.attribute && t.attribute in byAttr) {
         byAttr[t.attribute] = t.id
-      } else {
-        noAttr.add(t.id)
       }
     })
     setSelectedByAttr(byAttr)
-    setSelectedNoAttr(noAttr)
   }
 
   useEffect(() => {
@@ -75,7 +66,6 @@ export default function ItemFormPage() {
       setAllTags([])
       setAttributes([])
       setSelectedByAttr({})
-      setSelectedNoAttr(new Set())
       Promise.all([
         getTags(Number(form.gameId)),
         getTagAttributes(Number(form.gameId)),
@@ -92,28 +82,8 @@ export default function ItemFormPage() {
   const toggleAttrTag = (attrName: string, tagId: number) => {
     setSelectedByAttr((prev) => ({
       ...prev,
-      [attrName]: prev[attrName] === tagId ? null : tagId,
+      [attrName]: tagId === 0 ? null : tagId,
     }))
-  }
-
-  const toggleNoAttrTag = (tagId: number) => {
-    setSelectedNoAttr((prev) => {
-      const next = new Set(prev)
-      next.has(tagId) ? next.delete(tagId) : next.add(tagId)
-      return next
-    })
-  }
-
-  const addNewTag = async () => {
-    const name = newTag.trim()
-    if (!name || !form.gameId) return
-    try {
-      const res = await createTag(name, Number(form.gameId))
-      setAllTags((prev) => [...prev, res.data])
-      setNewTag('')
-    } catch {
-      setError('タグの作成に失敗しました（同名のタグが既に存在する可能性があります）')
-    }
   }
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,10 +108,7 @@ export default function ItemFormPage() {
   }
 
   const collectSelectedTagNames = () => {
-    const ids: number[] = [
-      ...Object.values(selectedByAttr).filter((v): v is number => v !== null),
-      ...Array.from(selectedNoAttr),
-    ]
+    const ids = Object.values(selectedByAttr).filter((v): v is number => v !== null)
     return ids.map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean) as string[]
   }
 
@@ -174,12 +141,12 @@ export default function ItemFormPage() {
     }
   }
 
-  // タグを属性ごとにグループ化
+  // タグを属性ごとにグループ化（属性ありのみ）
   const tagsByAttr: { attrName: string; tags: Tag[] }[] = attributes.map((a) => ({
     attrName: a.name,
     tags: allTags.filter((t) => t.attribute === a.name),
   }))
-  const tagsWithNoAttr = allTags.filter((t) => !t.attribute)
+  const hasAnyAttrTags = tagsByAttr.some(({ tags }) => tags.length > 0)
 
   // 新規作成時は目録経由（name + gameId）が必須
   if (!isEdit && (!form.name || !form.gameId)) {
@@ -300,75 +267,27 @@ export default function ItemFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-2">タグ</label>
             {!form.gameId ? (
               <p className="text-gray-500 text-xs">ゲームを選択するとタグが表示されます</p>
-            ) : allTags.length === 0 ? (
-              <p className="text-gray-500 text-xs mb-2">このゲームにタグはありません</p>
+            ) : !hasAnyAttrTags ? (
+              <p className="text-gray-500 text-xs">このゲームに選択できるタグはありません</p>
             ) : (
-              <div className="space-y-3">
-                {/* 属性別グループ (各1件のみ選択) */}
+              <div className="space-y-2">
                 {tagsByAttr.map(({ attrName, tags }) => (
                   tags.length === 0 ? null : (
-                    <div key={attrName}>
-                      <p className="text-xs text-gray-400 mb-1.5">{attrName} <span className="text-zinc-600">（1つまで）</span></p>
-                      <div className="flex flex-wrap gap-2">
+                    <div key={attrName} className="flex items-center gap-3">
+                      <label className="text-xs text-gray-400 w-20 shrink-0">{attrName}</label>
+                      <select
+                        value={selectedByAttr[attrName] ?? ''}
+                        onChange={(e) => toggleAttrTag(attrName, Number(e.target.value))}
+                        className="flex-1 border border-gray-600 rounded px-2 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-800"
+                      >
+                        <option value="">未選択</option>
                         {tags.map((t) => (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => toggleAttrTag(attrName, t.id)}
-                            className={`px-3 py-1 rounded-full text-sm border transition ${
-                              selectedByAttr[attrName] === t.id
-                                ? 'bg-red-900 border-red-800 text-white'
-                                : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
-                            }`}
-                          >
-                            {t.name}
-                          </button>
+                          <option key={t.id} value={t.id}>{t.name}</option>
                         ))}
-                      </div>
+                      </select>
                     </div>
                   )
                 ))}
-                {/* 属性なしタグ (複数選択可) */}
-                {tagsWithNoAttr.length > 0 && (
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1.5">その他 <span className="text-zinc-600">（複数選択可）</span></p>
-                    <div className="flex flex-wrap gap-2">
-                      {tagsWithNoAttr.map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => toggleNoAttrTag(t.id)}
-                          className={`px-3 py-1 rounded-full text-sm border transition ${
-                            selectedNoAttr.has(t.id)
-                              ? 'bg-red-900 border-red-800 text-white'
-                              : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
-                          }`}
-                        >
-                          {t.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {admin && form.gameId && (
-              <div className="flex gap-2 mt-3">
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNewTag() } }}
-                  placeholder="新規タグを追加（属性なし）"
-                  className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
-                />
-                <button
-                  type="button"
-                  onClick={addNewTag}
-                  className="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1.5 rounded text-sm"
-                >
-                  追加
-                </button>
               </div>
             )}
           </div>

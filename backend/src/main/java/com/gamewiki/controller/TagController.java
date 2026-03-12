@@ -49,6 +49,13 @@ public class TagController {
         return ResponseEntity.ok(tagService.update(id, name, attribute));
     }
 
+    @PutMapping("/order")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateOrder(@RequestBody List<Long> ids) {
+        tagService.updateOrder(ids);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
