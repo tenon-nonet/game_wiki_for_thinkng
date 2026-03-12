@@ -26,19 +26,9 @@ public class TagService {
 
     public List<TagResponse> findByGameId(Long gameId, String type) {
         List<Tag> tags = (type != null && !type.isBlank())
-                ? tagRepository.findByGameIdAndTypeOrderBySortOrderAscNameAsc(gameId, type)
-                : tagRepository.findByGameIdOrderBySortOrderAscNameAsc(gameId);
+                ? tagRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type)
+                : tagRepository.findByGameIdOrderByNameAsc(gameId);
         return tags.stream().map(this::toResponse).toList();
-    }
-
-    @Transactional
-    public void updateOrder(List<Long> ids) {
-        for (int i = 0; i < ids.size(); i++) {
-            Tag tag = tagRepository.findById(ids.get(i))
-                    .orElseThrow(() -> new IllegalArgumentException("Tag not found"));
-            tag.setSortOrder(i);
-            tagRepository.save(tag);
-        }
     }
 
     public TagResponse create(String name, Long gameId, String type, String attribute) {
