@@ -5,6 +5,7 @@ import { isLoggedIn, isAdmin } from '../auth'
 import type { Game, Item, Boss, Npc, CatalogEntry } from '../types'
 
 type TabType = 'ITEM' | 'BOSS' | 'NPC'
+type EntryStatus = 'REGISTERED' | 'IN_PROGRESS' | 'UNREGISTERED'
 
 const TAB_CONFIG: { key: TabType; label: string }[] = [
   { key: 'ITEM', label: 'アイテム' },
@@ -68,6 +69,13 @@ export default function CatalogPage() {
     setKeyword('')
   }, [selectedGameId])
 
+  const loadWikiEntries = (type?: TabType) => {
+    const gid = selectedGameId > 0 ? selectedGameId : undefined
+    if (!type || type === 'ITEM') getItems(gid).then((r) => setItems(r.data))
+    if (!type || type === 'BOSS') getBosses(gid).then((r) => setBosses(r.data))
+    if (!type || type === 'NPC') getNpcs(gid).then((r) => setNpcs(r.data))
+  }
+
   const loadCatalog = () => {
     const gid = selectedGameId > 0 ? selectedGameId : undefined
     getCatalogEntries(gid).then((r) => setCatalogEntries(r.data))
@@ -93,13 +101,16 @@ export default function CatalogPage() {
     return findWikiNpc(name)
   }
 
-  const isItemRegistered = (item: Item | undefined) =>
-    !!item && !!item.imagePath && !!item.description?.trim()
-
-  const isRegistered = (entry: CatalogEntry, tab: TabType) => {
+  const getEntryStatus = (entry: CatalogEntry, tab: TabType): EntryStatus => {
     const wiki = findWiki(entry.name, tab)
-    if (tab === 'ITEM') return isItemRegistered(wiki as Item | undefined)
-    return !!wiki
+    if (!wiki) return 'UNREGISTERED'
+
+    const hasImage = !!wiki.imagePath
+    const hasDescription = !!wiki.description?.trim()
+    const hasTags = !!wiki.tags?.length
+    if (hasImage && hasDescription) return 'REGISTERED'
+    if (!hasImage && !hasDescription && !hasTags) return 'UNREGISTERED'
+    return 'IN_PROGRESS'
   }
 
   const wikiPath = (tab: TabType) => {
@@ -121,10 +132,10 @@ export default function CatalogPage() {
     return list.filter((e) => e.name.toLowerCase().includes(keyword.toLowerCase()))
   }
 
-  // 進捗計算（Wikiエントリありを「登録済み」とする）
+  // 進捗計算（画像・説明・タグがすべて入力済みを「登録済み」とする）
   const progress = (tab: TabType) => {
     const all = entriesForTab(tab)
-    const registered = all.filter((e) => isRegistered(e, tab)).length
+    const registered = all.filter((e) => getEntryStatus(e, tab) === 'REGISTERED').length
     return { registered, total: all.length }
   }
 
@@ -146,6 +157,7 @@ export default function CatalogPage() {
       })
       setNewName('')
       loadCatalog()
+      loadWikiEntries(activeTab)
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: string } } }
       setAddError(err?.response?.data?.error ?? '追加に失敗しました')
@@ -181,6 +193,7 @@ export default function CatalogPage() {
       setBulkResult(res.data)
       setBulkText('')
       loadCatalog()
+      loadWikiEntries(activeTab)
     } catch {
       alert('一括登録に失敗しました')
     } finally {
@@ -277,15 +290,12 @@ export default function CatalogPage() {
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
     const wiki = findWiki(entry.name, tab)
-    const done = isRegistered(entry, tab)
+    const status = getEntryStatus(entry, tab)
     const hasImage = !!wiki?.imagePath
     const borderColor = 'border-zinc-700 hover:border-red-800'
-    const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
-    const editPath = wiki ? `/${wikiPath(tab)}/${wiki.id}/edit?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
     const detailPath = wiki ? `/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
     const newPath = `${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`
-    const formPath = wiki ? editPath : newPath
-    const cardPath = wiki && done ? detailPath : isLoggedIn() ? formPath : ''
+    const cardPath = wiki ? detailPath : isLoggedIn() ? newPath : ''
     return (
       <div
         key={entry.id}
@@ -310,17 +320,14 @@ export default function CatalogPage() {
             <span className="text-xs leading-tight break-all text-gray-100">
               {entry.name}
             </span>
-            <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
           </div>
           <div className="flex items-center gap-2">
-            {wiki && done ? (
-              <span className="text-xs text-green-400">登録済</span>
-            ) : wiki && tab === 'ITEM' && isLoggedIn() ? (
-              <span className="text-xs text-amber-400">続きを入力</span>
-            ) : isLoggedIn() ? (
-              <span className="text-xs text-zinc-500">未登録</span>
+            {status === 'REGISTERED' ? (
+              <span className="text-xs text-green-400">図録登録</span>
+            ) : status === 'IN_PROGRESS' ? (
+              <span className="text-xs text-amber-400">情報不足</span>
             ) : (
-              <span className="text-xs text-zinc-600">未登録</span>
+              <span className="text-xs text-zinc-500">情報なし</span>
             )}
             {isAdmin() && (
               <button
@@ -432,7 +439,7 @@ export default function CatalogPage() {
       {/* 進捗バー */}
       <div className="mb-5 w-full">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>登録済み {registered} / {total}</span>
+          <span>図録登録済み {registered} / {total}</span>
           <span>{pct}%</span>
         </div>
         <div className="w-full bg-zinc-800 rounded-full h-1.5">

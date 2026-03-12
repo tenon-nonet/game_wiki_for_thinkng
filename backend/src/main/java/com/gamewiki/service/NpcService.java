@@ -2,6 +2,7 @@ package com.gamewiki.service;
 
 import com.gamewiki.dto.NpcRequest;
 import com.gamewiki.dto.NpcResponse;
+import com.gamewiki.entity.CatalogEntry;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Npc;
 import com.gamewiki.entity.NpcDialogue;
@@ -10,6 +11,7 @@ import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
+import com.gamewiki.util.NameNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,9 +69,10 @@ public class NpcService {
     }
 
     public NpcResponse create(NpcRequest request, MultipartFile image) {
-        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "NPC", request.getGameId())) {
+        if (!existsCatalogEntry(request.getName(), request.getGameId(), "NPC")) {
             throw new IllegalArgumentException("目録に登録されていないNPCは作成できません。先に目録へ登録してください。");
         }
+        ensureNoDuplicateNpc(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -90,6 +93,7 @@ public class NpcService {
 
     public NpcResponse update(Long id, NpcRequest request, MultipartFile image) {
         Npc npc = getNpc(id);
+        ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -154,5 +158,25 @@ public class NpcService {
         r.setCreatedAt(npc.getCreatedAt());
         r.setUpdatedAt(npc.getUpdatedAt());
         return r;
+    }
+
+    private boolean existsCatalogEntry(String name, Long gameId, String type) {
+        String target = NameNormalizer.normalize(name);
+        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+    }
+
+    private void ensureNoDuplicateNpc(String name, Long gameId, Long selfId) {
+        String target = NameNormalizer.normalize(name);
+        boolean duplicated = npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
+                .filter(npc -> selfId == null || !npc.getId().equals(selfId))
+                .map(Npc::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+        if (duplicated) {
+            throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 }

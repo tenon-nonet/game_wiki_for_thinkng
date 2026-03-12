@@ -5,10 +5,12 @@ import com.gamewiki.dto.ItemResponse;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Item;
 import com.gamewiki.entity.Tag;
+import com.gamewiki.entity.CatalogEntry;
 import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
+import com.gamewiki.util.NameNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,9 +69,10 @@ public class ItemService {
     }
 
     public ItemResponse create(ItemRequest request, MultipartFile image) {
-        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "ITEM", request.getGameId())) {
+        if (!existsCatalogEntry(request.getName(), request.getGameId(), "ITEM")) {
             throw new IllegalArgumentException("目録に登録されていないアイテムは作成できません。先に目録へ登録してください。");
         }
+        ensureNoDuplicateItem(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -90,6 +93,7 @@ public class ItemService {
 
     public ItemResponse update(Long id, ItemRequest request, MultipartFile image) {
         Item item = getItem(id);
+        ensureNoDuplicateItem(request.getName(), request.getGameId(), id);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -140,5 +144,25 @@ public class ItemService {
         r.setCreatedAt(item.getCreatedAt());
         r.setUpdatedAt(item.getUpdatedAt());
         return r;
+    }
+
+    private boolean existsCatalogEntry(String name, Long gameId, String type) {
+        String target = NameNormalizer.normalize(name);
+        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+    }
+
+    private void ensureNoDuplicateItem(String name, Long gameId, Long selfId) {
+        String target = NameNormalizer.normalize(name);
+        boolean duplicated = itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
+                .filter(item -> selfId == null || !item.getId().equals(selfId))
+                .map(Item::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+        if (duplicated) {
+            throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 }
