@@ -206,37 +206,39 @@ export default function HomePage() {
                         )}
                       </div>
                       {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-4 space-y-2">
                         <Link
                           to={`/catalog?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                          className="block w-full bg-red-900 hover:bg-red-800 text-white text-sm font-medium px-4 py-2 rounded-md text-center transition"
                         >
-                          目録 →
+                          目録を見る
                         </Link>
-                        <Link
-                          to={`/items?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          アイテム図録 →
-                        </Link>
-                        <Link
-                          to={`/bosses?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          ボス図録 →
-                        </Link>
-                        <Link
-                          to={`/npcs?gameId=${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          NPC図録 →
-                        </Link>
-                        <Link
-                          to={`/games/${game.id}`}
-                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
-                        >
-                          ゲーム詳細 →
-                        </Link>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            to={`/items?gameId=${game.id}`}
+                            className="inline-block border border-white/30 hover:border-white/60 text-gray-200 hover:text-white bg-transparent text-xs px-3 py-2 rounded-md text-center transition"
+                          >
+                            アイテム図録
+                          </Link>
+                          <Link
+                            to={`/bosses?gameId=${game.id}`}
+                            className="inline-block border border-white/30 hover:border-white/60 text-gray-200 hover:text-white bg-transparent text-xs px-3 py-2 rounded-md text-center transition"
+                          >
+                            ボス図録
+                          </Link>
+                          <Link
+                            to={`/npcs?gameId=${game.id}`}
+                            className="inline-block border border-white/30 hover:border-white/60 text-gray-200 hover:text-white bg-transparent text-xs px-3 py-2 rounded-md text-center transition"
+                          >
+                            NPC図録
+                          </Link>
+                          <Link
+                            to={`/games/${game.id}`}
+                            className="inline-block border border-white/30 hover:border-white/60 text-gray-200 hover:text-white bg-transparent text-xs px-3 py-2 rounded-md text-center transition"
+                          >
+                            ゲーム詳細
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </>
