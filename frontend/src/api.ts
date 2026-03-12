@@ -30,6 +30,7 @@ export interface GameFormData {
   releaseDates?: string
   awards?: string
   staff?: string
+  categories?: string[]
 }
 
 export const createGame = (form: GameFormData, image?: File | null) => {

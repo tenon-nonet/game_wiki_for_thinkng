@@ -13,6 +13,7 @@ export interface Game {
   releaseDates: string | null
   awards: string | null
   staff: string | null
+  categories: string[] | null
   createdAt: string
   updatedAt: string
 }

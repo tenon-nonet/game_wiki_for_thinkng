@@ -12,8 +12,6 @@ const TAB_CONFIG: { key: TabType; label: string }[] = [
   { key: 'NPC', label: 'NPC' },
 ]
 
-const ITEM_CATEGORIES = ['武器', '防具', '消費アイテム', '素材', 'タリスマン', 'その他']
-
 const VALID_TABS: TabType[] = ['ITEM', 'BOSS', 'NPC']
 
 export default function CatalogPage() {
@@ -179,12 +177,14 @@ export default function CatalogPage() {
   const { registered, total } = progress(activeTab)
   const pct = total === 0 ? 0 : Math.round((registered / total) * 100)
   const isAllGames = selectedGameId === 0
+  const selectedGame = games.find((g) => g.id === selectedGameId) ?? null
+  const gameCategories: string[] = selectedGame?.categories ?? []
 
   // 特定ゲーム選択時: ITEMタブはカテゴリ別グループ化
   const groupedItemEntries = (() => {
     if (activeTab !== 'ITEM' || isAllGames) return null
     const groups: { label: string; entries: CatalogEntry[] }[] = []
-    const categoryOrder = [...ITEM_CATEGORIES, '未分類']
+    const categoryOrder = [...gameCategories, '未分類']
     const map = new Map<string, CatalogEntry[]>()
     for (const entry of currentEntries) {
       const key = entry.category || '未分類'
@@ -240,7 +240,7 @@ export default function CatalogPage() {
             {wiki ? (
               <Link to={`/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
             ) : isLoggedIn() ? (
-              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
+              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
             ) : (
               <span className="text-xs text-zinc-600">未登録</span>
             )}
@@ -333,7 +333,7 @@ export default function CatalogPage() {
                 className="border border-gray-600 rounded px-2 py-1.5 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-800 text-xs shrink-0"
               >
                 <option value="">カテゴリ</option>
-                {ITEM_CATEGORIES.map((c) => (
+                {gameCategories.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -376,7 +376,7 @@ export default function CatalogPage() {
                         className="flex-1 border border-gray-600 rounded px-2 py-1 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-800 text-xs"
                       >
                         <option value="">未分類</option>
-                        {ITEM_CATEGORIES.map((c) => (
+                        {gameCategories.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>

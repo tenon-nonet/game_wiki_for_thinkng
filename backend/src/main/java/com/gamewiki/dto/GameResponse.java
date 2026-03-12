@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,6 +17,7 @@ public class GameResponse {
     private String releaseDates;
     private String awards;
     private String staff;
+    private List<String> categories;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
