@@ -188,7 +188,7 @@ export default function HomePage() {
                   <>
                     <Link to={`/games/${game.id}`} className="block overflow-hidden">
                       {game.imagePath ? (
-                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-zinc-900 transition-transform duration-500 ease-out group-hover:scale-125" />
+                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-zinc-900 transition-all duration-300 ease-out group-hover:opacity-75 group-hover:blur-[2px]" />
                       ) : (
                         <div className="w-full h-64 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
                       )}
