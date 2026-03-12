@@ -199,18 +199,48 @@ export default function CatalogPage() {
   const groupedItemEntries = (() => {
     if (activeTab !== 'ITEM' || isAllGames) return null
     const groups: { label: string; entries: CatalogEntry[] }[] = []
-    const categoryOrder = [...gameCategories, '未分類']
     const map = new Map<string, CatalogEntry[]>()
     for (const entry of currentEntries) {
       const key = entry.category || '未分類'
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(entry)
     }
+    const categoryOrder = [...gameCategories, '未分類']
     for (const cat of categoryOrder) {
       const entries = map.get(cat)
       if (entries && entries.length > 0) groups.push({ label: cat, entries })
     }
+    for (const [cat, entries] of map.entries()) {
+      if (!categoryOrder.includes(cat)) groups.push({ label: cat, entries })
+    }
     return groups
+  })()
+
+  // すべてのゲーム + ITEMタブ: ゲームごとにカテゴリ表示
+  const groupedItemByGameAndCategory = (() => {
+    if (!isAllGames || activeTab !== 'ITEM') return null
+    const gameMap = new Map<string, Map<string, CatalogEntry[]>>()
+    for (const entry of currentEntries) {
+      const gameName = entry.gameName
+      const category = entry.category || '未分類'
+      if (!gameMap.has(gameName)) gameMap.set(gameName, new Map())
+      const categoryMap = gameMap.get(gameName)!
+      if (!categoryMap.has(category)) categoryMap.set(category, [])
+      categoryMap.get(category)!.push(entry)
+    }
+    return Array.from(gameMap.entries()).map(([gameName, categoryMap]) => {
+      const game = games.find((g) => g.name === gameName)
+      const orderedCategories = game?.categories ? [...game.categories, '未分類'] : ['未分類']
+      const categories: { label: string; entries: CatalogEntry[] }[] = []
+      for (const label of orderedCategories) {
+        const entries = categoryMap.get(label)
+        if (entries && entries.length > 0) categories.push({ label, entries })
+      }
+      for (const [label, entries] of categoryMap.entries()) {
+        if (!orderedCategories.includes(label)) categories.push({ label, entries })
+      }
+      return { gameName, categories }
+    })
   })()
 
   // すべてのゲーム選択時: ゲーム名でグループ化
@@ -448,27 +478,36 @@ export default function CatalogPage() {
       )}
 
       {/* エントリ一覧 */}
-      {isAllGames && groupedByGame ? (
-        // すべてのゲーム: ゲーム名でグループ化
+      {isAllGames && activeTab === 'ITEM' && groupedItemByGameAndCategory ? (
+        // すべてのゲーム + ITEMタブ: ゲームごとにカテゴリ別グループ化
         <div className="space-y-8">
-          {groupedByGame.length === 0 ? (
+          {groupedItemByGameAndCategory.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">目録にエントリがありません</p>
           ) : (
-            groupedByGame.map(({ gameName, entries }) => (
+            groupedItemByGameAndCategory.map(({ gameName, categories }) => (
               <div key={gameName}>
                 <h2 className="text-sm font-semibold text-gray-300 mb-3 px-1 border-b border-zinc-700 pb-1">
                   {gameName}
-                  <span className="ml-2 text-zinc-500 font-normal text-xs">{entries.length}件</span>
                 </h2>
-                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
-                  {entries.map((e) => renderCard(e, activeTab))}
+                <div className="space-y-4">
+                  {categories.map((category) => (
+                    <div key={category.label}>
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">
+                        {category.label}
+                        <span className="ml-2 text-zinc-600 font-normal normal-case">{category.entries.length}件</span>
+                      </h3>
+                      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
+                        {category.entries.map((e) => renderCard(e, 'ITEM'))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))
           )}
         </div>
       ) : activeTab === 'ITEM' && groupedItemEntries ? (
-        // 特定ゲーム・ITEMタブ: カテゴリ別グループ化
+        // 特定ゲーム + ITEMタブ: カテゴリ別グループ化
         <div className="space-y-6">
           {groupedItemEntries.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
@@ -483,6 +522,25 @@ export default function CatalogPage() {
                 </h2>
                 <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
                   {group.entries.map((e) => renderCard(e, 'ITEM'))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : isAllGames && groupedByGame ? (
+        // すべてのゲーム（BOSS/NPC）: ゲーム名でグループ化
+        <div className="space-y-8">
+          {groupedByGame.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">目録にエントリがありません</p>
+          ) : (
+            groupedByGame.map(({ gameName, entries }) => (
+              <div key={gameName}>
+                <h2 className="text-sm font-semibold text-gray-300 mb-3 px-1 border-b border-zinc-700 pb-1">
+                  {gameName}
+                  <span className="ml-2 text-zinc-500 font-normal text-xs">{entries.length}件</span>
+                </h2>
+                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-1.5">
+                  {entries.map((e) => renderCard(e, activeTab))}
                 </div>
               </div>
             ))
