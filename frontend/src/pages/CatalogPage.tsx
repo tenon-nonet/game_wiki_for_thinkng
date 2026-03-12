@@ -258,7 +258,13 @@ export default function CatalogPage() {
               <span className="text-xs text-zinc-600">未登録</span>
             )}
             {isAdmin() && (
-              <button onClick={() => handleDelete(entry.id)} className="text-xs text-zinc-600 hover:text-red-400 transition ml-auto" title="削除">×</button>
+              <button
+                onClick={() => handleDelete(entry.id)}
+                className="text-xs text-red-400/90 hover:text-red-300 border border-red-500/40 hover:border-red-400/70 rounded px-1.5 py-0.5 transition ml-auto"
+                title="削除"
+              >
+                削除
+              </button>
             )}
           </div>
         </div>
