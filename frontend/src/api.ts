@@ -139,9 +139,6 @@ export const deleteTagAttribute = (id: number) =>
 export const updateTagAttributeOrder = (ids: number[]) =>
   api.put('/tag-attributes/order', ids)
 
-export const updateTagOrder = (ids: number[]) =>
-  api.put('/tags/order', ids)
-
 // Comments
 export const getComments = (itemId: number) =>
   api.get<Comment[]>(`/items/${itemId}/comments`)

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getNpc, deleteNpc, getItems } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
+import { parseDialogueLines } from '../dialogues'
 import type { Npc, Item } from '../types'
 
 export default function NpcDetailPage() {
@@ -14,6 +15,7 @@ export default function NpcDetailPage() {
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
   const admin = isAdmin()
+  const dialogues = parseDialogueLines(npc?.dialogues)
 
   useEffect(() => {
     const npcId = Number(id)
@@ -95,11 +97,11 @@ export default function NpcDetailPage() {
             <div className="mt-6">
               <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">セリフ</h2>
               <div className="space-y-2">
-                {npc.dialogues.map((text, i) => (
+                {dialogues.filter((entry) => entry.text).map((entry, i) => (
                   <div key={i} className="flex gap-3 items-start">
-                    <span className="text-xs text-gray-500 mt-1 w-12 shrink-0">#{i + 1}</span>
+                    <span className="text-xs text-gray-500 mt-1 w-20 shrink-0">{entry.label}</span>
                     <p className="text-gray-200 text-sm whitespace-pre-wrap bg-zinc-700 rounded px-4 py-2 flex-1">
-                      {text}
+                      {entry.text}
                     </p>
                   </div>
                 ))}

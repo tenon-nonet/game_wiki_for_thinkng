@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getGames, getGame, getTags, createTag, updateTag, deleteTag, getTagAttributes, createTagAttribute, deleteTagAttribute, updateGameCategories, updateTagAttributeOrder, updateTagOrder } from '../api'
+import { getGames, getGame, getTags, createTag, updateTag, deleteTag, getTagAttributes, createTagAttribute, deleteTagAttribute, updateGameCategories, updateTagAttributeOrder } from '../api'
 import type { Game, Tag, TagAttribute } from '../types'
 
 function moveItem<T>(arr: T[], index: number, dir: -1 | 1): T[] {
@@ -24,6 +24,7 @@ export default function TagsAdminPage() {
   const [editAttribute, setEditAttribute] = useState('')
   const [newAttrName, setNewAttrName] = useState('')
   const [newCategoryName, setNewCategoryName] = useState('')
+  const [filterAttr, setFilterAttr] = useState<string>('ALL')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -43,6 +44,13 @@ export default function TagsAdminPage() {
     setEditingId(null)
     setError('')
   }, [selectedGameId, tagType])
+
+  useEffect(() => {
+    if (filterAttr === 'ALL') return
+    if (!attributes.some((attr) => attr.name === filterAttr)) {
+      setFilterAttr('ALL')
+    }
+  }, [attributes, filterAttr])
 
   const loadTags = () => getTags(Number(selectedGameId), tagType).then((r) => setTags(r.data))
   const loadAttributes = () => getTagAttributes(Number(selectedGameId)).then((r) => setAttributes(r.data))
@@ -92,12 +100,6 @@ export default function TagsAdminPage() {
     } catch {
       setError('タグの削除に失敗しました')
     }
-  }
-
-  const handleMoveTag = async (index: number, dir: -1 | 1) => {
-    const newTags = moveItem(tags, index, dir)
-    setTags(newTags)
-    await updateTagOrder(newTags.map((t) => t.id))
   }
 
   const handleCreateAttr = async (e: React.FormEvent) => {
@@ -279,7 +281,7 @@ export default function TagsAdminPage() {
             {(['ITEM', 'BOSS', 'NPC'] as const).map((t) => (
               <button
                 key={t}
-                onClick={() => setTagType(t)}
+                onClick={() => { setTagType(t); setFilterAttr('ALL') }}
                 className={`px-5 py-2 rounded text-sm font-medium transition ${tagType === t ? 'bg-red-900 text-white' : 'text-gray-400 hover:text-gray-200'}`}
               >
                 {t === 'ITEM' ? 'アイテムタグ' : t === 'BOSS' ? 'ボスタグ' : 'NPCタグ'}
@@ -288,6 +290,27 @@ export default function TagsAdminPage() {
           </div>
 
           {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
+
+          {/* 属性フィルター */}
+          {attributes.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-4">
+              <button
+                onClick={() => setFilterAttr('ALL')}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${filterAttr === 'ALL' ? 'bg-zinc-500 text-white' : 'bg-zinc-800 text-gray-400 hover:text-gray-200'}`}
+              >
+                すべて
+              </button>
+              {attributes.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => setFilterAttr(a.name)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${filterAttr === a.name ? 'bg-zinc-500 text-white' : 'bg-zinc-800 text-gray-400 hover:text-gray-200'}`}
+                >
+                  {a.name}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* タグ追加フォーム */}
           <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg p-4 mb-6 flex gap-2 items-center">
@@ -317,47 +340,52 @@ export default function TagsAdminPage() {
           </form>
 
           {/* タグ一覧 */}
-          {tags.length === 0 ? (
-            <p className="text-gray-500 text-sm">このゲームに{tagType === 'BOSS' ? 'ボス' : tagType === 'NPC' ? 'NPC' : 'アイテム'}タグはありません</p>
-          ) : (
-            <ul className="space-y-2">
-              {tags.map((tag, i) => (
-                <li key={tag.id} className="bg-zinc-800 rounded-lg px-4 py-3 flex items-center gap-3">
-                  {editingId === tag.id ? (
-                    <form onSubmit={handleUpdate} className="flex gap-2 flex-1 items-center">
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        required
-                        className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-                      />
-                      <select
-                        value={editAttribute}
-                        onChange={(e) => setEditAttribute(e.target.value)}
-                        className="border border-gray-600 rounded px-2 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-                      >
-                        <option value="">属性を選択</option>
-                        {attributes.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
-                      </select>
-                      <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded text-sm">保存</button>
-                      <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded text-sm">キャンセル</button>
-                    </form>
-                  ) : (
-                    <>
-                      <OrderButtons index={i} length={tags.length} onMove={(dir) => handleMoveTag(i, dir)} />
-                      <span className="flex-1 text-gray-100 text-sm">{tag.name}</span>
-                      {tag.attribute && (
-                        <span className="text-xs text-zinc-400 bg-zinc-700 rounded-full px-2 py-0.5">{tag.attribute}</span>
+          {(() => {
+            const isFiltered = filterAttr !== 'ALL'
+            const filteredTags = isFiltered ? tags.filter((t) => t.attribute === filterAttr) : tags
+            if (tags.length === 0) return <p className="text-gray-500 text-sm">このゲームに{tagType === 'BOSS' ? 'ボス' : tagType === 'NPC' ? 'NPC' : 'アイテム'}タグはありません</p>
+            if (filteredTags.length === 0) return <p className="text-gray-500 text-sm">該当するタグがありません</p>
+            return (
+              <ul className="space-y-2">
+                {filteredTags.map((tag) => {
+                  return (
+                    <li key={tag.id} className="bg-zinc-800 rounded-lg px-4 py-3 flex items-center gap-3">
+                      {editingId === tag.id ? (
+                        <form onSubmit={handleUpdate} className="flex gap-2 flex-1 items-center">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            required
+                            className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+                          />
+                          <select
+                            value={editAttribute}
+                            onChange={(e) => setEditAttribute(e.target.value)}
+                            className="border border-gray-600 rounded px-2 py-1.5 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+                          >
+                            <option value="">属性を選択</option>
+                            {attributes.map((a) => <option key={a.id} value={a.name}>{a.name}</option>)}
+                          </select>
+                          <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded text-sm">保存</button>
+                          <button type="button" onClick={() => setEditingId(null)} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded text-sm">キャンセル</button>
+                        </form>
+                      ) : (
+                        <>
+                          <span className="flex-1 text-gray-100 text-sm">{tag.name}</span>
+                          {tag.attribute && (
+                            <span className="text-xs text-zinc-400 bg-zinc-700 rounded-full px-2 py-0.5">{tag.attribute}</span>
+                          )}
+                          <button onClick={() => startEdit(tag)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
+                          <button onClick={() => handleDelete(tag.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
+                        </>
                       )}
-                      <button onClick={() => startEdit(tag)} className="text-gray-100 hover:text-gray-300 text-sm">編集</button>
-                      <button onClick={() => handleDelete(tag.id)} className="text-gray-100 hover:text-gray-300 text-sm">削除</button>
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+                    </li>
+                  )
+                })}
+              </ul>
+            )
+          })()}
         </>
       )}
     </div>

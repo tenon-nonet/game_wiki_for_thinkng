@@ -92,6 +92,15 @@ export default function CatalogPage() {
     return findWikiNpc(name)
   }
 
+  const isItemRegistered = (item: Item | undefined) =>
+    !!item && !!item.imagePath && !!item.description?.trim()
+
+  const isRegistered = (entry: CatalogEntry, tab: TabType) => {
+    const wiki = findWiki(entry.name, tab)
+    if (tab === 'ITEM') return isItemRegistered(wiki as Item | undefined)
+    return !!wiki
+  }
+
   const wikiPath = (tab: TabType) => {
     if (tab === 'ITEM') return 'items'
     if (tab === 'BOSS') return 'bosses'
@@ -114,7 +123,7 @@ export default function CatalogPage() {
   // 進捗計算（Wikiエントリありを「登録済み」とする）
   const progress = (tab: TabType) => {
     const all = entriesForTab(tab)
-    const registered = all.filter((e) => !!findWiki(e.name, tab)).length
+    const registered = all.filter((e) => isRegistered(e, tab)).length
     return { registered, total: all.length }
   }
 
@@ -212,10 +221,12 @@ export default function CatalogPage() {
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
     const wiki = findWiki(entry.name, tab)
-    const done = !!wiki
-    const hasImage = done && !!wiki.imagePath
+    const done = isRegistered(entry, tab)
+    const hasImage = !!wiki?.imagePath
     const borderColor = done ? 'border-zinc-700 hover:border-red-800' : 'border-zinc-800'
     const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
+    const editPath = wiki ? `/${wikiPath(tab)}/${wiki.id}/edit?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
+    const detailPath = wiki ? `/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
     return (
       <div key={entry.id} className={`relative flex flex-col gap-1 rounded border bg-zinc-900 transition ${borderColor} group overflow-hidden`}>
         {hasImage ? (
@@ -237,8 +248,10 @@ export default function CatalogPage() {
             <span className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${dotColor}`} title={done ? '登録済' : '未登録'} />
           </div>
           <div className="flex items-center gap-2">
-            {wiki ? (
-              <Link to={`/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+            {wiki && done ? (
+              <Link to={detailPath} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+            ) : wiki && tab === 'ITEM' && isLoggedIn() ? (
+              <Link to={editPath} className="text-xs text-amber-400 hover:text-amber-300 hover:underline">続きを入力</Link>
             ) : isLoggedIn() ? (
               <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
             ) : (

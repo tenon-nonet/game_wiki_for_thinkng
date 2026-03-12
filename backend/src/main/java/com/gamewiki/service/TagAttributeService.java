@@ -42,6 +42,7 @@ public class TagAttributeService {
         TagAttribute attr = new TagAttribute();
         attr.setName(name);
         attr.setGame(game);
+        attr.setSortOrder(tagAttributeRepository.countByGameId(gameId));
         return toResponse(tagAttributeRepository.save(attr));
     }
 
