@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getGames, getItems, getBosses, getNpcs, getCatalogEntries, createCatalogEntry, deleteCatalogEntry, bulkCreateCatalogEntries } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
 import type { Game, Item, Boss, Npc, CatalogEntry } from '../types'
@@ -15,6 +15,7 @@ const TAB_CONFIG: { key: TabType; label: string }[] = [
 const VALID_TABS: TabType[] = ['ITEM', 'BOSS', 'NPC']
 
 export default function CatalogPage() {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [games, setGames] = useState<Game[]>([])
   const [selectedGameId, setSelectedGameId] = useState<number>(Number(searchParams.get('gameId')) || 0)
@@ -223,12 +224,21 @@ export default function CatalogPage() {
     const wiki = findWiki(entry.name, tab)
     const done = isRegistered(entry, tab)
     const hasImage = !!wiki?.imagePath
-    const borderColor = done ? 'border-zinc-700 hover:border-red-800' : 'border-zinc-800'
+    const borderColor = 'border-zinc-700 hover:border-red-800'
     const dotColor = done ? 'bg-green-500' : 'bg-zinc-600'
     const editPath = wiki ? `/${wikiPath(tab)}/${wiki.id}/edit?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
     const detailPath = wiki ? `/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}` : ''
+    const newPath = `${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`
+    const formPath = wiki ? editPath : newPath
+    const cardPath = wiki && done ? detailPath : isLoggedIn() ? formPath : ''
     return (
-      <div key={entry.id} className={`relative flex flex-col gap-1 rounded border bg-zinc-900 transition ${borderColor} group overflow-hidden`}>
+      <div
+        key={entry.id}
+        className={`relative flex flex-col gap-1 rounded border bg-zinc-900 transition ${borderColor} group overflow-hidden ${cardPath ? 'cursor-pointer' : ''}`}
+        onClick={() => {
+          if (cardPath) navigate(cardPath)
+        }}
+      >
         {hasImage ? (
           <img
             src={`/uploads/${wiki.imagePath}`}
@@ -249,17 +259,20 @@ export default function CatalogPage() {
           </div>
           <div className="flex items-center gap-2">
             {wiki && done ? (
-              <Link to={detailPath} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
+              <span className="text-xs text-green-400">登録済</span>
             ) : wiki && tab === 'ITEM' && isLoggedIn() ? (
-              <Link to={editPath} className="text-xs text-amber-400 hover:text-amber-300 hover:underline">続きを入力</Link>
+              <span className="text-xs text-amber-400">続きを入力</span>
             ) : isLoggedIn() ? (
-              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
+              <span className="text-xs text-zinc-500">未登録</span>
             ) : (
               <span className="text-xs text-zinc-600">未登録</span>
             )}
             {isAdmin() && (
               <button
-                onClick={() => handleDelete(entry.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(entry.id)
+                }}
                 className="text-xs text-red-400/90 hover:text-red-300 border border-red-500/40 hover:border-red-400/70 rounded px-1.5 py-0.5 transition ml-auto"
                 title="削除"
               >

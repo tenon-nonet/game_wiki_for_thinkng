@@ -208,22 +208,28 @@ export default function HomePage() {
                       {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Link
+                          to={`/catalog?gameId=${game.id}`}
+                          className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
+                        >
+                          目録 →
+                        </Link>
+                        <Link
                           to={`/items?gameId=${game.id}`}
                           className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
                         >
-                          アイテム一覧 →
+                          アイテム図録 →
                         </Link>
                         <Link
                           to={`/bosses?gameId=${game.id}`}
                           className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
                         >
-                          ボス一覧 →
+                          ボス図録 →
                         </Link>
                         <Link
                           to={`/npcs?gameId=${game.id}`}
                           className="inline-block border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition"
                         >
-                          NPC一覧 →
+                          NPC図録 →
                         </Link>
                         <Link
                           to={`/games/${game.id}`}
