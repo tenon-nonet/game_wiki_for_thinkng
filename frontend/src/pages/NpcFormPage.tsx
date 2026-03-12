@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getNpc, getGames, getTags, createTag, createNpc, updateNpc, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
+import { defaultDialogueLabel, parseDialogueLines, serializeDialogueEntries, type DialogueEntry } from '../dialogues'
 import type { Game, Tag } from '../types'
 
 export default function NpcFormPage() {
@@ -19,7 +20,9 @@ export default function NpcFormPage() {
     description: '',
     gameId: searchParams.get('gameId') ?? '',
   })
-  const [dialogues, setDialogues] = useState<string[]>([''])
+  const [dialogues, setDialogues] = useState<DialogueEntry[]>([
+    { label: defaultDialogueLabel(0), text: '' },
+  ])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
@@ -39,7 +42,7 @@ export default function NpcFormPage() {
           gameId: String(npc.gameId),
         })
         setExistingImage(npc.imagePath)
-        setDialogues(npc.dialogues?.length ? npc.dialogues : [''])
+        setDialogues(parseDialogueLines(npc.dialogues))
         getTags(npc.gameId, 'NPC').then((r2) => {
           setAllTags(r2.data)
           setSelectedTags(new Set(npc.tags.map((t) => t.id)))
@@ -90,10 +93,10 @@ export default function NpcFormPage() {
         const res = await analyzeImageText(file)
         const extracted = res.data.text.trim()
         if (extracted) {
-          setForm((prev) => (
-            prev.description.trim()
+          setDialogues((prev) => (
+            prev.some((entry) => entry.text.trim())
               ? prev
-              : { ...prev, description: extracted }
+              : [{ label: defaultDialogueLabel(0), text: extracted }]
           ))
         }
       } catch (err: any) {
@@ -115,7 +118,7 @@ export default function NpcFormPage() {
       description: form.description,
       gameId: Number(form.gameId),
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
-      dialogues: dialogues.filter((d) => d.trim() !== ''),
+      dialogues: serializeDialogueEntries(dialogues),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -234,17 +237,27 @@ export default function NpcFormPage() {
             <div className="space-y-2">
               {dialogues.map((d, i) => (
                 <div key={i} className="flex gap-2 items-start">
-                  <span className="text-gray-500 text-sm mt-2 w-16 shrink-0">セリフ {i + 1}</span>
-                  <textarea
-                    value={d}
+                  <input
+                    type="text"
+                    value={d.label}
                     onChange={(e) => {
                       const next = [...dialogues]
-                      next[i] = e.target.value
+                      next[i] = { ...next[i], label: e.target.value }
+                      setDialogues(next)
+                    }}
+                    className="w-24 shrink-0 border border-gray-600 rounded px-2 py-2 bg-zinc-700 text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-800"
+                    placeholder={defaultDialogueLabel(i)}
+                  />
+                  <textarea
+                    value={d.text}
+                    onChange={(e) => {
+                      const next = [...dialogues]
+                      next[i] = { ...next[i], text: e.target.value }
                       setDialogues(next)
                     }}
                     rows={2}
                     className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
-                    placeholder={`セリフ ${i + 1}`}
+                    placeholder={defaultDialogueLabel(i)}
                   />
                   {dialogues.length > 1 && (
                     <button
@@ -260,7 +273,7 @@ export default function NpcFormPage() {
             </div>
             <button
               type="button"
-              onClick={() => setDialogues([...dialogues, ''])}
+              onClick={() => setDialogues([...dialogues, { label: defaultDialogueLabel(dialogues.length), text: '' }])}
               className="mt-2 text-sm text-gray-400 hover:text-gray-200 border border-gray-600 rounded px-3 py-1 hover:border-gray-400 transition"
             >
               ＋ セリフを追加
