@@ -91,9 +91,15 @@ public class NpcService {
         return toResponse(npcRepository.save(npc));
     }
 
+    @Transactional
     public NpcResponse update(Long id, NpcRequest request, MultipartFile image) {
         Npc npc = getNpc(id);
+        Long oldGameId = npc.getGame().getId();
+        String oldName = npc.getName();
+        CatalogEntry catalogEntry = findCatalogEntryByNormalizedName(oldName, oldGameId, "NPC");
+
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
+        ensureNoDuplicateCatalogEntry(request.getName(), request.getGameId(), "NPC", catalogEntry != null ? catalogEntry.getId() : null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -110,7 +116,21 @@ public class NpcService {
             npc.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(npcRepository.save(npc));
+        Npc saved = npcRepository.save(npc);
+
+        if (catalogEntry == null) {
+            CatalogEntry newEntry = new CatalogEntry();
+            newEntry.setName(request.getName());
+            newEntry.setType("NPC");
+            newEntry.setGame(game);
+            catalogEntryRepository.save(newEntry);
+        } else {
+            catalogEntry.setName(request.getName());
+            catalogEntry.setGame(game);
+            catalogEntryRepository.save(catalogEntry);
+        }
+
+        return toResponse(saved);
     }
 
     public void delete(Long id) {
@@ -166,6 +186,26 @@ public class NpcService {
                 .map(CatalogEntry::getName)
                 .map(NameNormalizer::normalize)
                 .anyMatch(target::equals);
+    }
+
+    private CatalogEntry findCatalogEntryByNormalizedName(String name, Long gameId, String type) {
+        String target = NameNormalizer.normalize(name);
+        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .filter(e -> NameNormalizer.normalize(e.getName()).equals(target))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void ensureNoDuplicateCatalogEntry(String name, Long gameId, String type, Long excludeId) {
+        String target = NameNormalizer.normalize(name);
+        boolean duplicated = catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
+                .filter(entry -> excludeId == null || !entry.getId().equals(excludeId))
+                .map(CatalogEntry::getName)
+                .map(NameNormalizer::normalize)
+                .anyMatch(target::equals);
+        if (duplicated) {
+            throw new IllegalArgumentException("目録に同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 
     private void ensureNoDuplicateNpc(String name, Long gameId, Long selfId) {
