@@ -88,7 +88,11 @@ export default function BossFormPage() {
         const res = await analyzeImageText(file)
         const extracted = res.data.text.trim()
         if (extracted) {
-          setForm((prev) => ({ ...prev, description: extracted }))
+          setForm((prev) => (
+            prev.description.trim()
+              ? prev
+              : { ...prev, description: extracted }
+          ))
         }
       } catch (err: any) {
         const msg = err.response?.data?.error || err.message || '不明なエラー'
@@ -185,7 +189,7 @@ export default function BossFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                ※ 画像を選択するとテキストを自動抽出して説明欄に入力します
+                添付すると自動で文字を入力しますが、結構間違えます
               </span>
             </label>
             {(preview || existingImage) && (
