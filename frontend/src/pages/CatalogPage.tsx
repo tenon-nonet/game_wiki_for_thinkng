@@ -240,7 +240,7 @@ export default function CatalogPage() {
             {wiki ? (
               <Link to={`/${wikiPath(tab)}/${wiki.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`} className="text-xs text-green-400 hover:text-green-300 hover:underline">登録済</Link>
             ) : isLoggedIn() ? (
-              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${selectedGameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
+              <Link to={`${wikiNewPath(tab)}?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${tab === 'ITEM' && entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`} className="text-xs text-zinc-500 hover:text-gray-300 hover:underline">未登録</Link>
             ) : (
               <span className="text-xs text-zinc-600">未登録</span>
             )}

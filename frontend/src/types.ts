@@ -23,6 +23,13 @@ export interface Tag {
   name: string
   gameId: number
   type?: string
+  attribute?: string | null
+}
+
+export interface TagAttribute {
+  id: number
+  name: string
+  gameId: number
 }
 
 export interface Comment {

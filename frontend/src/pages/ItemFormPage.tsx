@@ -1,8 +1,8 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { getItem, getGames, getTags, createTag, createItem, updateItem, analyzeImageText } from '../api'
+import { getItem, getGames, getTags, getTagAttributes, createTag, createItem, updateItem, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
-import type { Game, Tag } from '../types'
+import type { Game, Tag, TagAttribute } from '../types'
 
 export default function ItemFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -13,19 +13,38 @@ export default function ItemFormPage() {
 
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
+  const [attributes, setAttributes] = useState<TagAttribute[]>([])
   const [form, setForm] = useState({
     name: searchParams.get('name') ?? '',
     description: '',
     gameId: searchParams.get('gameId') ?? '',
     category: searchParams.get('category') ?? '',
   })
-  const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
+  // 属性ごとに選択中タグID (max 1 per attribute)
+  const [selectedByAttr, setSelectedByAttr] = useState<Record<string, number | null>>({})
+  // 属性なしタグは Set で管理（複数選択可）
+  const [selectedNoAttr, setSelectedNoAttr] = useState<Set<number>>(new Set())
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [existingImage, setExistingImage] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
+
+  const initSelection = (tags: Tag[], attrs: TagAttribute[]) => {
+    const byAttr: Record<string, number | null> = {}
+    attrs.forEach((a) => { byAttr[a.name] = null })
+    const noAttr = new Set<number>()
+    tags.forEach((t) => {
+      if (t.attribute) {
+        byAttr[t.attribute] = t.id
+      } else {
+        noAttr.add(t.id)
+      }
+    })
+    setSelectedByAttr(byAttr)
+    setSelectedNoAttr(noAttr)
+  }
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
@@ -38,9 +57,15 @@ export default function ItemFormPage() {
           gameId: String(item.gameId),
           category: item.category || '',
         })
-        setSelectedTags(new Set(item.tags.map((t) => t.id)))
         setExistingImage(item.imagePath)
-        getTags(item.gameId).then((r2) => setAllTags(r2.data))
+        Promise.all([
+          getTags(item.gameId),
+          getTagAttributes(item.gameId),
+        ]).then(([tagsRes, attrsRes]) => {
+          setAllTags(tagsRes.data)
+          setAttributes(attrsRes.data)
+          initSelection(item.tags, attrsRes.data)
+        })
       })
     }
   }, [id])
@@ -48,15 +73,33 @@ export default function ItemFormPage() {
   useEffect(() => {
     if (form.gameId && !isEdit) {
       setAllTags([])
-      setSelectedTags(new Set())
-      getTags(Number(form.gameId)).then((r) => setAllTags(r.data))
+      setAttributes([])
+      setSelectedByAttr({})
+      setSelectedNoAttr(new Set())
+      Promise.all([
+        getTags(Number(form.gameId)),
+        getTagAttributes(Number(form.gameId)),
+      ]).then(([tagsRes, attrsRes]) => {
+        setAllTags(tagsRes.data)
+        setAttributes(attrsRes.data)
+        const byAttr: Record<string, number | null> = {}
+        attrsRes.data.forEach((a: TagAttribute) => { byAttr[a.name] = null })
+        setSelectedByAttr(byAttr)
+      })
     }
   }, [form.gameId])
 
-  const toggleTag = (id: number) => {
-    setSelectedTags((prev) => {
+  const toggleAttrTag = (attrName: string, tagId: number) => {
+    setSelectedByAttr((prev) => ({
+      ...prev,
+      [attrName]: prev[attrName] === tagId ? null : tagId,
+    }))
+  }
+
+  const toggleNoAttrTag = (tagId: number) => {
+    setSelectedNoAttr((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      next.has(tagId) ? next.delete(tagId) : next.add(tagId)
       return next
     })
   }
@@ -67,7 +110,6 @@ export default function ItemFormPage() {
     try {
       const res = await createTag(name, Number(form.gameId))
       setAllTags((prev) => [...prev, res.data])
-      setSelectedTags((prev) => new Set(prev).add(res.data.id))
       setNewTag('')
     } catch {
       setError('タグの作成に失敗しました（同名のタグが既に存在する可能性があります）')
@@ -86,13 +128,21 @@ export default function ItemFormPage() {
         if (extracted) {
           setForm((prev) => ({ ...prev, description: extracted }))
         }
-      } catch (err: any) {
-        const msg = err.response?.data?.error || err.message || '不明なエラー'
-        setError('画像解析に失敗しました: ' + msg)
+      } catch (err: unknown) {
+        const e = err as { response?: { data?: { error?: string } }; message?: string }
+        setError('画像解析に失敗しました: ' + (e.response?.data?.error || e.message || '不明なエラー'))
       } finally {
         setAnalyzing(false)
       }
     }
+  }
+
+  const collectSelectedTagNames = () => {
+    const ids: number[] = [
+      ...Object.values(selectedByAttr).filter((v): v is number => v !== null),
+      ...Array.from(selectedNoAttr),
+    ]
+    return ids.map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean) as string[]
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,7 +155,7 @@ export default function ItemFormPage() {
       description: form.description,
       gameId: Number(form.gameId),
       category: form.category || null,
-      tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
+      tags: collectSelectedTagNames(),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -118,10 +168,18 @@ export default function ItemFormPage() {
         const res = await createItem(data)
         navigate(`/items/${res.data.id}`)
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || '保存に失敗しました')
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } }
+      setError(e.response?.data?.error || '保存に失敗しました')
     }
   }
+
+  // タグを属性ごとにグループ化
+  const tagsByAttr: { attrName: string; tags: Tag[] }[] = attributes.map((a) => ({
+    attrName: a.name,
+    tags: allTags.filter((t) => t.attribute === a.name),
+  }))
+  const tagsWithNoAttr = allTags.filter((t) => !t.attribute)
 
   // 新規作成時は目録経由（name + gameId）が必須
   if (!isEdit && (!form.name || !form.gameId)) {
@@ -237,38 +295,71 @@ export default function ItemFormPage() {
             />
           </div>
 
+          {/* タグ選択 */}
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-2">タグ</label>
             {!form.gameId ? (
               <p className="text-gray-500 text-xs">ゲームを選択するとタグが表示されます</p>
-            ) : allTags.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {allTags.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => toggleTag(t.id)}
-                    className={`px-3 py-1 rounded-full text-sm border transition ${
-                      selectedTags.has(t.id)
-                        ? 'bg-red-900 border-red-800 text-white'
-                        : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
-                    }`}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              </div>
-            ) : (
+            ) : allTags.length === 0 ? (
               <p className="text-gray-500 text-xs mb-2">このゲームにタグはありません</p>
+            ) : (
+              <div className="space-y-3">
+                {/* 属性別グループ (各1件のみ選択) */}
+                {tagsByAttr.map(({ attrName, tags }) => (
+                  tags.length === 0 ? null : (
+                    <div key={attrName}>
+                      <p className="text-xs text-gray-400 mb-1.5">{attrName} <span className="text-zinc-600">（1つまで）</span></p>
+                      <div className="flex flex-wrap gap-2">
+                        {tags.map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => toggleAttrTag(attrName, t.id)}
+                            className={`px-3 py-1 rounded-full text-sm border transition ${
+                              selectedByAttr[attrName] === t.id
+                                ? 'bg-red-900 border-red-800 text-white'
+                                : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
+                            }`}
+                          >
+                            {t.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                ))}
+                {/* 属性なしタグ (複数選択可) */}
+                {tagsWithNoAttr.length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1.5">その他 <span className="text-zinc-600">（複数選択可）</span></p>
+                    <div className="flex flex-wrap gap-2">
+                      {tagsWithNoAttr.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => toggleNoAttrTag(t.id)}
+                          className={`px-3 py-1 rounded-full text-sm border transition ${
+                            selectedNoAttr.has(t.id)
+                              ? 'bg-red-900 border-red-800 text-white'
+                              : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
+                          }`}
+                        >
+                          {t.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
             {admin && form.gameId && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-3">
                 <input
                   type="text"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNewTag() } }}
-                  placeholder="新規タグを追加"
+                  placeholder="新規タグを追加（属性なし）"
                   className="flex-1 border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
                 />
                 <button
@@ -279,11 +370,6 @@ export default function ItemFormPage() {
                   追加
                 </button>
               </div>
-            )}
-            {selectedTags.size > 0 && (
-              <p className="text-xs text-gray-400 mt-2">
-                選択中: {Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean).join(', ')}
-              </p>
             )}
           </div>
 

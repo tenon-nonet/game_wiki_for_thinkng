@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, Comment } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -52,6 +52,9 @@ export const deleteGame = (id: number) =>
 
 export const updateGameOrder = (ids: number[]) =>
   api.put('/games/order', ids)
+
+export const updateGameCategories = (id: number, categories: string[]) =>
+  api.put<Game>(`/games/${id}/categories`, { categories })
 
 // Items
 export const getItems = (gameId?: number, tag?: string, keyword?: string) =>
@@ -114,14 +117,24 @@ export const updateNpcOrder = (ids: number[]) =>
 export const getTags = (gameId: number, type?: string) =>
   api.get<Tag[]>('/tags', { params: { gameId, ...(type ? { type } : {}) } })
 
-export const createTag = (name: string, gameId: number, type?: string) =>
-  api.post<Tag>('/tags', { name, gameId, ...(type ? { type } : {}) })
+export const createTag = (name: string, gameId: number, type?: string, attribute?: string) =>
+  api.post<Tag>('/tags', { name, gameId, ...(type ? { type } : {}), ...(attribute ? { attribute } : {}) })
 
-export const updateTag = (id: number, name: string) =>
-  api.put<Tag>(`/tags/${id}`, { name })
+export const updateTag = (id: number, name: string, attribute?: string) =>
+  api.put<Tag>(`/tags/${id}`, { name, ...(attribute !== undefined ? { attribute } : {}) })
 
 export const deleteTag = (id: number) =>
   api.delete(`/tags/${id}`)
+
+// Tag Attributes
+export const getTagAttributes = (gameId: number) =>
+  api.get<TagAttribute[]>('/tag-attributes', { params: { gameId } })
+
+export const createTagAttribute = (name: string, gameId: number) =>
+  api.post<TagAttribute>('/tag-attributes', { name, gameId })
+
+export const deleteTagAttribute = (id: number) =>
+  api.delete(`/tag-attributes/${id}`)
 
 // Comments
 export const getComments = (itemId: number) =>

@@ -34,7 +34,8 @@ public class TagController {
         }
         Long gameId = Long.valueOf(gameIdObj.toString());
         String type = body.get("type") != null ? body.get("type").toString() : null;
-        return ResponseEntity.ok(tagService.create(name, gameId, type));
+        String attribute = body.get("attribute") != null ? body.get("attribute").toString() : null;
+        return ResponseEntity.ok(tagService.create(name, gameId, type, attribute));
     }
 
     @PutMapping("/{id}")
@@ -44,7 +45,8 @@ public class TagController {
         if (name == null || name.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(tagService.update(id, name));
+        String attribute = body.get("attribute");
+        return ResponseEntity.ok(tagService.update(id, name, attribute));
     }
 
     @DeleteMapping("/{id}")
