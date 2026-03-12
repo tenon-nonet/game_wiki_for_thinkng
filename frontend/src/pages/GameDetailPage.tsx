@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getGame, updateGame, deleteGame, getNews } from '../api'
 import type { GameFormData } from '../api'
@@ -13,7 +13,6 @@ export default function GameDetailPage() {
   const [game, setGame] = useState<Game | null>(null)
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<GameFormData>({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '' })
-  const [categoriesText, setCategoriesText] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [news, setNews] = useState<NewsItem[]>([])
@@ -31,7 +30,6 @@ export default function GameDetailPage() {
         awards: res.data.awards || '',
         staff: res.data.staff || '',
       })
-      setCategoriesText(res.data.categories?.join('\n') || '')
       setNewsLoading(true)
       getNews(res.data.name, 5).then((r) => {
         setNews(r.data)
@@ -48,8 +46,8 @@ export default function GameDetailPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    const categories = categoriesText.split('\n').map((s) => s.trim()).filter(Boolean)
-    const res = await updateGame(Number(id), { ...form, categories }, image)
+    // カテゴリはタグ管理画面で編集するため、既存の値をそのまま引き継ぐ
+    const res = await updateGame(Number(id), { ...form, categories: game?.categories ?? [] }, image)
     setGame(res.data)
     setEditing(false)
     setImage(null)
@@ -135,16 +133,6 @@ export default function GameDetailPage() {
                   value={form.staff}
                   onChange={(e) => setForm({ ...form, staff: e.target.value })}
                   rows={3}
-                  className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">アイテムカテゴリ (1行1件)</label>
-                <textarea
-                  placeholder={"例:\n武器\n防具\n消費アイテム"}
-                  value={categoriesText}
-                  onChange={(e) => setCategoriesText(e.target.value)}
-                  rows={4}
                   className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                 />
               </div>
