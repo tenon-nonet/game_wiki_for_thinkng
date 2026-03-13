@@ -142,20 +142,20 @@ export default function ItemDetailPage() {
             ← {fromCatalog ? '目録へ' : 'アイテム一覧へ'}
           </Link>
         </div>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-3">
           {prevItem ? (
-            <Link to={`/items/${prevItem.id}${fromCatalog ? detailQueryFromCatalog : ''}`} className="text-gray-300 hover:underline text-sm truncate">
+            <Link to={`/items/${prevItem.id}${fromCatalog ? detailQueryFromCatalog : ''}`} className="min-w-0 flex-1 text-gray-300 hover:underline text-sm truncate">
               ← {prevItem.name}
             </Link>
           ) : (
-            <span />
+            <span className="flex-1" />
           )}
           {nextItem ? (
-            <Link to={`/items/${nextItem.id}${fromCatalog ? detailQueryFromCatalog : ''}`} className="text-gray-300 hover:underline text-sm truncate text-right">
+            <Link to={`/items/${nextItem.id}${fromCatalog ? detailQueryFromCatalog : ''}`} className="min-w-0 flex-1 text-gray-300 hover:underline text-sm truncate text-right">
               {nextItem.name} →
             </Link>
           ) : (
-            <span />
+            <span className="flex-1" />
           )}
         </div>
       </div>
