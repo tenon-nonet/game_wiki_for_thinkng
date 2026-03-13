@@ -77,7 +77,6 @@ export default function NpcsPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-100 sm:text-3xl">NPC図録</h1>
-          <p className="mt-1 text-sm text-zinc-500">人物画のように大きなカードでNPCの雰囲気を並べて確認できます。</p>
         </div>
         {loggedIn && (
           <Link
@@ -126,7 +125,7 @@ export default function NpcsPage() {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="例: ヴァレーネ"
+            placeholder="例: エーゴン"
             className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-64"
           />
         </div>
@@ -140,7 +139,7 @@ export default function NpcsPage() {
       {npcs.length === 0 ? (
         <p className="py-12 text-center text-gray-500">NPCがありません</p>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {npcs.map((npc, index) => (
             <EncyclopediaCard
               key={npc.id}
@@ -151,8 +150,8 @@ export default function NpcsPage() {
               description={npc.description}
               createdAt={npc.createdAt}
               updatedAt={npc.updatedAt}
-              imageHeightClass="h-[22rem]"
-              bodyMinHeightClass="min-h-[16rem] sm:min-h-[18rem]"
+              imageHeightClass="h-[clamp(16rem,26vw,22rem)]"
+              bodyMinHeightClass="min-h-[clamp(12rem,16vw,16rem)] sm:min-h-[clamp(13rem,17vw,18rem)]"
               draggable={loggedIn}
               onDragStart={loggedIn ? () => handleDragStart(index) : undefined}
               onDragOver={loggedIn ? (e) => handleDragOver(e, index) : undefined}
@@ -166,6 +165,5 @@ export default function NpcsPage() {
     </div>
   )
 }
-
 
 

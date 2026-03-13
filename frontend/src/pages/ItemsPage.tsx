@@ -77,7 +77,6 @@ export default function ItemsPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-100 sm:text-3xl">アイテム図録</h1>
-          <p className="mt-1 text-sm text-zinc-500">詳細画面の画像と情報を大きなカードで並べて鑑賞できます。</p>
         </div>
         {loggedIn && (
           <div className="flex gap-2">
@@ -134,7 +133,7 @@ export default function ItemsPage() {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="例: ルーン"
+            placeholder="例: 大ルーン"
             className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-64"
           />
         </div>
@@ -148,7 +147,7 @@ export default function ItemsPage() {
       {items.length === 0 ? (
         <p className="py-12 text-center text-gray-500">アイテムがありません</p>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item, index) => (
             <EncyclopediaCard
               key={item.id}
@@ -172,6 +171,5 @@ export default function ItemsPage() {
     </div>
   )
 }
-
 
 
