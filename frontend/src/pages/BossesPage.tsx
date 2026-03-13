@@ -88,13 +88,13 @@ export default function BossesPage() {
         )}
       </div>
 
-      <div className="mb-8 flex w-full flex-col flex-wrap gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 shadow-lg sm:flex-row sm:items-end">
+      <div className="mb-5 flex w-full flex-col gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3 shadow-lg sm:w-fit sm:flex-row sm:flex-wrap sm:items-end">
         <div>
           <label className="mb-1 block text-xs text-gray-400">ゲームで絞り込み</label>
           <select
             value={gameId}
             onChange={(e) => setGameId(e.target.value)}
-            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-auto"
+            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
           >
             <option value="">すべて</option>
             {games.map((g) => (
@@ -109,7 +109,7 @@ export default function BossesPage() {
           <select
             value={tag}
             onChange={(e) => setTag(e.target.value)}
-            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-auto"
+            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
           >
             <option value="">すべて</option>
             {tags.map((t) => (
@@ -126,7 +126,7 @@ export default function BossesPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="例: マルギット"
-            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-64"
+            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
         </div>
         {(gameId || tag || keyword) && (
