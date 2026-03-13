@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getItem, getGames, getTags, getTagAttributes, createItem, updateItem, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
+import MessageOverlay from '../components/MessageOverlay'
+import { IMAGE_FILE_SIZE_ERROR, isImageFileSizeValid } from '../upload'
 import type { Game, Tag, TagAttribute } from '../types'
 
 export default function ItemFormPage() {
@@ -38,6 +40,7 @@ export default function ItemFormPage() {
   const [existingImage, setExistingImage] = useState<string | null>(null)
   const [catalogCategory, setCatalogCategory] = useState(searchParams.get('category') ?? '')
   const [error, setError] = useState('')
+  const [overlayMessage, setOverlayMessage] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
   const adminLockedInEdit = isEdit && !admin
 
@@ -108,6 +111,13 @@ export default function ItemFormPage() {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
+    if (!isImageFileSizeValid(file)) {
+      setOverlayMessage(IMAGE_FILE_SIZE_ERROR)
+      setImage(null)
+      setPreview(null)
+      e.target.value = ''
+      return
+    }
     setImage(file)
     if (file) {
       setPreview(URL.createObjectURL(file))
@@ -194,6 +204,12 @@ export default function ItemFormPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      {overlayMessage && (
+        <MessageOverlay
+          message={overlayMessage}
+          onClose={() => setOverlayMessage('')}
+        />
+      )}
       <div className="flex items-center gap-4">
         <Link to="/items" className="text-gray-100 hover:underline text-sm">← アイテム一覧</Link>
         {!isEdit && <Link to={`/catalog${form.gameId ? `?gameId=${form.gameId}&tab=ITEM` : ''}`} className="text-gray-400 hover:underline text-sm">← 目録</Link>}

@@ -2,7 +2,9 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getBoss, getGames, getTags, createTag, createBoss, updateBoss, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
+import MessageOverlay from '../components/MessageOverlay'
 import { defaultDialogueLabel, parseDialogueLines, serializeDialogueEntries, type DialogueEntry } from '../dialogues'
+import { IMAGE_FILE_SIZE_ERROR, isImageFileSizeValid } from '../upload'
 import type { Game, Tag } from '../types'
 
 export default function BossFormPage() {
@@ -39,6 +41,7 @@ export default function BossFormPage() {
   const [preview, setPreview] = useState<string | null>(null)
   const [existingImage, setExistingImage] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [overlayMessage, setOverlayMessage] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
 
   useEffect(() => {
@@ -101,6 +104,13 @@ export default function BossFormPage() {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
+    if (!isImageFileSizeValid(file)) {
+      setOverlayMessage(IMAGE_FILE_SIZE_ERROR)
+      setImage(null)
+      setPreview(null)
+      e.target.value = ''
+      return
+    }
     setImage(file)
     if (file) {
       setPreview(URL.createObjectURL(file))
@@ -169,6 +179,12 @@ export default function BossFormPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
+      {overlayMessage && (
+        <MessageOverlay
+          message={overlayMessage}
+          onClose={() => setOverlayMessage('')}
+        />
+      )}
       <div className="flex items-center gap-4">
         <Link to="/bosses" className="text-gray-100 hover:underline text-sm">← ボス一覧</Link>
         {!isEdit && <Link to={`/catalog${form.gameId ? `?gameId=${form.gameId}&tab=BOSS` : ''}`} className="text-gray-400 hover:underline text-sm">← 目録</Link>}
