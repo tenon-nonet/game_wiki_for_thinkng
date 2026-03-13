@@ -11,6 +11,10 @@ import {
   getNpcs,
 } from '../api'
 import { isAdmin } from '../auth'
+import CatalogControls from '../components/catalog/CatalogControls'
+import CatalogEntryCard from '../components/catalog/CatalogEntryCard'
+import CatalogEntryGrid from '../components/catalog/CatalogEntryGrid'
+import CatalogProgressBar from '../components/catalog/CatalogProgressBar'
 import type { Boss, CatalogEntry, Game, Item, Npc } from '../types'
 import {
   filterEntries,
@@ -19,7 +23,6 @@ import {
   groupEntriesByGame,
   groupItemsByCategory,
   groupItemsByGameAndCategory,
-  TAB_CONFIG,
   type TabType,
   VALID_TABS,
 } from './catalogUtils'
@@ -93,6 +96,12 @@ export default function CatalogPage() {
     return { registered, total: all.length }
   }
 
+  const progressByTab = {
+    ITEM: progress('ITEM'),
+    BOSS: progress('BOSS'),
+    NPC: progress('NPC'),
+  } as const
+
   const handleAdd = async () => {
     if (!isAdmin()) {
       setAddError('目録追加は管理者のみ実行できます')
@@ -158,7 +167,6 @@ export default function CatalogPage() {
 
   const currentEntries = filterEntries(entriesForTab(activeTab), keyword)
   const { registered, total } = progress(activeTab)
-  const pct = total === 0 ? 0 : Math.round((registered / total) * 100)
   const isAllGames = selectedGameId === 0
   const selectedGame = games.find((game) => game.id === selectedGameId) ?? null
   const gameCategories = selectedGame?.categories ?? []
@@ -183,51 +191,18 @@ export default function CatalogPage() {
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
     const wiki = findWikiEntity(entry, tab, items, bosses, npcs)
     const status = getEntryStatus(entry, tab, items, bosses, npcs)
-    const hasImage = Boolean(wiki?.imagePath)
     const cardPath = `/${wikiPath(tab)}/${entry.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`
 
     return (
-      <div
+      <CatalogEntryCard
         key={`${entry.type}-${entry.id}`}
-        className="relative flex cursor-pointer flex-col gap-1 overflow-hidden rounded border border-zinc-700 bg-zinc-900 transition hover:border-red-800"
-        onClick={() => navigate(cardPath)}
-      >
-        {hasImage ? (
-          <img
-            src={`/uploads/${wiki!.imagePath}`}
-            alt={entry.name}
-            className="h-16 w-full object-cover object-top"
-          />
-        ) : (
-          <div className="flex h-16 w-full items-center justify-center bg-zinc-800 text-xs text-zinc-600">
-            画像なし
-          </div>
-        )}
-        <div className="flex flex-col gap-1 px-2.5 py-2">
-          <span className="break-all text-xs leading-tight text-gray-100">{entry.name}</span>
-          <div className="flex items-center gap-2">
-            {status === 'REGISTERED' ? (
-              <span className="text-xs text-green-400">図録登録</span>
-            ) : status === 'IN_PROGRESS' ? (
-              <span className="text-xs text-amber-400">情報不足</span>
-            ) : (
-              <span className="text-xs text-zinc-500">情報なし</span>
-            )}
-            {isAdmin() && (
-              <button
-                onClick={(event) => {
-                  event.stopPropagation()
-                  handleDelete(entry.id, entry.type as TabType)
-                }}
-                className="ml-auto rounded border border-red-500/40 px-1.5 py-0.5 text-xs text-red-400/90 transition hover:border-red-400/70 hover:text-red-300"
-                title="削除"
-              >
-                削除
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+        entry={entry}
+        tab={tab}
+        status={status}
+        imagePath={wiki?.imagePath}
+        onOpen={() => navigate(cardPath)}
+        onDelete={isAdmin() ? () => handleDelete(entry.id, entry.type as TabType) : undefined}
+      />
     )
   }
 
@@ -235,104 +210,32 @@ export default function CatalogPage() {
     <div className="w-full px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-100">目録</h1>
 
-      <div className="mb-6 flex flex-wrap items-stretch gap-3 sm:items-center">
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <select
-            value={selectedGameId}
-            onChange={(event) => {
-              setSelectedGameId(Number(event.target.value))
-              setKeyword('')
-            }}
-            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-auto"
-          >
-            <option value={0}>すべて</option>
-            {games.map((game) => (
-              <option key={game.id} value={game.id}>
-                {game.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <CatalogControls
+        games={games}
+        selectedGameId={selectedGameId}
+        activeTab={activeTab}
+        keyword={keyword}
+        newName={newName}
+        newCategory={newCategory}
+        gameCategories={gameCategories}
+        adding={adding}
+        addError={addError}
+        onGameChange={(gameId) => {
+          setSelectedGameId(gameId)
+          setKeyword('')
+        }}
+        onKeywordChange={setKeyword}
+        onTabChange={(tab) => {
+          setActiveTab(tab)
+          setAddError('')
+        }}
+        onNewNameChange={setNewName}
+        onNewCategoryChange={setNewCategory}
+        onAdd={handleAdd}
+        progressByTab={progressByTab}
+      />
 
-        <input
-          type="text"
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          placeholder={activeTab === 'ITEM' ? 'アイテム名で絞り込み...' : activeTab === 'BOSS' ? 'ボス名で絞り込み...' : 'NPC名で絞り込み...'}
-          className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-56"
-        />
-
-        <div className="flex w-full flex-wrap gap-1 rounded-lg bg-zinc-900 p-1 sm:w-auto">
-          {TAB_CONFIG.map((tab) => {
-            const { registered: tabRegistered, total: tabTotal } = progress(tab.key)
-            return (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  setActiveTab(tab.key)
-                  setAddError('')
-                }}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                  activeTab === tab.key ? 'bg-red-900 text-white' : 'text-gray-400 hover:text-gray-200'
-                }`}
-              >
-                {tab.label}
-                <span className={`ml-2 text-xs ${activeTab === tab.key ? 'text-red-200' : 'text-gray-600'}`}>
-                  {tabRegistered}/{tabTotal}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        {isAdmin() && selectedGameId > 0 && (
-          <div className="ml-0 flex w-full flex-wrap items-center gap-1.5 sm:ml-4 sm:w-auto">
-            <span className="mr-1 text-sm text-gray-400">目録追加</span>
-            {activeTab === 'ITEM' && (
-              <select
-                value={newCategory}
-                onChange={(event) => setNewCategory(event.target.value)}
-                className="w-full rounded border border-gray-600 bg-zinc-800 px-2 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-auto"
-              >
-                <option value="">カテゴリ</option>
-                {gameCategories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            )}
-            <input
-              type="text"
-              value={newName}
-              onChange={(event) => setNewName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') handleAdd()
-              }}
-              placeholder="名前を追加..."
-              className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-56"
-            />
-            <button
-              onClick={handleAdd}
-              disabled={adding || !newName.trim()}
-              className="rounded bg-red-900 px-3 py-2 text-sm text-white transition hover:bg-red-800 disabled:opacity-50"
-            >
-              追加
-            </button>
-            {addError && <span className="text-xs text-red-400">{addError}</span>}
-          </div>
-        )}
-      </div>
-
-      <div className="mb-5 w-full">
-        <div className="mb-1 flex justify-between text-xs text-gray-500">
-          <span>図録登録済み {registered} / {total}</span>
-          <span>{pct}%</span>
-        </div>
-        <div className="h-1.5 w-full rounded-full bg-zinc-800">
-          <div className="h-1.5 rounded-full bg-red-800 transition-all" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
+      <CatalogProgressBar registered={registered} total={total} />
 
       {isAdmin() && selectedGameId > 0 && (
         <div className="mb-5 flex flex-wrap items-start gap-2">
@@ -392,82 +295,15 @@ export default function CatalogPage() {
         </div>
       )}
 
-      {isAllGames && activeTab === 'ITEM' && groupedItemByGameAndCategory ? (
-        <div className="space-y-8">
-          {groupedItemByGameAndCategory.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-500">目録データがありません</p>
-          ) : (
-            groupedItemByGameAndCategory.map(({ gameName, categories }) => (
-              <div key={gameName}>
-                <h2 className="mb-3 border-b border-zinc-700 px-1 pb-1 text-sm font-semibold text-gray-300">{gameName}</h2>
-                <div className="space-y-4">
-                  {categories.map((category) => (
-                    <div key={category.label}>
-                      <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        {category.label}
-                        <span className="ml-2 text-zinc-600 normal-case font-normal">{category.entries.length}件</span>
-                      </h3>
-                      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-                        {category.entries.map((entry) => renderCard(entry, 'ITEM'))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      ) : activeTab === 'ITEM' && groupedItemEntries ? (
-        <div className="space-y-6">
-          {groupedItemEntries.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-500">
-              {total === 0 ? '目録データがありません' : '該当するデータがありません'}
-            </p>
-          ) : (
-            groupedItemEntries.map((group) => (
-              <div key={group.label}>
-                <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  {group.label}
-                  <span className="ml-2 text-zinc-600 normal-case font-normal">{group.entries.length}件</span>
-                </h2>
-                <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-                  {group.entries.map((entry) => renderCard(entry, 'ITEM'))}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      ) : isAllGames && groupedByGame ? (
-        <div className="space-y-8">
-          {groupedByGame.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-500">目録データがありません</p>
-          ) : (
-            groupedByGame.map(({ gameName, entries }) => (
-              <div key={gameName}>
-                <h2 className="mb-3 border-b border-zinc-700 px-1 pb-1 text-sm font-semibold text-gray-300">
-                  {gameName}
-                  <span className="ml-2 text-xs font-normal text-zinc-500">{entries.length}件</span>
-                </h2>
-                <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-                  {entries.map((entry) => renderCard(entry, activeTab))}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      ) : (
-        <div>
-          {currentEntries.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-500">
-              {total === 0 ? '目録データがありません' : '該当するデータがありません'}
-            </p>
-          ) : (
-            <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-              {currentEntries.map((entry) => renderCard(entry, activeTab))}
-            </div>
-          )}
-        </div>
-      )}
+      <CatalogEntryGrid
+        activeTab={activeTab}
+        total={total}
+        currentEntries={currentEntries}
+        groupedItemEntries={groupedItemEntries}
+        groupedItemByGameAndCategory={groupedItemByGameAndCategory}
+        groupedByGame={groupedByGame}
+        renderCard={renderCard}
+      />
     </div>
   )
 }
