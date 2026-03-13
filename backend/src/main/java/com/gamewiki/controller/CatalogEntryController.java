@@ -46,8 +46,8 @@ public class CatalogEntryController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        catalogEntryService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam String type) {
+        catalogEntryService.delete(id, type);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,13 +1,11 @@
-package com.gamewiki.service;
+﻿package com.gamewiki.service;
 
 import com.gamewiki.dto.BossRequest;
 import com.gamewiki.dto.BossResponse;
 import com.gamewiki.entity.Boss;
-import com.gamewiki.entity.CatalogEntry;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
-import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
 import com.gamewiki.util.NameNormalizer;
@@ -28,7 +26,6 @@ public class BossService {
     private final BossRepository bossRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
-    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -42,12 +39,9 @@ public class BossService {
     }
 
     public List<BossResponse> findAll(Long gameId, String tagName, String keyword) {
-        List<Boss> bosses;
-        if (gameId != null) {
-            bosses = bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId);
-        } else {
-            bosses = bossRepository.findAllByOrderBySortOrderAscIdAsc();
-        }
+        List<Boss> bosses = gameId != null
+                ? bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
+                : bossRepository.findAllByOrderBySortOrderAscIdAsc();
         if (tagName != null && !tagName.isBlank()) {
             bosses = bosses.stream()
                     .filter(b -> b.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
@@ -68,9 +62,6 @@ public class BossService {
     }
 
     public BossResponse create(BossRequest request, MultipartFile image) {
-        if (!existsCatalogEntry(request.getName(), request.getGameId(), "BOSS")) {
-            throw new IllegalArgumentException("目録に登録されていないボスは作成できません。先に目録へ登録してください。");
-        }
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
@@ -92,12 +83,7 @@ public class BossService {
     @Transactional
     public BossResponse update(Long id, BossRequest request, MultipartFile image) {
         Boss boss = getBoss(id);
-        Long oldGameId = boss.getGame().getId();
-        String oldName = boss.getName();
-        CatalogEntry catalogEntry = resolveCatalogEntryForUpdate(oldName, request.getName(), oldGameId, "BOSS");
-
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
-        ensureNoDuplicateCatalogEntry(request.getName(), request.getGameId(), "BOSS", catalogEntry.getId());
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -112,13 +98,7 @@ public class BossService {
             boss.setImagePath(fileStorageService.store(image));
         }
 
-        Boss saved = bossRepository.save(boss);
-
-        catalogEntry.setName(request.getName());
-        catalogEntry.setGame(game);
-        catalogEntryRepository.save(catalogEntry);
-
-        return toResponse(saved);
+        return toResponse(bossRepository.save(boss));
     }
 
     public void delete(Long id) {
@@ -152,50 +132,6 @@ public class BossService {
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
         return r;
-    }
-
-    private boolean existsCatalogEntry(String name, Long gameId, String type) {
-        String target = NameNormalizer.normalize(name);
-        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
-                .map(CatalogEntry::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-    }
-
-    private CatalogEntry findCatalogEntryByNormalizedName(String name, Long gameId, String type) {
-        String target = NameNormalizer.normalize(name);
-        return catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
-                .filter(e -> NameNormalizer.normalize(e.getName()).equals(target))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private CatalogEntry resolveCatalogEntryForUpdate(String oldName, String newName, Long oldGameId, String type) {
-        CatalogEntry byOldName = findCatalogEntryByNormalizedName(oldName, oldGameId, type);
-        if (byOldName != null) return byOldName;
-
-        CatalogEntry byNewName = findCatalogEntryByNormalizedName(newName, oldGameId, type);
-        if (byNewName != null) return byNewName;
-
-        String target = NameNormalizer.normalize(oldName);
-        List<CatalogEntry> candidates = catalogEntryRepository.findByTypeOrderByNameAsc(type).stream()
-                .filter(e -> NameNormalizer.normalize(e.getName()).equals(target))
-                .toList();
-        if (candidates.size() == 1) return candidates.get(0);
-
-        throw new IllegalStateException("目録エントリとの紐付け不整合があるため更新できません。目録を確認してください。");
-    }
-
-    private void ensureNoDuplicateCatalogEntry(String name, Long gameId, String type, Long excludeId) {
-        String target = NameNormalizer.normalize(name);
-        boolean duplicated = catalogEntryRepository.findByGameIdAndTypeOrderByNameAsc(gameId, type).stream()
-                .filter(entry -> excludeId == null || !entry.getId().equals(excludeId))
-                .map(CatalogEntry::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-        if (duplicated) {
-            throw new IllegalArgumentException("目録に同一ゲーム・同一種別で同名のデータが既に存在します");
-        }
     }
 
     private void ensureNoDuplicateBoss(String name, Long gameId, Long selfId) {
