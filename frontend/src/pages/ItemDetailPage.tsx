@@ -8,8 +8,9 @@ export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
+  const locationState = (location.state as { fromCatalog?: boolean; flashMessage?: string } | null) ?? null
   const [searchParams] = useSearchParams()
-  const fromCatalogInState = Boolean((location.state as { fromCatalog?: boolean } | null)?.fromCatalog)
+  const fromCatalogInState = Boolean(locationState?.fromCatalog)
   const fromCatalog = searchParams.get('from') === 'catalog' || fromCatalogInState
   const catalogGameId = searchParams.get('gameId')
   const catalogTab = searchParams.get('tab') ?? 'ITEM'
@@ -28,8 +29,23 @@ export default function ItemDetailPage() {
   const [editText, setEditText] = useState('')
   const [replyToId, setReplyToId] = useState<number | null>(null)
   const [replyText, setReplyText] = useState('')
+  const [flashMessage, setFlashMessage] = useState('')
+  const [showFlash, setShowFlash] = useState(false)
   const currentUser = getUsername()
   const admin = isAdmin()
+
+  useEffect(() => {
+    if (!locationState?.flashMessage) return
+    setFlashMessage(locationState.flashMessage)
+    setShowFlash(true)
+  }, [locationState?.flashMessage])
+
+  const closeFlash = () => {
+    setShowFlash(false)
+    if (!locationState?.flashMessage) return
+    const { flashMessage: _flashMessage, ...restState } = locationState
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: restState })
+  }
 
   useEffect(() => {
     const itemId = Number(id)
@@ -137,6 +153,26 @@ export default function ItemDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      {showFlash && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/72 px-4">
+          <div className="w-full max-w-2xl rounded-sm border border-amber-200/55 bg-gradient-to-b from-zinc-900/95 via-zinc-950/95 to-black/95 p-1 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+            <div className="rounded-sm border border-amber-100/25 px-8 py-8 text-center">
+              <div className="mx-auto mb-5 h-px w-40 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
+              <p className="text-2xl sm:text-3xl font-serif font-medium tracking-[0.08em] text-amber-100 drop-shadow-[0_0_6px_rgba(251,191,36,0.35)]">
+                {flashMessage}
+              </p>
+              <div className="mx-auto mt-5 h-px w-40 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
+              <button
+                type="button"
+                onClick={closeFlash}
+                className="mt-7 min-w-28 rounded-sm border border-amber-200/60 bg-gradient-to-b from-zinc-800 to-zinc-900 px-5 py-2 text-sm tracking-[0.14em] text-amber-50 hover:from-zinc-700 hover:to-zinc-800"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="space-y-2">
         <div className="flex items-center justify-start">
           <Link to={fromCatalog ? catalogUrl : '/items'} className="text-gray-100 hover:underline text-sm">

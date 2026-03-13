@@ -154,7 +154,7 @@ export default function ItemFormPage() {
     try {
       if (isEdit) {
         await updateItem(Number(id), data)
-        navigate(`/items/${id}${detailReturnQuery}`)
+        navigate(`/items/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
       } else {
         const res = await createItem(data)
         navigate(`/items/${res.data.id}`)

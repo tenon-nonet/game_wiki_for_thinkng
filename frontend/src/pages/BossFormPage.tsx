@@ -134,7 +134,7 @@ export default function BossFormPage() {
     try {
       if (isEdit) {
         await updateBoss(Number(id), data)
-        navigate(`/bosses/${id}${detailReturnQuery}`)
+        navigate(`/bosses/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
       } else {
         const res = await createBoss(data)
         navigate(`/bosses/${res.data.id}`)

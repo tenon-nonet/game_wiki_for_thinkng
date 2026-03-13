@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getBoss, deleteBoss, getItems } from '../api'
 import { isAdmin } from '../auth'
 import { parseDialogueLines } from '../dialogues'
@@ -8,6 +8,8 @@ import type { Boss, Item } from '../types'
 export default function BossDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const locationState = (location.state as { flashMessage?: string } | null) ?? null
   const [searchParams] = useSearchParams()
   const fromCatalog = searchParams.get('from') === 'catalog'
   const fromEncyclopedia = searchParams.get('from') === 'bosses'
@@ -16,8 +18,23 @@ export default function BossDetailPage() {
   const detailQueryFromEncyclopedia = '?from=bosses'
   const [boss, setBoss] = useState<Boss | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
+  const [flashMessage, setFlashMessage] = useState('')
+  const [showFlash, setShowFlash] = useState(false)
   const admin = isAdmin()
   const dialogues = parseDialogueLines(boss?.description ? boss.description.split(/\r?\n/) : [])
+
+  useEffect(() => {
+    if (!locationState?.flashMessage) return
+    setFlashMessage(locationState.flashMessage)
+    setShowFlash(true)
+  }, [locationState?.flashMessage])
+
+  const closeFlash = () => {
+    setShowFlash(false)
+    if (!locationState?.flashMessage) return
+    const { flashMessage: _flashMessage, ...restState } = locationState
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: restState })
+  }
 
   useEffect(() => {
     const bossId = Number(id)
@@ -49,6 +66,26 @@ export default function BossDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      {showFlash && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/72 px-4">
+          <div className="w-full max-w-2xl rounded-sm border border-amber-200/55 bg-gradient-to-b from-zinc-900/95 via-zinc-950/95 to-black/95 p-1 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+            <div className="rounded-sm border border-amber-100/25 px-8 py-8 text-center">
+              <div className="mx-auto mb-5 h-px w-40 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
+              <p className="text-2xl sm:text-3xl font-serif font-medium tracking-[0.08em] text-amber-100 drop-shadow-[0_0_6px_rgba(251,191,36,0.35)]">
+                {flashMessage}
+              </p>
+              <div className="mx-auto mt-5 h-px w-40 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
+              <button
+                type="button"
+                onClick={closeFlash}
+                className="mt-7 min-w-28 rounded-sm border border-amber-200/60 bg-gradient-to-b from-zinc-800 to-zinc-900 px-5 py-2 text-sm tracking-[0.14em] text-amber-50 hover:from-zinc-700 hover:to-zinc-800"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-4">
         <Link to="/bosses" className="text-gray-100 hover:underline text-sm">← ボス一覧</Link>
         {fromCatalog && <Link to={catalogUrl} className="text-gray-400 hover:underline text-sm">← 目録</Link>}

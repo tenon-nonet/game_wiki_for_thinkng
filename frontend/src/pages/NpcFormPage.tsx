@@ -136,7 +136,7 @@ export default function NpcFormPage() {
     try {
       if (isEdit) {
         await updateNpc(Number(id), data)
-        navigate(`/npcs/${id}${detailReturnQuery}`)
+        navigate(`/npcs/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
       } else {
         const res = await createNpc(data)
         navigate(`/npcs/${res.data.id}`)
