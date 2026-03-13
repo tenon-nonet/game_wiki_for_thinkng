@@ -209,7 +209,7 @@ export default function BossFormPage() {
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border border-gray-600"
+                className="w-full max-w-[32rem] max-h-[24rem] object-contain rounded mb-3 border border-gray-600 bg-zinc-900"
               />
             )}
             <input

@@ -292,7 +292,7 @@ export default function ItemFormPage() {
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border border-gray-500"
+                className="w-full max-w-[32rem] max-h-[24rem] object-contain rounded mb-3 border border-gray-500 bg-zinc-900"
               />
             )}
             <div className="rounded border border-dashed border-gray-500 bg-zinc-900/60 px-3 py-3">
