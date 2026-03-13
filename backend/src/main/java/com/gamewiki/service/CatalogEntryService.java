@@ -11,6 +11,7 @@ import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.NpcRepository;
+import com.gamewiki.util.EntityNameConflictChecker;
 import com.gamewiki.util.NameNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -215,15 +216,27 @@ public class CatalogEntryService {
 
     private void ensureNoDuplicateEntity(String normalizedName, String type, Long gameId, Long selfId) {
         boolean duplicated = switch (type) {
-            case "ITEM" -> itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                    .anyMatch(item -> (selfId == null || !item.getId().equals(selfId))
-                            && NameNormalizer.normalize(item.getName()).equals(normalizedName));
-            case "BOSS" -> bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                    .anyMatch(boss -> (selfId == null || !boss.getId().equals(selfId))
-                            && NameNormalizer.normalize(boss.getName()).equals(normalizedName));
-            case "NPC" -> npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                    .anyMatch(npc -> (selfId == null || !npc.getId().equals(selfId))
-                            && NameNormalizer.normalize(npc.getName()).equals(normalizedName));
+            case "ITEM" -> EntityNameConflictChecker.hasDuplicateName(
+                    itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                    Item::getId,
+                    Item::getName,
+                    normalizedName,
+                    selfId
+            );
+            case "BOSS" -> EntityNameConflictChecker.hasDuplicateName(
+                    bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                    Boss::getId,
+                    Boss::getName,
+                    normalizedName,
+                    selfId
+            );
+            case "NPC" -> EntityNameConflictChecker.hasDuplicateName(
+                    npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                    Npc::getId,
+                    Npc::getName,
+                    normalizedName,
+                    selfId
+            );
             default -> throw new IllegalArgumentException("Unsupported catalog type: " + type);
         };
         if (duplicated) {

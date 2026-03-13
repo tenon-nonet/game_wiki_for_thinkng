@@ -8,7 +8,7 @@ import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
-import com.gamewiki.util.NameNormalizer;
+import com.gamewiki.util.EntityNameConflictChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -135,13 +135,13 @@ public class BossService {
     }
 
     private void ensureNoDuplicateBoss(String name, Long gameId, Long selfId) {
-        String target = NameNormalizer.normalize(name);
-        boolean duplicated = bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                .filter(boss -> selfId == null || !boss.getId().equals(selfId))
-                .map(Boss::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-        if (duplicated) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Boss::getId,
+                Boss::getName,
+                name,
+                selfId
+        )) {
             throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
         }
     }

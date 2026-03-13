@@ -8,7 +8,7 @@ import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
-import com.gamewiki.util.NameNormalizer;
+import com.gamewiki.util.EntityNameConflictChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -138,13 +138,13 @@ public class ItemService {
     }
 
     private void ensureNoDuplicateItem(String name, Long gameId, Long selfId) {
-        String target = NameNormalizer.normalize(name);
-        boolean duplicated = itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                .filter(item -> selfId == null || !item.getId().equals(selfId))
-                .map(Item::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-        if (duplicated) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Item::getId,
+                Item::getName,
+                name,
+                selfId
+        )) {
             throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
         }
     }

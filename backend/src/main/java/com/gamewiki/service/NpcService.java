@@ -9,7 +9,7 @@ import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
-import com.gamewiki.util.NameNormalizer;
+import com.gamewiki.util.EntityNameConflictChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,13 +153,13 @@ public class NpcService {
     }
 
     private void ensureNoDuplicateNpc(String name, Long gameId, Long selfId) {
-        String target = NameNormalizer.normalize(name);
-        boolean duplicated = npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                .filter(npc -> selfId == null || !npc.getId().equals(selfId))
-                .map(Npc::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-        if (duplicated) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Npc::getId,
+                Npc::getName,
+                name,
+                selfId
+        )) {
             throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
         }
     }
