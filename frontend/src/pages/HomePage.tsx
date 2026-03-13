@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews } from '../api'
+import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit } from '../api'
 import { isAdmin } from '../auth'
 import type { Game } from '../types'
 
@@ -28,6 +28,7 @@ export default function HomePage() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [news, setNews] = useState<{ title: string; url: string; publishedAt: string; source: string }[]>([])
   const [newsLoading, setNewsLoading] = useState(false)
+  const [totalVisitors, setTotalVisitors] = useState<number | null>(null)
 
   const load = async (q?: string) => {
     const res = await getGames(q)
@@ -42,6 +43,11 @@ export default function HomePage() {
   }
 
   useEffect(() => { load() }, [])
+  useEffect(() => {
+    trackHomeVisit()
+      .then((r) => setTotalVisitors(r.data.totalUniqueDailyVisitors))
+      .catch(() => setTotalVisitors(null))
+  }, [])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -121,16 +127,19 @@ export default function HomePage() {
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       {/* ゲーム一覧 */}
       <section>
-        {admin && (
-          <div className="flex justify-end mb-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="text-xs text-gray-400">
+            {admin && totalVisitors !== null ? `訪問者数: ${totalVisitors}` : ''}
+          </div>
+          {admin && (
             <button
               onClick={() => setShowForm(!showForm)}
               className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded text-sm whitespace-nowrap"
             >
               + ゲーム追加
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {showForm && (
           <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">
