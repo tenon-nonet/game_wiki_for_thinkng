@@ -1,4 +1,4 @@
-﻿package com.gamewiki.service;
+package com.gamewiki.service;
 
 import com.gamewiki.dto.BossRequest;
 import com.gamewiki.dto.BossResponse;

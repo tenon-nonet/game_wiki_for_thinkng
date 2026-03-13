@@ -1,4 +1,4 @@
-﻿package com.gamewiki.service;
+package com.gamewiki.service;
 
 import com.gamewiki.dto.CatalogBulkRequest;
 import com.gamewiki.dto.CatalogEntryRequest;
