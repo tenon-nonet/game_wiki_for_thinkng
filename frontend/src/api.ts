@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -161,13 +161,13 @@ export const getNews = (q: string, limit?: number) =>
 
 // Catalog
 export const getCatalogEntries = (gameId?: number, type?: string) =>
-  api.get('/catalog', { params: { ...(gameId ? { gameId } : {}), ...(type ? { type } : {}) } })
+  api.get<CatalogEntry[]>('/catalog', { params: { ...(gameId ? { gameId } : {}), ...(type ? { type } : {}) } })
 
 export const createCatalogEntry = (data: { name: string; type: string; gameId: number; category?: string }) =>
-  api.post('/catalog', data)
+  api.post<CatalogEntry>('/catalog', data)
 
-export const deleteCatalogEntry = (id: number) =>
-  api.delete(`/catalog/${id}`)
+export const deleteCatalogEntry = (id: number, type: string) =>
+  api.delete(`/catalog/${id}`, { params: { type } })
 
 export const bulkCreateCatalogEntries = (data: { names: string[]; type: string; gameId: number; category?: string }) =>
   api.post<{ added: number; skipped: number }>('/catalog/bulk', data)

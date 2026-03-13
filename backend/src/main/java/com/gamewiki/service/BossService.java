@@ -6,9 +6,11 @@ import com.gamewiki.entity.Boss;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
-import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
+import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,6 @@ public class BossService {
     private final BossRepository bossRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
-    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -40,24 +41,10 @@ public class BossService {
     }
 
     public List<BossResponse> findAll(Long gameId, String tagName, String keyword) {
-        List<Boss> bosses;
-        if (gameId != null) {
-            bosses = bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId);
-        } else {
-            bosses = bossRepository.findAllByOrderBySortOrderAscIdAsc();
-        }
-        if (tagName != null && !tagName.isBlank()) {
-            bosses = bosses.stream()
-                    .filter(b -> b.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            bosses = bosses.stream()
-                    .filter(b -> b.getName().toLowerCase().contains(lower)
-                            || (b.getDescription() != null && b.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        List<Boss> bosses = gameId != null
+                ? bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
+                : bossRepository.findAllByOrderBySortOrderAscIdAsc();
+        bosses = EntitySearchFilter.apply(bosses, tagName, keyword, Boss::getTags, Boss::getName, Boss::getDescription);
         return bosses.stream().map(this::toResponse).toList();
     }
 
@@ -66,9 +53,7 @@ public class BossService {
     }
 
     public BossResponse create(BossRequest request, MultipartFile image) {
-        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "BOSS", request.getGameId())) {
-            throw new IllegalArgumentException("目録に登録されていないボスは作成できません。先に目録へ登録してください。");
-        }
+        ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -86,8 +71,10 @@ public class BossService {
         return toResponse(bossRepository.save(boss));
     }
 
+    @Transactional
     public BossResponse update(Long id, BossRequest request, MultipartFile image) {
         Boss boss = getBoss(id);
+        ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -136,5 +123,17 @@ public class BossService {
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
         return r;
+    }
+
+    private void ensureNoDuplicateBoss(String name, Long gameId, Long selfId) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Boss::getId,
+                Boss::getName,
+                name,
+                selfId
+        )) {
+            throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 }

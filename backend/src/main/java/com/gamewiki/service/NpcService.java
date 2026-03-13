@@ -6,10 +6,12 @@ import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Npc;
 import com.gamewiki.entity.NpcDialogue;
 import com.gamewiki.entity.Tag;
-import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
+import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +29,6 @@ public class NpcService {
     private final NpcRepository npcRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
-    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -41,24 +42,10 @@ public class NpcService {
     }
 
     public List<NpcResponse> findAll(Long gameId, String tagName, String keyword) {
-        List<Npc> npcs;
-        if (gameId != null) {
-            npcs = npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId);
-        } else {
-            npcs = npcRepository.findAllByOrderBySortOrderAscIdAsc();
-        }
-        if (tagName != null && !tagName.isBlank()) {
-            npcs = npcs.stream()
-                    .filter(n -> n.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            npcs = npcs.stream()
-                    .filter(n -> n.getName().toLowerCase().contains(lower)
-                            || (n.getDescription() != null && n.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        List<Npc> npcs = gameId != null
+                ? npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
+                : npcRepository.findAllByOrderBySortOrderAscIdAsc();
+        npcs = EntitySearchFilter.apply(npcs, tagName, keyword, Npc::getTags, Npc::getName, Npc::getDescription);
         return npcs.stream().map(this::toResponse).toList();
     }
 
@@ -67,9 +54,7 @@ public class NpcService {
     }
 
     public NpcResponse create(NpcRequest request, MultipartFile image) {
-        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "NPC", request.getGameId())) {
-            throw new IllegalArgumentException("目録に登録されていないNPCは作成できません。先に目録へ登録してください。");
-        }
+        ensureNoDuplicateNpc(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -88,8 +73,10 @@ public class NpcService {
         return toResponse(npcRepository.save(npc));
     }
 
+    @Transactional
     public NpcResponse update(Long id, NpcRequest request, MultipartFile image) {
         Npc npc = getNpc(id);
+        ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -154,5 +141,17 @@ public class NpcService {
         r.setCreatedAt(npc.getCreatedAt());
         r.setUpdatedAt(npc.getUpdatedAt());
         return r;
+    }
+
+    private void ensureNoDuplicateNpc(String name, Long gameId, Long selfId) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Npc::getId,
+                Npc::getName,
+                name,
+                selfId
+        )) {
+            throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 }

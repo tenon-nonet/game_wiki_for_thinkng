@@ -225,7 +225,7 @@ export default function HomePage() {
                         >
                           目録を見る
                         </Link>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <Link
                             to={`/items?gameId=${game.id}`}
                             className={secondaryActionClass}

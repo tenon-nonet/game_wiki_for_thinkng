@@ -74,7 +74,6 @@ export interface CatalogEntry {
   category: string | null
   gameId: number
   gameName: string
-  createdBy: string
   createdAt: string
 }
 

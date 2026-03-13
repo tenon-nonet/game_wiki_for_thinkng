@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getNpcs, getGames, getTags, updateNpcOrder, getCatalogEntries } from '../api'
+import { getNpcs, getGames, getTags, updateNpcOrder } from '../api'
 import { isLoggedIn } from '../auth'
-import type { Npc, Game, Tag, CatalogEntry } from '../types'
+import type { Npc, Game, Tag } from '../types'
 
 export default function NpcsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [npcs, setNpcs] = useState<Npc[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [catalogEntries, setCatalogEntries] = useState<CatalogEntry[]>([])
   const [gameId, setGameId] = useState<string>(searchParams.get('gameId') || '')
   const [tag, setTag] = useState<string>(searchParams.get('tag') || '')
   const [keyword, setKeyword] = useState<string>(searchParams.get('keyword') || '')
@@ -65,7 +64,6 @@ export default function NpcsPage() {
     setSearchParams(params, { replace: true })
     getNpcs(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setNpcs(r.data))
-    getCatalogEntries(gameId ? Number(gameId) : undefined, 'NPC').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {
@@ -74,19 +72,10 @@ export default function NpcsPage() {
     setKeyword('')
   }
 
-  const unregisteredEntries = tag
-    ? []
-    : catalogEntries.filter((e) => {
-        const inWiki = npcs.some((n) => n.name.toLowerCase() === e.name.toLowerCase())
-        if (inWiki) return false
-        if (keyword && !e.name.toLowerCase().includes(keyword.toLowerCase())) return false
-        return true
-      })
-
   return (
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">NPC一覧</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">NPC図録</h1>
         {loggedIn && (
           <Link
             to="/catalog"
@@ -97,8 +86,8 @@ export default function NpcsPage() {
         )}
       </div>
 
-      <div className="bg-zinc-800 rounded-lg shadow p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end w-full sm:w-fit">
-        <div>
+      <div className="bg-zinc-800 rounded-lg shadow p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-end w-full">
+        <div className="w-full sm:w-auto">
           <label className="block text-xs text-gray-400 mb-1">ゲームで絞り込み</label>
           <select
             value={gameId}
@@ -111,7 +100,7 @@ export default function NpcsPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-xs text-gray-400 mb-1">タグで絞り込み</label>
           <select
             value={tag}
@@ -124,14 +113,14 @@ export default function NpcsPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-xs text-gray-400 mb-1">名前・説明文キーワード</label>
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="例: 白面のヴァレー"
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
+            placeholder="例: ヴァレー"
+            className="w-full sm:w-56 border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
         </div>
         {(gameId || tag || keyword) && (
@@ -141,10 +130,10 @@ export default function NpcsPage() {
         )}
       </div>
 
-      {npcs.length === 0 && unregisteredEntries.length === 0 ? (
-        <p className="text-gray-500 text-center py-12">NPCが登録されていません</p>
+      {npcs.length === 0 ? (
+        <p className="text-gray-500 text-center py-12">NPCがありません</p>
       ) : (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {npcs.map((npc, index) => (
             <div
               key={npc.id}
@@ -183,24 +172,6 @@ export default function NpcsPage() {
                   )}
                 </div>
               </Link>
-            </div>
-          ))}
-          {unregisteredEntries.map((entry) => (
-            <div key={`catalog-${entry.id}`} className="bg-zinc-900 border border-zinc-700 rounded-xl shadow overflow-hidden opacity-60">
-              {loggedIn ? (
-                <Link to={`/npcs/new?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}`} className="block h-full">
-                  <div className="w-full h-48 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs">未登録</div>
-                  <div className="p-3 flex flex-col gap-1">
-                    <p className="font-semibold text-gray-300 text-sm line-clamp-2">{entry.name}</p>
-                    <p className="text-zinc-500 text-xs">クリックして登録</p>
-                  </div>
-                </Link>
-              ) : (
-                <div>
-                  <div className="w-full h-48 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs">未登録</div>
-                  <div className="p-3"><p className="font-semibold text-gray-300 text-sm line-clamp-2">{entry.name}</p></div>
-                </div>
-              )}
             </div>
           ))}
         </div>

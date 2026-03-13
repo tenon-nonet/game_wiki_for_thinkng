@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getItem, getGames, getTags, getTagAttributes, createItem, updateItem, analyzeImageText } from '../api'
+import { isAdmin } from '../auth'
 import type { Game, Tag, TagAttribute } from '../types'
 
 export default function ItemFormPage() {
@@ -8,6 +9,9 @@ export default function ItemFormPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isEdit = !!id
+  const admin = isAdmin()
+  const fileInputId = useId()
+  const initialGameLoaded = useRef(false)
 
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
@@ -23,8 +27,10 @@ export default function ItemFormPage() {
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [existingImage, setExistingImage] = useState<string | null>(null)
+  const [catalogCategory, setCatalogCategory] = useState(searchParams.get('category') ?? '')
   const [error, setError] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
+  const adminLockedInEdit = isEdit && !admin
 
   const initSelection = (tags: Tag[], attrs: TagAttribute[]) => {
     const byAttr: Record<string, number | null> = {}
@@ -42,11 +48,13 @@ export default function ItemFormPage() {
     if (isEdit) {
       getItem(Number(id)).then((r) => {
         const item = r.data
+        const itemCategory = item.category || ''
+        setCatalogCategory(itemCategory)
         setForm({
           name: item.name,
           description: item.description || '',
           gameId: String(item.gameId),
-          category: item.category || '',
+          category: itemCategory,
         })
         setExistingImage(item.imagePath)
         Promise.all([
@@ -62,22 +70,25 @@ export default function ItemFormPage() {
   }, [id])
 
   useEffect(() => {
-    if (form.gameId && !isEdit) {
-      setAllTags([])
-      setAttributes([])
-      setSelectedByAttr({})
-      Promise.all([
-        getTags(Number(form.gameId)),
-        getTagAttributes(Number(form.gameId)),
-      ]).then(([tagsRes, attrsRes]) => {
-        setAllTags(tagsRes.data)
-        setAttributes(attrsRes.data)
-        const byAttr: Record<string, number | null> = {}
-        attrsRes.data.forEach((a: TagAttribute) => { byAttr[a.name] = null })
-        setSelectedByAttr(byAttr)
-      })
+    if (!form.gameId) return
+    if (isEdit && !initialGameLoaded.current) {
+      initialGameLoaded.current = true
+      return
     }
-  }, [form.gameId])
+    setAllTags([])
+    setAttributes([])
+    setSelectedByAttr({})
+    Promise.all([
+      getTags(Number(form.gameId)),
+      getTagAttributes(Number(form.gameId)),
+    ]).then(([tagsRes, attrsRes]) => {
+      setAllTags(tagsRes.data)
+      setAttributes(attrsRes.data)
+      const byAttr: Record<string, number | null> = {}
+      attrsRes.data.forEach((a: TagAttribute) => { byAttr[a.name] = null })
+      setSelectedByAttr(byAttr)
+    })
+  }, [form.gameId, isEdit])
 
   const toggleAttrTag = (attrName: string, tagId: number) => {
     setSelectedByAttr((prev) => ({
@@ -183,46 +194,82 @@ export default function ItemFormPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-1">アイテム名 *</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-200">アイテム名 *</label>
+              {adminLockedInEdit && <span className="text-xs text-amber-300">変更不可</span>}
+            </div>
+            {adminLockedInEdit ? (
+              <input
+                type="text"
+                value={form.name}
+                readOnly
+                className="w-full border border-amber-500/40 rounded px-3 py-2 bg-zinc-800 text-gray-200"
+              />
+            ) : (
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
+              />
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-1">ゲーム *</label>
-            <select
-              value={form.gameId}
-              onChange={(e) => setForm({ ...form, gameId: e.target.value })}
-              required
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-            >
-              <option value="">選択してください</option>
-              {games.map((g) => (
-                <option key={g.id} value={g.id}>{g.name}</option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-200">ゲーム *</label>
+              {adminLockedInEdit && <span className="text-xs text-amber-300">変更不可</span>}
+            </div>
+            {adminLockedInEdit ? (
+              <input
+                type="text"
+                value={games.find((g) => String(g.id) === form.gameId)?.name || ''}
+                readOnly
+                className="w-full border border-amber-500/40 rounded px-3 py-2 bg-zinc-800 text-gray-200"
+              />
+            ) : (
+              <select
+                value={form.gameId}
+                onChange={(e) => setForm({ ...form, gameId: e.target.value })}
+                required
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+              >
+                <option value="">選択してください</option>
+                {games.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-1">カテゴリ</label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
-            >
-              <option value="">未分類</option>
-              <option value="武器">武器</option>
-              <option value="防具">防具</option>
-              <option value="消費アイテム">消費アイテム</option>
-              <option value="素材">素材</option>
-              <option value="タリスマン">タリスマン</option>
-              <option value="その他">その他</option>
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-200">カテゴリ</label>
+              {adminLockedInEdit && <span className="text-xs text-amber-300">変更不可</span>}
+            </div>
+            {adminLockedInEdit ? (
+              <input
+                type="text"
+                value={catalogCategory || form.category || '未分類'}
+                readOnly
+                className="w-full border border-amber-500/40 rounded px-3 py-2 bg-zinc-800 text-gray-200"
+              />
+            ) : (
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+              >
+                <option value="">未分類</option>
+                <option value="武器">武器</option>
+                <option value="防具">防具</option>
+                <option value="消費アイテム">消費アイテム</option>
+                <option value="素材">素材</option>
+                <option value="タリスマン">タリスマン</option>
+                <option value="その他">その他</option>
+              </select>
+            )}
           </div>
 
           <div>
@@ -236,15 +283,30 @@ export default function ItemFormPage() {
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border border-gray-600"
+                className="w-40 h-40 object-cover rounded mb-2 border border-gray-500"
               />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="text-sm text-gray-400"
-            />
+            <div className="rounded border border-dashed border-gray-500 bg-zinc-900/60 px-3 py-3">
+              <input
+                id={fileInputId}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor={fileInputId}
+                  className="inline-flex items-center rounded border border-zinc-500/70 bg-zinc-900 px-3 py-1.5 text-sm text-gray-100 hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  ファイルを選択
+                </label>
+                <span className="text-sm text-gray-300 truncate">
+                  {image?.name || '未選択'}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-gray-400">JPG / PNG などの画像を選択</p>
+            </div>
           </div>
 
           <div>
@@ -259,7 +321,7 @@ export default function ItemFormPage() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={4}
+              rows={6}
               disabled={analyzing}
               placeholder={analyzing ? '解析中...' : ''}
               className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"

@@ -14,6 +14,5 @@ public class CatalogEntryResponse {
     private Long gameId;
     private String gameName;
     private String category;
-    private String createdBy;
     private LocalDateTime createdAt;
 }

@@ -5,15 +5,16 @@ import com.gamewiki.dto.ItemResponse;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Item;
 import com.gamewiki.entity.Tag;
-import com.gamewiki.repository.CatalogEntryRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
+import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +28,6 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
-    private final CatalogEntryRepository catalogEntryRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
 
@@ -41,24 +41,10 @@ public class ItemService {
     }
 
     public List<ItemResponse> findAll(Long gameId, String tagName, String keyword) {
-        List<Item> items;
-        if (gameId != null) {
-            items = itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId);
-        } else {
-            items = itemRepository.findAllByOrderBySortOrderAscIdAsc();
-        }
-        if (tagName != null && !tagName.isBlank()) {
-            items = items.stream()
-                    .filter(i -> i.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            items = items.stream()
-                    .filter(i -> i.getName().toLowerCase().contains(lower)
-                            || (i.getDescription() != null && i.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        List<Item> items = gameId != null
+                ? itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
+                : itemRepository.findAllByOrderBySortOrderAscIdAsc();
+        items = EntitySearchFilter.apply(items, tagName, keyword, Item::getTags, Item::getName, Item::getDescription);
         return items.stream().map(this::toResponse).toList();
     }
 
@@ -67,9 +53,7 @@ public class ItemService {
     }
 
     public ItemResponse create(ItemRequest request, MultipartFile image) {
-        if (!catalogEntryRepository.existsByNameAndTypeAndGameId(request.getName(), "ITEM", request.getGameId())) {
-            throw new IllegalArgumentException("目録に登録されていないアイテムは作成できません。先に目録へ登録してください。");
-        }
+        ensureNoDuplicateItem(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -88,8 +72,10 @@ public class ItemService {
         return toResponse(itemRepository.save(item));
     }
 
+    @Transactional
     public ItemResponse update(Long id, ItemRequest request, MultipartFile image) {
         Item item = getItem(id);
+        ensureNoDuplicateItem(request.getName(), request.getGameId(), id);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -140,5 +126,17 @@ public class ItemService {
         r.setCreatedAt(item.getCreatedAt());
         r.setUpdatedAt(item.getUpdatedAt());
         return r;
+    }
+
+    private void ensureNoDuplicateItem(String name, Long gameId, Long selfId) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Item::getId,
+                Item::getName,
+                name,
+                selfId
+        )) {
+            throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
+        }
     }
 }
