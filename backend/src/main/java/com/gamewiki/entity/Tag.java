@@ -25,9 +25,6 @@ public class Tag {
     @Column(length = 50)
     private String attribute;
 
-    @Column(name = "sort_order")
-    private int sortOrder = 0;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private Game game;

@@ -46,9 +46,6 @@ public class Npc {
     @OrderBy("orderIndex ASC")
     private List<NpcDialogue> dialogues = new ArrayList<>();
 
-    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
-    private int sortOrder = 0;
-
     @CreationTimestamp
     private LocalDateTime createdAt;
 
