@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getBosses, getGames, getTags, updateBossOrder, getCatalogEntries } from '../api'
+import { getBosses, getGames, getTags, updateBossOrder } from '../api'
 import { isLoggedIn } from '../auth'
-import type { Boss, Game, Tag, CatalogEntry } from '../types'
+import type { Boss, Game, Tag } from '../types'
 
 export default function BossesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [bosses, setBosses] = useState<Boss[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [catalogEntries, setCatalogEntries] = useState<CatalogEntry[]>([])
   const [gameId, setGameId] = useState<string>(searchParams.get('gameId') || '')
   const [tag, setTag] = useState<string>(searchParams.get('tag') || '')
   const [keyword, setKeyword] = useState<string>(searchParams.get('keyword') || '')
@@ -65,7 +64,6 @@ export default function BossesPage() {
     setSearchParams(params, { replace: true })
     getBosses(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setBosses(r.data))
-    getCatalogEntries(gameId ? Number(gameId) : undefined, 'BOSS').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {
@@ -74,21 +72,10 @@ export default function BossesPage() {
     setKeyword('')
   }
 
-  const unregisteredEntries = tag
-    ? []
-    : catalogEntries.filter((e) => {
-        const inWiki = bosses.some(
-          (b) => b.gameId === e.gameId && normalizeName(b.name) === normalizeName(e.name)
-        )
-        if (inWiki) return false
-        if (keyword && !normalizeName(e.name).includes(normalizeName(keyword))) return false
-        return true
-      })
-
   return (
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
       <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">ボス一覧</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">ボス図録</h1>
         {loggedIn && (
           <Link
             to="/catalog"
@@ -143,8 +130,8 @@ export default function BossesPage() {
         )}
       </div>
 
-      {bosses.length === 0 && unregisteredEntries.length === 0 ? (
-        <p className="text-gray-500 text-center py-12">ボスが登録されていません</p>
+      {bosses.length === 0 ? (
+        <p className="text-gray-500 text-center py-12">ボスがありません</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {bosses.map((boss, index) => (
@@ -187,27 +174,8 @@ export default function BossesPage() {
               </Link>
             </div>
           ))}
-          {unregisteredEntries.map((entry) => (
-            <div key={`catalog-${entry.id}`} className="bg-zinc-900 border border-zinc-700 rounded-xl shadow overflow-hidden opacity-60">
-              {loggedIn ? (
-                <Link to={`/bosses/new?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}`} className="block h-full">
-                  <div className="w-full h-48 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs">未登録</div>
-                  <div className="p-3 flex flex-col gap-1">
-                    <p className="font-semibold text-gray-300 text-sm line-clamp-2">{entry.name}</p>
-                    <p className="text-zinc-500 text-xs">クリックして登録</p>
-                  </div>
-                </Link>
-              ) : (
-                <div>
-                  <div className="w-full h-48 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs">未登録</div>
-                  <div className="p-3"><p className="font-semibold text-gray-300 text-sm line-clamp-2">{entry.name}</p></div>
-                </div>
-              )}
-            </div>
-          ))}
         </div>
       )}
     </div>
   )
 }
-  const normalizeName = (name: string) => name.trim().toLowerCase()
