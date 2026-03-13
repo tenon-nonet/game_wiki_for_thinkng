@@ -11,6 +11,15 @@ export default function BossFormPage() {
   const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
+  const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'bosses'
+  const catalogGameId = searchParams.get('gameId')
+  const catalogTab = searchParams.get('tab') ?? 'BOSS'
+  const detailReturnQuery = fromCatalog
+    ? `?from=catalog${catalogGameId ? `&gameId=${catalogGameId}` : ''}&tab=${catalogTab}`
+    : fromEncyclopedia
+      ? '?from=bosses'
+      : ''
 
   const initialGameLoaded = useRef(false)
   const [games, setGames] = useState<Game[]>([])
@@ -124,7 +133,7 @@ export default function BossFormPage() {
     try {
       if (isEdit) {
         await updateBoss(Number(id), data)
-        navigate(`/bosses/${id}`)
+        navigate(`/bosses/${id}${detailReturnQuery}`)
       } else {
         const res = await createBoss(data)
         navigate(`/bosses/${res.data.id}`)

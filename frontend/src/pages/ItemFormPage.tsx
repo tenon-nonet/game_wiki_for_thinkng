@@ -12,6 +12,15 @@ export default function ItemFormPage() {
   const admin = isAdmin()
   const fileInputId = useId()
   const initialGameLoaded = useRef(false)
+  const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'items'
+  const catalogGameId = searchParams.get('gameId')
+  const catalogTab = searchParams.get('tab') ?? 'ITEM'
+  const detailReturnQuery = fromCatalog
+    ? `?from=catalog${catalogGameId ? `&gameId=${catalogGameId}` : ''}&tab=${catalogTab}`
+    : fromEncyclopedia
+      ? '?from=items'
+      : ''
 
   const [games, setGames] = useState<Game[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
@@ -145,7 +154,7 @@ export default function ItemFormPage() {
     try {
       if (isEdit) {
         await updateItem(Number(id), data)
-        navigate(`/items/${id}`)
+        navigate(`/items/${id}${detailReturnQuery}`)
       } else {
         const res = await createItem(data)
         navigate(`/items/${res.data.id}`)

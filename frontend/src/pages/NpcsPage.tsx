@@ -144,7 +144,7 @@ export default function NpcsPage() {
           {npcs.map((npc, index) => (
             <EncyclopediaCard
               key={npc.id}
-              to={`/npcs/${npc.id}`}
+              to={`/npcs/${npc.id}?from=npcs`}
               name={npc.name}
               gameName={npc.gameName}
               imagePath={npc.imagePath}

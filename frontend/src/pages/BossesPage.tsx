@@ -144,7 +144,7 @@ export default function BossesPage() {
           {bosses.map((boss, index) => (
             <EncyclopediaCard
               key={boss.id}
-              to={`/bosses/${boss.id}`}
+              to={`/bosses/${boss.id}?from=bosses`}
               name={boss.name}
               gameName={boss.gameName}
               imagePath={boss.imagePath}

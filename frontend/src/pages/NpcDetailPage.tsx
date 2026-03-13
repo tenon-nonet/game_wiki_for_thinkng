@@ -10,7 +10,10 @@ export default function NpcDetailPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'npcs'
   const catalogUrl = `/catalog${searchParams.get('gameId') ? `?gameId=${searchParams.get('gameId')}&tab=${searchParams.get('tab') ?? 'NPC'}` : ''}`
+  const detailQueryFromCatalog = `?from=catalog${searchParams.get('gameId') ? `&gameId=${searchParams.get('gameId')}` : ''}&tab=${searchParams.get('tab') ?? 'NPC'}`
+  const detailQueryFromEncyclopedia = '?from=npcs'
   const [npc, setNpc] = useState<Npc | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
@@ -75,7 +78,7 @@ export default function NpcDetailPage() {
             {loggedIn && (
               <div className="flex gap-2 flex-shrink-0">
                 <Link
-                  to={`/npcs/${npc.id}/edit`}
+                  to={`/npcs/${npc.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
                   className="text-gray-100 hover:underline text-sm"
                 >
                   編集

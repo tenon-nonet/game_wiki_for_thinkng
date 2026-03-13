@@ -10,7 +10,10 @@ export default function BossDetailPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'bosses'
   const catalogUrl = `/catalog${searchParams.get('gameId') ? `?gameId=${searchParams.get('gameId')}&tab=${searchParams.get('tab') ?? 'BOSS'}` : ''}`
+  const detailQueryFromCatalog = `?from=catalog${searchParams.get('gameId') ? `&gameId=${searchParams.get('gameId')}` : ''}&tab=${searchParams.get('tab') ?? 'BOSS'}`
+  const detailQueryFromEncyclopedia = '?from=bosses'
   const [boss, setBoss] = useState<Boss | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
@@ -75,7 +78,7 @@ export default function BossDetailPage() {
             {loggedIn && (
               <div className="flex gap-2 flex-shrink-0">
                 <Link
-                  to={`/bosses/${boss.id}/edit`}
+                  to={`/bosses/${boss.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
                   className="text-gray-100 hover:underline text-sm"
                 >
                   編集

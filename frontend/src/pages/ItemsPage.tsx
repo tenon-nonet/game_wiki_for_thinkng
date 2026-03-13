@@ -152,7 +152,7 @@ export default function ItemsPage() {
           {items.map((item, index) => (
             <EncyclopediaCard
               key={item.id}
-              to={`/items/${item.id}`}
+              to={`/items/${item.id}?from=items`}
               name={item.name}
               gameName={item.gameName}
               imagePath={item.imagePath}

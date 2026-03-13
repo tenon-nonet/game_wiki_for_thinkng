@@ -11,6 +11,15 @@ export default function NpcFormPage() {
   const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
+  const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'npcs'
+  const catalogGameId = searchParams.get('gameId')
+  const catalogTab = searchParams.get('tab') ?? 'NPC'
+  const detailReturnQuery = fromCatalog
+    ? `?from=catalog${catalogGameId ? `&gameId=${catalogGameId}` : ''}&tab=${catalogTab}`
+    : fromEncyclopedia
+      ? '?from=npcs'
+      : ''
 
   const initialGameLoaded = useRef(false)
   const [games, setGames] = useState<Game[]>([])
@@ -126,7 +135,7 @@ export default function NpcFormPage() {
     try {
       if (isEdit) {
         await updateNpc(Number(id), data)
-        navigate(`/npcs/${id}`)
+        navigate(`/npcs/${id}${detailReturnQuery}`)
       } else {
         const res = await createNpc(data)
         navigate(`/npcs/${res.data.id}`)
