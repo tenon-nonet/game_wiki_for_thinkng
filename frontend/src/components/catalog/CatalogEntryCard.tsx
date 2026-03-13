@@ -20,10 +20,10 @@ export default function CatalogEntryCard({ entry, status, imagePath, onOpen, onD
         <img
           src={`/uploads/${imagePath}`}
           alt={entry.name}
-          className="h-16 w-full object-cover object-top"
+          className="h-20 w-full object-cover object-top"
         />
       ) : (
-        <div className="flex h-16 w-full items-center justify-center bg-zinc-800 text-xs text-zinc-600">
+        <div className="flex h-20 w-full items-center justify-center bg-zinc-800 text-xs text-zinc-600">
           画像なし
         </div>
       )}
