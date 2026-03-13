@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getNpc, deleteNpc, getItems } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
@@ -10,7 +10,10 @@ export default function NpcDetailPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'npcs'
   const catalogUrl = `/catalog${searchParams.get('gameId') ? `?gameId=${searchParams.get('gameId')}&tab=${searchParams.get('tab') ?? 'NPC'}` : ''}`
+  const detailQueryFromCatalog = `?from=catalog${searchParams.get('gameId') ? `&gameId=${searchParams.get('gameId')}` : ''}&tab=${searchParams.get('tab') ?? 'NPC'}`
+  const detailQueryFromEncyclopedia = '?from=npcs'
   const [npc, setNpc] = useState<Npc | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
@@ -59,19 +62,23 @@ export default function NpcDetailPage() {
             alt={npc.name}
             className="w-full max-h-[500px] object-contain bg-zinc-900"
           />
-        ) : (
+          ) : (
           <div className="w-full h-48 bg-zinc-700 flex items-center justify-center text-gray-500">
             画像なし
           </div>
         )}
 
         <div className="p-5 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
+          <Link to={`/games/${npc.gameId}`} className="text-gray-100 hover:underline text-sm">
+            {npc.gameName}
+          </Link>
+
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{npc.name}</h1>
             {loggedIn && (
               <div className="flex gap-2 flex-shrink-0">
                 <Link
-                  to={`/npcs/${npc.id}/edit`}
+                  to={`/npcs/${npc.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
                   className="text-gray-100 hover:underline text-sm"
                 >
                   編集
@@ -85,17 +92,13 @@ export default function NpcDetailPage() {
             )}
           </div>
 
-          <Link to={`/games/${npc.gameId}`} className="text-gray-100 hover:underline text-sm">
-            {npc.gameName}
-          </Link>
-
           {npc.description && (
             <p className="text-gray-300 mt-4 whitespace-pre-wrap">{npc.description}</p>
           )}
 
           {npc.dialogues?.length > 0 && (
             <div className="mt-6">
-              <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">セリフ</h2>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">セリフ</h2>
               <div className="space-y-2">
                 {dialogues.filter((entry) => entry.text).map((entry, i) => (
                   <div key={i} className="flex gap-3 items-start">
@@ -119,9 +122,10 @@ export default function NpcDetailPage() {
             </div>
           )}
 
-          <p className="text-xs text-gray-500 mt-6">
-            追加日: {new Date(npc.createdAt).toLocaleDateString('ja-JP')}
-          </p>
+          <div className="mt-6 space-y-1 text-xs text-gray-500">
+            <p>追加日: {new Date(npc.createdAt).toLocaleDateString('ja-JP')}</p>
+            <p>更新日: {new Date(npc.updatedAt).toLocaleDateString('ja-JP')}</p>
+          </div>
         </div>
       </div>
 
@@ -170,3 +174,5 @@ export default function NpcDetailPage() {
     </div>
   )
 }
+
+

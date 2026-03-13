@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getBoss, deleteBoss, getItems } from '../api'
 import { isLoggedIn, isAdmin } from '../auth'
@@ -10,7 +10,10 @@ export default function BossDetailPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const fromCatalog = searchParams.get('from') === 'catalog'
+  const fromEncyclopedia = searchParams.get('from') === 'bosses'
   const catalogUrl = `/catalog${searchParams.get('gameId') ? `?gameId=${searchParams.get('gameId')}&tab=${searchParams.get('tab') ?? 'BOSS'}` : ''}`
+  const detailQueryFromCatalog = `?from=catalog${searchParams.get('gameId') ? `&gameId=${searchParams.get('gameId')}` : ''}&tab=${searchParams.get('tab') ?? 'BOSS'}`
+  const detailQueryFromEncyclopedia = '?from=bosses'
   const [boss, setBoss] = useState<Boss | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const loggedIn = isLoggedIn()
@@ -59,19 +62,23 @@ export default function BossDetailPage() {
             alt={boss.name}
             className="w-full max-h-[500px] object-contain bg-zinc-900"
           />
-        ) : (
+          ) : (
           <div className="w-full h-48 bg-zinc-700 flex items-center justify-center text-gray-500">
             画像なし
           </div>
         )}
 
         <div className="p-5 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
+          <Link to={`/games/${boss.gameId}`} className="text-gray-100 hover:underline text-sm">
+            {boss.gameName}
+          </Link>
+
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{boss.name}</h1>
             {loggedIn && (
               <div className="flex gap-2 flex-shrink-0">
                 <Link
-                  to={`/bosses/${boss.id}/edit`}
+                  to={`/bosses/${boss.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
                   className="text-gray-100 hover:underline text-sm"
                 >
                   編集
@@ -85,13 +92,9 @@ export default function BossDetailPage() {
             )}
           </div>
 
-          <Link to={`/games/${boss.gameId}`} className="text-gray-100 hover:underline text-sm">
-            {boss.gameName}
-          </Link>
-
           {dialogues.some((entry) => entry.text) && (
             <div className="mt-6">
-              <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">セリフ</h2>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">セリフ</h2>
               <div className="space-y-2">
                 {dialogues.filter((entry) => entry.text).map((entry, i) => (
                   <div key={i} className="flex gap-3 items-start">
@@ -115,9 +118,10 @@ export default function BossDetailPage() {
             </div>
           )}
 
-          <p className="text-xs text-gray-500 mt-6">
-            追加日: {new Date(boss.createdAt).toLocaleDateString('ja-JP')}
-          </p>
+          <div className="mt-6 space-y-1 text-xs text-gray-500">
+            <p>追加日: {new Date(boss.createdAt).toLocaleDateString('ja-JP')}</p>
+            <p>更新日: {new Date(boss.updatedAt).toLocaleDateString('ja-JP')}</p>
+          </div>
         </div>
       </div>
 
@@ -166,3 +170,5 @@ export default function BossDetailPage() {
     </div>
   )
 }
+
+

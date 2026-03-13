@@ -13,8 +13,10 @@ export default function ItemDetailPage() {
   const fromCatalog = searchParams.get('from') === 'catalog' || fromCatalogInState
   const catalogGameId = searchParams.get('gameId')
   const catalogTab = searchParams.get('tab') ?? 'ITEM'
+  const fromEncyclopedia = searchParams.get('from') === 'items'
   const catalogUrl = `/catalog${catalogGameId ? `?gameId=${catalogGameId}&tab=${catalogTab}` : ''}`
   const detailQueryFromCatalog = `?from=catalog${catalogGameId ? `&gameId=${catalogGameId}` : ''}&tab=${catalogTab}`
+  const detailQueryFromEncyclopedia = '?from=items'
   const [item, setItem] = useState<Item | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
   const [prevItem, setPrevItem] = useState<Item | null>(null)
@@ -139,19 +141,19 @@ export default function ItemDetailPage() {
       <div className="space-y-2">
         <div className="flex items-center justify-start">
           <Link to={fromCatalog ? catalogUrl : '/items'} className="text-gray-100 hover:underline text-sm">
-            ← {fromCatalog ? '目録へ' : 'アイテム一覧へ'}
+            ← {fromCatalog ? '目録へ' : 'アイテム図録へ'}
           </Link>
         </div>
         <div className="flex items-center justify-between gap-3">
           {prevItem ? (
-            <Link to={`/items/${prevItem.id}${fromCatalog ? detailQueryFromCatalog : ''}`} className="min-w-0 flex-1 text-gray-300 hover:underline text-sm truncate">
+            <Link to={`/items/${prevItem.id}${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`} className="min-w-0 flex-1 text-gray-300 hover:underline text-sm truncate">
               ← {prevItem.name}
             </Link>
           ) : (
             <span className="flex-1" />
           )}
           {nextItem ? (
-            <Link to={`/items/${nextItem.id}${fromCatalog ? detailQueryFromCatalog : ''}`} className="min-w-0 flex-1 text-gray-300 hover:underline text-sm truncate text-right">
+            <Link to={`/items/${nextItem.id}${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`} className="min-w-0 flex-1 text-gray-300 hover:underline text-sm truncate text-right">
               {nextItem.name} →
             </Link>
           ) : (
@@ -174,12 +176,16 @@ export default function ItemDetailPage() {
         )}
 
         <div className="p-5 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
+          <Link to={`/games/${item.gameId}`} className="text-gray-100 hover:underline text-sm">
+            {item.gameName}
+          </Link>
+
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{item.name}</h1>
             {loggedIn && (
               <div className="flex gap-2 flex-shrink-0">
                 <Link
-                  to={`/items/${item.id}/edit`}
+                  to={`/items/${item.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
                   className="text-gray-100 hover:underline text-sm"
                 >
                   編集
@@ -192,10 +198,6 @@ export default function ItemDetailPage() {
               </div>
             )}
           </div>
-
-          <Link to={`/games/${item.gameId}`} className="text-gray-100 hover:underline text-sm">
-            {item.gameName}
-          </Link>
 
           {item.description && (
             <p className="text-gray-300 mt-4 whitespace-pre-wrap">{item.description}</p>
@@ -211,9 +213,10 @@ export default function ItemDetailPage() {
             </div>
           )}
 
-          <p className="text-xs text-gray-500 mt-6">
-            追加日: {new Date(item.createdAt).toLocaleDateString('ja-JP')}
-          </p>
+          <div className="mt-6 space-y-1 text-xs text-gray-500">
+            <p>追加日: {new Date(item.createdAt).toLocaleDateString('ja-JP')}</p>
+            <p>更新日: {new Date(item.updatedAt).toLocaleDateString('ja-JP')}</p>
+          </div>
         </div>
       </div>
 
@@ -398,3 +401,5 @@ export default function ItemDetailPage() {
     </div>
   )
 }
+
+
