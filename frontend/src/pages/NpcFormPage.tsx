@@ -204,7 +204,7 @@ export default function NpcFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                添付すると自動で文字を入力しますが、結構間違えます
+                添付すると画像解析して説明欄に自動入力されますが、結構間違えますので校閲お願いします
               </span>
             </label>
             {(preview || existingImage) && (
@@ -264,7 +264,7 @@ export default function NpcFormPage() {
                       next[i] = { ...next[i], text: e.target.value }
                       setDialogues(next)
                     }}
-                    rows={2}
+                    rows={5}
                     className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
                     placeholder={defaultDialogueLabel(i)}
                   />

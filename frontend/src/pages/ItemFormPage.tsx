@@ -285,7 +285,7 @@ export default function ItemFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                添付すると自動で文字を入力しますが、結構間違えます
+                添付すると画像解析して説明欄に自動入力されますが、結構間違えますので校閲お願いします
               </span>
             </label>
             {(preview || existingImage) && (
@@ -330,7 +330,7 @@ export default function ItemFormPage() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={6}
+              rows={8}
               disabled={analyzing}
               placeholder={analyzing ? '解析中...' : ''}
               className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
