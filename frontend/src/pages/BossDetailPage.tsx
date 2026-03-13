@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getBoss, deleteBoss, getItems } from '../api'
-import { isLoggedIn, isAdmin } from '../auth'
+import { isAdmin } from '../auth'
 import { parseDialogueLines } from '../dialogues'
 import type { Boss, Item } from '../types'
 
@@ -16,7 +16,6 @@ export default function BossDetailPage() {
   const detailQueryFromEncyclopedia = '?from=bosses'
   const [boss, setBoss] = useState<Boss | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
-  const loggedIn = isLoggedIn()
   const admin = isAdmin()
   const dialogues = parseDialogueLines(boss?.description ? boss.description.split(/\r?\n/) : [])
 
@@ -75,21 +74,19 @@ export default function BossDetailPage() {
 
           <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{boss.name}</h1>
-            {loggedIn && (
-              <div className="flex gap-2 flex-shrink-0">
-                <Link
-                  to={`/bosses/${boss.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
-                  className="text-gray-100 hover:underline text-sm"
-                >
-                  編集
-                </Link>
-                {admin && (
-                  <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
-                    削除
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="flex gap-2 flex-shrink-0">
+              <Link
+                to={`/bosses/${boss.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
+                className="text-gray-100 hover:underline text-sm"
+              >
+                編集
+              </Link>
+              {admin && (
+                <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
+                  削除
+                </button>
+              )}
+            </div>
           </div>
 
           {dialogues.some((entry) => entry.text) && (

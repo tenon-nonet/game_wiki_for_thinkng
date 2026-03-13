@@ -17,7 +17,6 @@ public class ImageAnalysisController {
     private final ImageAnalysisService imageAnalysisService;
 
     @PostMapping("/image-text")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, String>> extractText(
             @RequestParam("image") MultipartFile image) {
         try {

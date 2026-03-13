@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
-import { isLoggedIn, getUsername, isAdmin } from '../auth'
+import { getUsername, isAdmin } from '../auth'
 import type { Item, Comment, Game, Tag } from '../types'
 
 export default function ItemDetailPage() {
@@ -33,7 +33,6 @@ export default function ItemDetailPage() {
   const [searchGameId, setSearchGameId] = useState('')
   const [searchTag, setSearchTag] = useState('')
   const [searchKeyword, setSearchKeyword] = useState('')
-  const loggedIn = isLoggedIn()
   const currentUser = getUsername()
   const admin = isAdmin()
 
@@ -253,21 +252,19 @@ export default function ItemDetailPage() {
 
           <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{item.name}</h1>
-            {loggedIn && (
-              <div className="flex gap-2 flex-shrink-0">
-                <Link
-                  to={`/items/${item.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
-                  className="text-gray-100 hover:underline text-sm"
-                >
-                  編集
-                </Link>
-                {admin && (
-                  <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
-                    削除
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="flex gap-2 flex-shrink-0">
+              <Link
+                to={`/items/${item.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
+                className="text-gray-100 hover:underline text-sm"
+              >
+                編集
+              </Link>
+              {admin && (
+                <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">
+                  削除
+                </button>
+              )}
+            </div>
           </div>
 
           {item.description && (

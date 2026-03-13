@@ -34,7 +34,6 @@ public class NpcController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<NpcResponse> create(
             @Valid @RequestPart("data") NpcRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image) {
@@ -42,7 +41,6 @@ public class NpcController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<NpcResponse> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") NpcRequest request,
