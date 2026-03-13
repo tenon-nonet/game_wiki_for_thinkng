@@ -40,9 +40,6 @@ public class Boss {
     )
     private Set<Tag> tags = new HashSet<>();
 
-    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
-    private int sortOrder = 0;
-
     @CreationTimestamp
     private LocalDateTime createdAt;
 

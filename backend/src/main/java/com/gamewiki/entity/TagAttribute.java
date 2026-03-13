@@ -19,9 +19,6 @@ public class TagAttribute {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(name = "sort_order")
-    private int sortOrder = 0;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", nullable = false)
     private Game game;
