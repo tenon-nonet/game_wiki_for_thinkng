@@ -9,6 +9,8 @@ import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
 import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,18 +44,7 @@ public class BossService {
         List<Boss> bosses = gameId != null
                 ? bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
                 : bossRepository.findAllByOrderBySortOrderAscIdAsc();
-        if (tagName != null && !tagName.isBlank()) {
-            bosses = bosses.stream()
-                    .filter(b -> b.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            bosses = bosses.stream()
-                    .filter(b -> b.getName().toLowerCase().contains(lower)
-                            || (b.getDescription() != null && b.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        bosses = EntitySearchFilter.apply(bosses, tagName, keyword, Boss::getTags, Boss::getName, Boss::getDescription);
         return bosses.stream().map(this::toResponse).toList();
     }
 

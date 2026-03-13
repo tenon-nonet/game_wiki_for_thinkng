@@ -10,6 +10,8 @@ import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
 import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,18 +45,7 @@ public class NpcService {
         List<Npc> npcs = gameId != null
                 ? npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
                 : npcRepository.findAllByOrderBySortOrderAscIdAsc();
-        if (tagName != null && !tagName.isBlank()) {
-            npcs = npcs.stream()
-                    .filter(n -> n.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            npcs = npcs.stream()
-                    .filter(n -> n.getName().toLowerCase().contains(lower)
-                            || (n.getDescription() != null && n.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        npcs = EntitySearchFilter.apply(npcs, tagName, keyword, Npc::getTags, Npc::getName, Npc::getDescription);
         return npcs.stream().map(this::toResponse).toList();
     }
 

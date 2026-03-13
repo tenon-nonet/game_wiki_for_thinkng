@@ -9,6 +9,8 @@ import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
 import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,18 +44,7 @@ public class ItemService {
         List<Item> items = gameId != null
                 ? itemRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
                 : itemRepository.findAllByOrderBySortOrderAscIdAsc();
-        if (tagName != null && !tagName.isBlank()) {
-            items = items.stream()
-                    .filter(i -> i.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            items = items.stream()
-                    .filter(i -> i.getName().toLowerCase().contains(lower)
-                            || (i.getDescription() != null && i.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        items = EntitySearchFilter.apply(items, tagName, keyword, Item::getTags, Item::getName, Item::getDescription);
         return items.stream().map(this::toResponse).toList();
     }
 
