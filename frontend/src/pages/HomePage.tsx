@@ -5,6 +5,14 @@ import { isAdmin } from '../auth'
 import type { Game } from '../types'
 
 export default function HomePage() {
+  const FROM_SOFTWARE_NEWS_QUERY = [
+    'FromSoftware',
+    'フロムソフトウェア',
+    'ELDEN RING',
+    'ダークソウル',
+    'ブラッドボーン',
+  ].join(' OR ')
+
   const [games, setGames] = useState<Game[]>([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', description: '' })
@@ -24,10 +32,9 @@ export default function HomePage() {
   const load = async (q?: string) => {
     const res = await getGames(q)
     setGames(res.data)
-    if (!q && res.data.length > 0) {
+    if (!q) {
       setNewsLoading(true)
-      const query = res.data.map((g) => g.name).join(' OR ')
-      getNews(query, 5).then((r) => {
+      getNews(FROM_SOFTWARE_NEWS_QUERY, 5).then((r) => {
         setNews(r.data)
         setNewsLoading(false)
       }).catch(() => setNewsLoading(false))
@@ -261,14 +268,14 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* ゲーム関連ニュース */}
+      {/* 関連ニュース */}
       {(newsLoading || news.length > 0) && (
         <section className="mt-12 max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">ゲーム関連ニュース</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">関連ニュース</h2>
             {!newsLoading && news.length > 0 && (
               <Link to="/news" className="text-gray-100 hover:underline text-sm">
-                ニュース一覧はコチラ →
+                関連ニュース一覧へ →
               </Link>
             )}
           </div>

@@ -351,7 +351,7 @@ export default function ItemFormPage() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={8}
+              rows={12}
               disabled={analyzing}
               placeholder={analyzing ? '解析中...' : ''}
               className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
