@@ -59,12 +59,13 @@ export function groupItemsByCategory(entries: CatalogEntry[], categoryOrder: str
   }
 
   const groups: { label: string; entries: CatalogEntry[] }[] = []
-  for (const category of [...categoryOrder, UNCATEGORIZED_LABEL]) {
+  const orderedCategories = [...categoryOrder, UNCATEGORIZED_LABEL]
+  for (const category of orderedCategories) {
     const categoryEntries = map.get(category)
     if (categoryEntries?.length) groups.push({ label: category, entries: categoryEntries })
   }
   for (const [category, categoryEntries] of map.entries()) {
-    if (![...categoryOrder, UNCATEGORIZED_LABEL].includes(category)) {
+    if (!orderedCategories.includes(category)) {
       groups.push({ label: category, entries: categoryEntries })
     }
   }
@@ -97,10 +98,7 @@ export function groupItemsByGameAndCategory(entries: CatalogEntry[], games: Game
       const orderedCategories = game?.categories ?? []
       return {
         gameName,
-        categories: groupItemsByCategory(
-          Array.from(categoryMap.values()).flat(),
-          orderedCategories,
-        ),
+        categories: groupItemsByCategory(Array.from(categoryMap.values()).flat(), orderedCategories),
       }
     })
 }
