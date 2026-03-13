@@ -77,9 +77,11 @@ export default function NpcsPage() {
   const unregisteredEntries = tag
     ? []
     : catalogEntries.filter((e) => {
-        const inWiki = npcs.some((n) => n.name.toLowerCase() === e.name.toLowerCase())
+        const inWiki = npcs.some(
+          (n) => n.gameId === e.gameId && normalizeName(n.name) === normalizeName(e.name)
+        )
         if (inWiki) return false
-        if (keyword && !e.name.toLowerCase().includes(keyword.toLowerCase())) return false
+        if (keyword && !normalizeName(e.name).includes(normalizeName(keyword))) return false
         return true
       })
 
@@ -208,3 +210,4 @@ export default function NpcsPage() {
     </div>
   )
 }
+  const normalizeName = (name: string) => name.trim().toLowerCase()

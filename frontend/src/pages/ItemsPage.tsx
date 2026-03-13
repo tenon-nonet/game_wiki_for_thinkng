@@ -81,9 +81,11 @@ export default function ItemsPage() {
   const unregisteredEntries = tag
     ? []
     : catalogEntries.filter((e) => {
-        const matchedItem = items.find((i) => i.name.toLowerCase() === e.name.toLowerCase())
+        const matchedItem = items.find(
+          (i) => i.gameId === e.gameId && normalizeName(i.name) === normalizeName(e.name)
+        )
         if (isItemRegistered(matchedItem)) return false
-        if (keyword && !e.name.toLowerCase().includes(keyword.toLowerCase())) return false
+        if (keyword && !normalizeName(e.name).includes(normalizeName(keyword))) return false
         return true
       })
 
@@ -207,7 +209,9 @@ export default function ItemsPage() {
           {unregisteredEntries.map((entry) => (
             <div key={`catalog-${entry.id}`} className="bg-zinc-900 border border-zinc-700 rounded-lg shadow overflow-hidden opacity-60">
               {(() => {
-                const matchedItem = items.find((item) => item.name.toLowerCase() === entry.name.toLowerCase())
+                const matchedItem = items.find(
+                  (item) => item.gameId === entry.gameId && normalizeName(item.name) === normalizeName(entry.name)
+                )
                 const continuePath = matchedItem
                   ? `/items/${matchedItem.id}/edit?from=catalog&gameId=${entry.gameId}&tab=ITEM`
                   : `/items/new?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`
@@ -242,3 +246,4 @@ export default function ItemsPage() {
     </div>
   )
 }
+  const normalizeName = (name: string) => name.trim().toLowerCase()

@@ -86,23 +86,23 @@ export default function CatalogPage() {
     catalogEntries.filter((e) => e.type === tab)
 
   // Wiki 内の同名エントリを検索
-  const findWikiItem = (name: string) =>
-    items.find((i) => i.name.toLowerCase() === name.toLowerCase())
+  const findWikiItem = (entry: CatalogEntry) =>
+    items.find((i) => i.gameId === entry.gameId && normalizeName(i.name) === normalizeName(entry.name))
 
-  const findWikiBoss = (name: string) =>
-    bosses.find((b) => b.name.toLowerCase() === name.toLowerCase())
+  const findWikiBoss = (entry: CatalogEntry) =>
+    bosses.find((b) => b.gameId === entry.gameId && normalizeName(b.name) === normalizeName(entry.name))
 
-  const findWikiNpc = (name: string) =>
-    npcs.find((n) => n.name.toLowerCase() === name.toLowerCase())
+  const findWikiNpc = (entry: CatalogEntry) =>
+    npcs.find((n) => n.gameId === entry.gameId && normalizeName(n.name) === normalizeName(entry.name))
 
-  const findWiki = (name: string, tab: TabType) => {
-    if (tab === 'ITEM') return findWikiItem(name)
-    if (tab === 'BOSS') return findWikiBoss(name)
-    return findWikiNpc(name)
+  const findWiki = (entry: CatalogEntry, tab: TabType) => {
+    if (tab === 'ITEM') return findWikiItem(entry)
+    if (tab === 'BOSS') return findWikiBoss(entry)
+    return findWikiNpc(entry)
   }
 
   const getEntryStatus = (entry: CatalogEntry, tab: TabType): EntryStatus => {
-    const wiki = findWiki(entry.name, tab)
+    const wiki = findWiki(entry, tab)
     if (!wiki) return 'UNREGISTERED'
 
     const hasImage = !!wiki.imagePath
@@ -289,7 +289,7 @@ export default function CatalogPage() {
   })()
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
-    const wiki = findWiki(entry.name, tab)
+    const wiki = findWiki(entry, tab)
     const status = getEntryStatus(entry, tab)
     const hasImage = !!wiki?.imagePath
     const borderColor = 'border-zinc-700 hover:border-red-800'
@@ -591,3 +591,4 @@ export default function CatalogPage() {
     </div>
   )
 }
+  const normalizeName = (name: string) => name.trim().toLowerCase()

@@ -77,9 +77,11 @@ export default function BossesPage() {
   const unregisteredEntries = tag
     ? []
     : catalogEntries.filter((e) => {
-        const inWiki = bosses.some((b) => b.name.toLowerCase() === e.name.toLowerCase())
+        const inWiki = bosses.some(
+          (b) => b.gameId === e.gameId && normalizeName(b.name) === normalizeName(e.name)
+        )
         if (inWiki) return false
-        if (keyword && !e.name.toLowerCase().includes(keyword.toLowerCase())) return false
+        if (keyword && !normalizeName(e.name).includes(normalizeName(keyword))) return false
         return true
       })
 
@@ -208,3 +210,4 @@ export default function BossesPage() {
     </div>
   )
 }
+  const normalizeName = (name: string) => name.trim().toLowerCase()
