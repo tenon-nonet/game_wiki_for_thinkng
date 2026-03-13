@@ -2,6 +2,7 @@
 import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getNpc, deleteNpc, getItems } from '../api'
 import { isAdmin } from '../auth'
+import MessageOverlay from '../components/MessageOverlay'
 import { parseDialogueLines } from '../dialogues'
 import type { Npc, Item } from '../types'
 
@@ -66,28 +67,7 @@ export default function NpcDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
-      {showFlash && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/76 px-4">
-          <div className="w-full max-w-3xl">
-            <div className="mx-auto bg-gradient-to-b from-zinc-800/80 via-zinc-900/90 to-black/90 px-8 py-7 text-center shadow-[0_12px_36px_rgba(0,0,0,0.65)] backdrop-blur-[1px]">
-              <div className="mx-auto mb-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
-              <p className="text-[1.35rem] sm:text-[1.7rem] leading-tight font-serif font-medium tracking-[0.1em] text-amber-100/95 drop-shadow-[0_0_6px_rgba(251,191,36,0.28)]">
-                {flashMessage}
-              </p>
-              <div className="mx-auto mt-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
-            </div>
-            <div className="mt-4 flex justify-center">
-              <button
-                type="button"
-                onClick={closeFlash}
-                className="rounded-sm border border-amber-100/55 bg-black/70 px-10 py-2 text-sm font-medium tracking-[0.18em] text-amber-50 hover:bg-black/85"
-              >
-                閉じる
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showFlash && <MessageOverlay message={flashMessage} onClose={closeFlash} />}
       <div className="flex items-center gap-4">
         <Link to="/npcs" className="text-gray-100 hover:underline text-sm">← NPC一覧</Link>
         {fromCatalog && <Link to={catalogUrl} className="text-gray-400 hover:underline text-sm">← 目録</Link>}
@@ -113,12 +93,12 @@ export default function NpcDetailPage() {
 
           <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{npc.name}</h1>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <Link
                 to={`/npcs/${npc.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
-                className="text-gray-100 hover:underline text-sm"
+                className="inline-flex items-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-2.5 text-base font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"
               >
-                編集
+                情報を追加する
               </Link>
               {admin && (
                 <button onClick={handleDelete} className="text-gray-100 hover:underline text-sm">

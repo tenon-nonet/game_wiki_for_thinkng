@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGameOrder } from '../api'
 import type { GameFormData } from '../api'
 import { isAdmin } from '../auth'
+import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
 
 export default function GamesPage() {
@@ -46,6 +47,19 @@ export default function GamesPage() {
     } catch (err: any) {
       setError(err.response?.data?.error || '追加に失敗しました')
     }
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    if (!isGameImageFileSizeValid(file)) {
+      setError(GAME_IMAGE_FILE_SIZE_ERROR)
+      setImage(null)
+      setPreview(null)
+      e.target.value = ''
+      return
+    }
+    setImage(file)
+    setPreview(file ? URL.createObjectURL(file) : null)
   }
 
   const handleDragStart = (index: number) => setDragIndex(index)
@@ -145,7 +159,7 @@ export default function GamesPage() {
           <div>
             <label className="block text-sm text-gray-300 mb-1">画像</label>
             {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />}
-            <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setImage(f); setPreview(f ? URL.createObjectURL(f) : null) }} className="text-sm text-gray-400" />
+            <input type="file" accept="image/*" onChange={handleImageChange} className="text-sm text-gray-400" />
           </div>
           <div className="flex gap-2">
             <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm">保存</button>

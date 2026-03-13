@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit } from '../api'
 import { isAdmin } from '../auth'
+import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
 
 export default function HomePage() {
@@ -62,6 +63,32 @@ export default function HomePage() {
     } catch (err: any) {
       setError(err.response?.data?.error || '追加に失敗しました')
     }
+  }
+
+  const handleCreateImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    if (!isGameImageFileSizeValid(file)) {
+      setError(GAME_IMAGE_FILE_SIZE_ERROR)
+      setImage(null)
+      setPreview(null)
+      e.target.value = ''
+      return
+    }
+    setImage(file)
+    setPreview(file ? URL.createObjectURL(file) : null)
+  }
+
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    if (!isGameImageFileSizeValid(file)) {
+      setError(GAME_IMAGE_FILE_SIZE_ERROR)
+      setEditImage(null)
+      setEditPreview(null)
+      e.target.value = ''
+      return
+    }
+    setEditImage(file)
+    setEditPreview(file ? URL.createObjectURL(file) : null)
   }
 
   const startEdit = (game: Game) => {
@@ -162,7 +189,7 @@ export default function HomePage() {
             <div>
               <label className="block text-sm text-gray-300 mb-1">画像</label>
               {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />}
-              <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setImage(f); setPreview(f ? URL.createObjectURL(f) : null) }} className="text-sm text-gray-400" />
+              <input type="file" accept="image/*" onChange={handleCreateImageChange} className="text-sm text-gray-400" />
             </div>
             <div className="flex gap-2">
               <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded text-sm">保存</button>
@@ -205,7 +232,7 @@ export default function HomePage() {
                       {(editPreview || game.imagePath) && (
                         <img src={editPreview || `/uploads/${game.imagePath}`} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />
                       )}
-                      <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setEditImage(f); setEditPreview(f ? URL.createObjectURL(f) : null) }} className="text-xs text-gray-400" />
+                      <input type="file" accept="image/*" onChange={handleEditImageChange} className="text-xs text-gray-400" />
                     </div>
                     <div className="flex gap-2">
                       <button type="submit" className="bg-red-900 hover:bg-red-800 text-white px-3 py-1.5 rounded text-sm">保存</button>
