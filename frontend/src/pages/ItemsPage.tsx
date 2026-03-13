@@ -1,15 +1,14 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getItems, getGames, getTags, updateItemOrder, getCatalogEntries } from '../api'
+import { getItems, getGames, getTags, updateItemOrder } from '../api'
 import { isLoggedIn } from '../auth'
-import type { Item, Game, Tag, CatalogEntry } from '../types'
+import type { Item, Game, Tag } from '../types'
 
 export default function ItemsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState<Item[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [catalogEntries, setCatalogEntries] = useState<CatalogEntry[]>([])
   const [gameId, setGameId] = useState<string>(searchParams.get('gameId') || '')
   const [tag, setTag] = useState<string>(searchParams.get('tag') || '')
   const [keyword, setKeyword] = useState<string>(searchParams.get('keyword') || '')
@@ -65,7 +64,6 @@ export default function ItemsPage() {
     setSearchParams(params, { replace: true })
     getItems(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
       .then((r) => setItems(r.data))
-    getCatalogEntries(gameId ? Number(gameId) : undefined, 'ITEM').then((r) => setCatalogEntries(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {
@@ -73,21 +71,6 @@ export default function ItemsPage() {
     setTag('')
     setKeyword('')
   }
-
-  const isItemRegistered = (item: Item | undefined) =>
-    !!item && !!item.imagePath && !!item.description?.trim()
-
-  // カタログ登録済みだがwiki未登録のエントリ（タグフィルターなし時のみ表示）
-  const unregisteredEntries = tag
-    ? []
-    : catalogEntries.filter((e) => {
-        const matchedItem = items.find(
-          (i) => i.gameId === e.gameId && normalizeName(i.name) === normalizeName(e.name)
-        )
-        if (isItemRegistered(matchedItem)) return false
-        if (keyword && !normalizeName(e.name).includes(normalizeName(keyword))) return false
-        return true
-      })
 
   return (
     <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
@@ -155,7 +138,7 @@ export default function ItemsPage() {
         )}
       </div>
 
-      {items.length === 0 && unregisteredEntries.length === 0 ? (
+      {items.length === 0 ? (
         <p className="text-gray-500 text-center py-12">アイテムがありません</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -206,44 +189,8 @@ export default function ItemsPage() {
               )}
             </div>
           ))}
-          {unregisteredEntries.map((entry) => (
-            <div key={`catalog-${entry.id}`} className="bg-zinc-900 border border-zinc-700 rounded-lg shadow overflow-hidden opacity-60">
-              {(() => {
-                const matchedItem = items.find(
-                  (item) => item.gameId === entry.gameId && normalizeName(item.name) === normalizeName(entry.name)
-                )
-                const continuePath = matchedItem
-                  ? `/items/${matchedItem.id}/edit?from=catalog&gameId=${entry.gameId}&tab=ITEM`
-                  : `/items/new?name=${encodeURIComponent(entry.name)}&gameId=${entry.gameId}${entry.category ? `&category=${encodeURIComponent(entry.category)}` : ''}`
-                const cta = matchedItem ? 'クリックして続きを入力' : 'クリックして登録'
-                return loggedIn ? (
-                  <Link to={continuePath} className="flex items-stretch h-full">
-                    <div className="w-24 h-24 sm:w-36 sm:h-36 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs flex-shrink-0">
-                      未登録
-                    </div>
-                    <div className="p-3 sm:p-4 flex flex-col justify-center min-w-0">
-                      <p className="font-semibold text-gray-300 text-sm sm:text-base line-clamp-2 mb-1">{entry.name}</p>
-                      {entry.category && <p className="text-zinc-500 text-xs">{entry.category}</p>}
-                      <p className="text-zinc-500 text-xs mt-1">{cta}</p>
-                    </div>
-                  </Link>
-                ) : (
-                  <div className="flex items-stretch">
-                    <div className="w-24 h-24 sm:w-36 sm:h-36 bg-zinc-800 flex items-center justify-center text-zinc-600 text-xs flex-shrink-0">
-                      未登録
-                    </div>
-                    <div className="p-3 sm:p-4 flex flex-col justify-center min-w-0">
-                      <p className="font-semibold text-gray-300 text-sm sm:text-base line-clamp-2 mb-1">{entry.name}</p>
-                      {entry.category && <p className="text-zinc-500 text-xs">{entry.category}</p>}
-                    </div>
-                  </div>
-                )
-              })()}
-            </div>
-          ))}
         </div>
       )}
     </div>
   )
 }
-  const normalizeName = (name: string) => name.trim().toLowerCase()

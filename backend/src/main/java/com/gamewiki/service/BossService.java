@@ -94,10 +94,10 @@ public class BossService {
         Boss boss = getBoss(id);
         Long oldGameId = boss.getGame().getId();
         String oldName = boss.getName();
-        CatalogEntry catalogEntry = findCatalogEntryByNormalizedName(oldName, oldGameId, "BOSS");
+        CatalogEntry catalogEntry = resolveCatalogEntryForUpdate(oldName, request.getName(), oldGameId, "BOSS");
 
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
-        ensureNoDuplicateCatalogEntry(request.getName(), request.getGameId(), "BOSS", catalogEntry != null ? catalogEntry.getId() : null);
+        ensureNoDuplicateCatalogEntry(request.getName(), request.getGameId(), "BOSS", catalogEntry.getId());
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -114,17 +114,9 @@ public class BossService {
 
         Boss saved = bossRepository.save(boss);
 
-        if (catalogEntry == null) {
-            CatalogEntry newEntry = new CatalogEntry();
-            newEntry.setName(request.getName());
-            newEntry.setType("BOSS");
-            newEntry.setGame(game);
-            catalogEntryRepository.save(newEntry);
-        } else {
-            catalogEntry.setName(request.getName());
-            catalogEntry.setGame(game);
-            catalogEntryRepository.save(catalogEntry);
-        }
+        catalogEntry.setName(request.getName());
+        catalogEntry.setGame(game);
+        catalogEntryRepository.save(catalogEntry);
 
         return toResponse(saved);
     }
@@ -176,6 +168,22 @@ public class BossService {
                 .filter(e -> NameNormalizer.normalize(e.getName()).equals(target))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private CatalogEntry resolveCatalogEntryForUpdate(String oldName, String newName, Long oldGameId, String type) {
+        CatalogEntry byOldName = findCatalogEntryByNormalizedName(oldName, oldGameId, type);
+        if (byOldName != null) return byOldName;
+
+        CatalogEntry byNewName = findCatalogEntryByNormalizedName(newName, oldGameId, type);
+        if (byNewName != null) return byNewName;
+
+        String target = NameNormalizer.normalize(oldName);
+        List<CatalogEntry> candidates = catalogEntryRepository.findByTypeOrderByNameAsc(type).stream()
+                .filter(e -> NameNormalizer.normalize(e.getName()).equals(target))
+                .toList();
+        if (candidates.size() == 1) return candidates.get(0);
+
+        throw new IllegalStateException("目録エントリとの紐付け不整合があるため更新できません。目録を確認してください。");
     }
 
     private void ensureNoDuplicateCatalogEntry(String name, Long gameId, String type, Long excludeId) {
