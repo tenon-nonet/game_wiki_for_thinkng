@@ -12,20 +12,17 @@ import {
 } from '../api'
 import { isAdmin } from '../auth'
 import type { Boss, CatalogEntry, Game, Item, Npc } from '../types'
-
-type TabType = 'ITEM' | 'BOSS' | 'NPC'
-type EntryStatus = 'REGISTERED' | 'IN_PROGRESS' | 'UNREGISTERED'
-
-type WikiEntity = Item | Boss | Npc
-
-const TAB_CONFIG: { key: TabType; label: string }[] = [
-  { key: 'ITEM', label: 'アイテム' },
-  { key: 'BOSS', label: 'ボス' },
-  { key: 'NPC', label: 'NPC' },
-]
-
-const VALID_TABS: TabType[] = ['ITEM', 'BOSS', 'NPC']
-const UNCATEGORIZED_LABEL = '未分類'
+import {
+  filterEntries,
+  findWikiEntity,
+  getEntryStatus,
+  groupEntriesByGame,
+  groupItemsByCategory,
+  groupItemsByGameAndCategory,
+  TAB_CONFIG,
+  type TabType,
+  VALID_TABS,
+} from './catalogUtils'
 
 export default function CatalogPage() {
   const navigate = useNavigate()
@@ -84,41 +81,15 @@ export default function CatalogPage() {
 
   const entriesForTab = (tab: TabType) => catalogEntries.filter((entry) => entry.type === tab)
 
-  const findWiki = (entry: CatalogEntry, tab: TabType): WikiEntity | undefined => {
-    if (tab === 'ITEM') return items.find((item) => item.id === entry.id)
-    if (tab === 'BOSS') return bosses.find((boss) => boss.id === entry.id)
-    return npcs.find((npc) => npc.id === entry.id)
-  }
-
-  const getEntryStatus = (entry: CatalogEntry, tab: TabType): EntryStatus => {
-    const wiki = findWiki(entry, tab)
-    if (!wiki) return 'UNREGISTERED'
-
-    const hasImage = Boolean(wiki.imagePath)
-    const hasDescription = Boolean(wiki.description?.trim())
-    const hasTags = Boolean(wiki.tags?.length)
-
-    if (hasImage && hasDescription) return 'REGISTERED'
-    if (!hasImage && !hasDescription && !hasTags) return 'UNREGISTERED'
-    return 'IN_PROGRESS'
-  }
-
   const wikiPath = (tab: TabType) => {
     if (tab === 'ITEM') return 'items'
     if (tab === 'BOSS') return 'bosses'
     return 'npcs'
   }
 
-  const filteredEntries = (tab: TabType) => {
-    const list = entriesForTab(tab)
-    if (!keyword.trim()) return list
-    const lower = keyword.toLowerCase()
-    return list.filter((entry) => entry.name.toLowerCase().includes(lower))
-  }
-
   const progress = (tab: TabType) => {
     const all = entriesForTab(tab)
-    const registered = all.filter((entry) => getEntryStatus(entry, tab) === 'REGISTERED').length
+    const registered = all.filter((entry) => getEntryStatus(entry, tab, items, bosses, npcs) === 'REGISTERED').length
     return { registered, total: all.length }
   }
 
@@ -185,7 +156,7 @@ export default function CatalogPage() {
     }
   }
 
-  const currentEntries = filteredEntries(activeTab)
+  const currentEntries = filterEntries(entriesForTab(activeTab), keyword)
   const { registered, total } = progress(activeTab)
   const pct = total === 0 ? 0 : Math.round((registered / total) * 100)
   const isAllGames = selectedGameId === 0
@@ -194,88 +165,24 @@ export default function CatalogPage() {
 
   const groupedItemEntries = (() => {
     if (activeTab !== 'ITEM' || isAllGames) return null
-    const map = new Map<string, CatalogEntry[]>()
-    for (const entry of currentEntries) {
-      const key = entry.category || UNCATEGORIZED_LABEL
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(entry)
-    }
-
-    const groups: { label: string; entries: CatalogEntry[] }[] = []
-    const categoryOrder = [...gameCategories, UNCATEGORIZED_LABEL]
-    for (const category of categoryOrder) {
-      const entries = map.get(category)
-      if (entries?.length) groups.push({ label: category, entries })
-    }
-    for (const [category, entries] of map.entries()) {
-      if (!categoryOrder.includes(category)) groups.push({ label: category, entries })
-    }
-    return groups
+    return groupItemsByCategory(currentEntries, gameCategories)
   })()
 
   const groupedItemByGameAndCategory = (() => {
     if (!isAllGames || activeTab !== 'ITEM') return null
 
-    const gameMap = new Map<string, Map<string, CatalogEntry[]>>()
-    for (const entry of currentEntries) {
-      const gameName = entry.gameName
-      const category = entry.category || UNCATEGORIZED_LABEL
-      if (!gameMap.has(gameName)) gameMap.set(gameName, new Map())
-      const categoryMap = gameMap.get(gameName)!
-      if (!categoryMap.has(category)) categoryMap.set(category, [])
-      categoryMap.get(category)!.push(entry)
-    }
-
-    const gameOrderMap = new Map(games.map((game, index) => [game.name, index]))
-    return Array.from(gameMap.entries())
-      .sort(([a], [b]) => {
-        const ai = gameOrderMap.get(a)
-        const bi = gameOrderMap.get(b)
-        if (ai !== undefined && bi !== undefined) return ai - bi
-        if (ai !== undefined) return -1
-        if (bi !== undefined) return 1
-        return a.localeCompare(b, 'ja')
-      })
-      .map(([gameName, categoryMap]) => {
-        const game = games.find((candidate) => candidate.name === gameName)
-        const orderedCategories = game?.categories ? [...game.categories, UNCATEGORIZED_LABEL] : [UNCATEGORIZED_LABEL]
-        const categories: { label: string; entries: CatalogEntry[] }[] = []
-        for (const category of orderedCategories) {
-          const entries = categoryMap.get(category)
-          if (entries?.length) categories.push({ label: category, entries })
-        }
-        for (const [category, entries] of categoryMap.entries()) {
-          if (!orderedCategories.includes(category)) categories.push({ label: category, entries })
-        }
-        return { gameName, categories }
-      })
+    return groupItemsByGameAndCategory(currentEntries, games)
   })()
 
   const groupedByGame = (() => {
     if (!isAllGames) return null
 
-    const map = new Map<string, CatalogEntry[]>()
-    for (const entry of currentEntries) {
-      if (!map.has(entry.gameName)) map.set(entry.gameName, [])
-      map.get(entry.gameName)!.push(entry)
-    }
-
-    const gameOrderMap = new Map(games.map((game, index) => [game.name, index]))
-    return Array.from(map.entries())
-      .sort(([a], [b]) => {
-        const ai = gameOrderMap.get(a)
-        const bi = gameOrderMap.get(b)
-        if (ai !== undefined && bi !== undefined) return ai - bi
-        if (ai !== undefined) return -1
-        if (bi !== undefined) return 1
-        return a.localeCompare(b, 'ja')
-      })
-      .map(([gameName, entries]) => ({ gameName, entries }))
+    return groupEntriesByGame(currentEntries, games)
   })()
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
-    const wiki = findWiki(entry, tab)
-    const status = getEntryStatus(entry, tab)
+    const wiki = findWikiEntity(entry, tab, items, bosses, npcs)
+    const status = getEntryStatus(entry, tab, items, bosses, npcs)
     const hasImage = Boolean(wiki?.imagePath)
     const cardPath = `/${wikiPath(tab)}/${entry.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`
 

@@ -9,7 +9,9 @@ import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
-import com.gamewiki.util.NameNormalizer;
+import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,18 +45,7 @@ public class NpcService {
         List<Npc> npcs = gameId != null
                 ? npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
                 : npcRepository.findAllByOrderBySortOrderAscIdAsc();
-        if (tagName != null && !tagName.isBlank()) {
-            npcs = npcs.stream()
-                    .filter(n -> n.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            npcs = npcs.stream()
-                    .filter(n -> n.getName().toLowerCase().contains(lower)
-                            || (n.getDescription() != null && n.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        npcs = EntitySearchFilter.apply(npcs, tagName, keyword, Npc::getTags, Npc::getName, Npc::getDescription);
         return npcs.stream().map(this::toResponse).toList();
     }
 
@@ -153,13 +144,13 @@ public class NpcService {
     }
 
     private void ensureNoDuplicateNpc(String name, Long gameId, Long selfId) {
-        String target = NameNormalizer.normalize(name);
-        boolean duplicated = npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                .filter(npc -> selfId == null || !npc.getId().equals(selfId))
-                .map(Npc::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-        if (duplicated) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                npcRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Npc::getId,
+                Npc::getName,
+                name,
+                selfId
+        )) {
             throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
         }
     }

@@ -8,7 +8,9 @@ import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
 import com.gamewiki.repository.TagRepository;
-import com.gamewiki.util.NameNormalizer;
+import com.gamewiki.util.EntityNameConflictChecker;
+import com.gamewiki.util.EntitySearchFilter;
+import com.gamewiki.util.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,18 +44,7 @@ public class BossService {
         List<Boss> bosses = gameId != null
                 ? bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId)
                 : bossRepository.findAllByOrderBySortOrderAscIdAsc();
-        if (tagName != null && !tagName.isBlank()) {
-            bosses = bosses.stream()
-                    .filter(b -> b.getTags().stream().anyMatch(t -> t.getName().equalsIgnoreCase(tagName)))
-                    .toList();
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            String lower = keyword.toLowerCase();
-            bosses = bosses.stream()
-                    .filter(b -> b.getName().toLowerCase().contains(lower)
-                            || (b.getDescription() != null && b.getDescription().toLowerCase().contains(lower)))
-                    .toList();
-        }
+        bosses = EntitySearchFilter.apply(bosses, tagName, keyword, Boss::getTags, Boss::getName, Boss::getDescription);
         return bosses.stream().map(this::toResponse).toList();
     }
 
@@ -135,13 +126,13 @@ public class BossService {
     }
 
     private void ensureNoDuplicateBoss(String name, Long gameId, Long selfId) {
-        String target = NameNormalizer.normalize(name);
-        boolean duplicated = bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId).stream()
-                .filter(boss -> selfId == null || !boss.getId().equals(selfId))
-                .map(Boss::getName)
-                .map(NameNormalizer::normalize)
-                .anyMatch(target::equals);
-        if (duplicated) {
+        if (EntityNameConflictChecker.hasDuplicateName(
+                bossRepository.findByGameIdOrderBySortOrderAscIdAsc(gameId),
+                Boss::getId,
+                Boss::getName,
+                name,
+                selfId
+        )) {
             throw new IllegalArgumentException("同一ゲーム・同一種別で同名のデータが既に存在します");
         }
     }

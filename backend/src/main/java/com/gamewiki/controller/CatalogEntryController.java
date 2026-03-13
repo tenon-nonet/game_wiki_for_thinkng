@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,18 +29,14 @@ public class CatalogEntryController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CatalogEntryResponse> create(
-            @Valid @RequestBody CatalogEntryRequest request,
-            Authentication authentication) {
-        return ResponseEntity.ok(catalogEntryService.create(request, authentication.getName()));
+    public ResponseEntity<CatalogEntryResponse> create(@Valid @RequestBody CatalogEntryRequest request) {
+        return ResponseEntity.ok(catalogEntryService.create(request));
     }
 
     @PostMapping("/bulk")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Integer>> bulkCreate(
-            @Valid @RequestBody CatalogBulkRequest request,
-            Authentication authentication) {
-        return ResponseEntity.ok(catalogEntryService.bulkCreate(request, authentication.getName()));
+    public ResponseEntity<Map<String, Integer>> bulkCreate(@Valid @RequestBody CatalogBulkRequest request) {
+        return ResponseEntity.ok(catalogEntryService.bulkCreate(request));
     }
 
     @DeleteMapping("/{id}")
