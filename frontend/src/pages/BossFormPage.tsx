@@ -32,10 +32,17 @@ export default function BossFormPage() {
     description: '',
     gameId: searchParams.get('gameId') ?? '',
   })
+  const [initialForm, setInitialForm] = useState<{
+    name: string
+    description: string
+    gameId: string
+  } | null>(null)
   const [dialogues, setDialogues] = useState<DialogueEntry[]>([
     { label: defaultDialogueLabel(0), text: '' },
   ])
+  const [initialDialogues, setInitialDialogues] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
+  const [initialSelectedTags, setInitialSelectedTags] = useState<number[]>([])
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -54,17 +61,24 @@ export default function BossFormPage() {
           description: boss.description || '',
           gameId: String(boss.gameId),
         })
-        setDialogues(
-          parseDialogueLines(
-            boss.dialogues && boss.dialogues.length > 0
-              ? boss.dialogues
-              : (boss.description ? boss.description.split(/\r?\n/) : [])
-          )
+        setInitialForm({
+          name: boss.name,
+          description: boss.description || '',
+          gameId: String(boss.gameId),
+        })
+        const parsedDialogues = parseDialogueLines(
+          boss.dialogues && boss.dialogues.length > 0
+            ? boss.dialogues
+            : (boss.description ? boss.description.split(/\r?\n/) : [])
         )
+        setDialogues(parsedDialogues)
+        setInitialDialogues(serializeDialogueEntries(parsedDialogues))
         setExistingImage(boss.imagePath)
         getTags(boss.gameId, 'BOSS').then((r2) => {
           setAllTags(r2.data)
-          setSelectedTags(new Set(boss.tags.map((t) => t.id)))
+          const selectedTagIds = boss.tags.map((t) => t.id).sort((a, b) => a - b)
+          setSelectedTags(new Set(selectedTagIds))
+          setInitialSelectedTags(selectedTagIds)
         })
       })
     }
@@ -162,6 +176,16 @@ export default function BossFormPage() {
       setError(err.response?.data?.error || '保存に失敗しました')
     }
   }
+  const serializedDialogues = serializeDialogueEntries(dialogues)
+  const selectedTagIds = Array.from(selectedTags).sort((a, b) => a - b)
+  const hasBossChanges = !isEdit || !initialForm
+    ? true
+    : image !== null
+      || form.name !== initialForm.name
+      || form.description !== initialForm.description
+      || form.gameId !== initialForm.gameId
+      || JSON.stringify(serializedDialogues) !== JSON.stringify(initialDialogues)
+      || JSON.stringify(selectedTagIds) !== JSON.stringify(initialSelectedTags)
 
   if (!isEdit && (!form.name || !form.gameId)) {
     return (
@@ -389,15 +413,15 @@ export default function BossFormPage() {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={analyzing}
-              className="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+              disabled={analyzing || (isEdit && !hasBossChanges)}
+              className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-6 py-2.5 text-base font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isEdit ? '更新する' : '追加する'}
+              {isEdit ? '情報を更新する' : '追加する'}
             </button>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
+              className="inline-flex items-center justify-center rounded-md border border-zinc-500/70 bg-zinc-900/80 px-5 py-2.5 text-base font-medium text-gray-100 transition hover:border-zinc-400 hover:bg-zinc-800"
             >
               キャンセル
             </button>

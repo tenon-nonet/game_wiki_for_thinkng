@@ -33,8 +33,15 @@ export default function ItemFormPage() {
     gameId: searchParams.get('gameId') ?? '',
     category: searchParams.get('category') ?? '',
   })
+  const [initialForm, setInitialForm] = useState<{
+    name: string
+    description: string
+    gameId: string
+    category: string
+  } | null>(null)
   // 属性ごとに選択中タグID (max 1 per attribute)
   const [selectedByAttr, setSelectedByAttr] = useState<Record<string, number | null>>({})
+  const [initialSelectedByAttr, setInitialSelectedByAttr] = useState<Record<string, number | null>>({})
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [existingImage, setExistingImage] = useState<string | null>(null)
@@ -68,6 +75,12 @@ export default function ItemFormPage() {
           gameId: String(item.gameId),
           category: itemCategory,
         })
+        setInitialForm({
+          name: item.name,
+          description: item.description || '',
+          gameId: String(item.gameId),
+          category: itemCategory,
+        })
         setExistingImage(item.imagePath)
         Promise.all([
           getTags(item.gameId),
@@ -75,6 +88,14 @@ export default function ItemFormPage() {
         ]).then(([tagsRes, attrsRes]) => {
           setAllTags(tagsRes.data)
           setAttributes(attrsRes.data)
+          const byAttr: Record<string, number | null> = {}
+          attrsRes.data.forEach((a: TagAttribute) => { byAttr[a.name] = null })
+          item.tags.forEach((t) => {
+            if (t.attribute && t.attribute in byAttr) {
+              byAttr[t.attribute] = t.id
+            }
+          })
+          setInitialSelectedByAttr(byAttr)
           initSelection(item.tags, attrsRes.data)
         })
       })
@@ -186,6 +207,14 @@ export default function ItemFormPage() {
   const categoryOptions = form.category && !gameCategories.includes(form.category)
     ? [form.category, ...gameCategories]
     : gameCategories
+  const hasItemChanges = !isEdit || !initialForm
+    ? true
+    : image !== null
+      || form.name !== initialForm.name
+      || form.description !== initialForm.description
+      || form.gameId !== initialForm.gameId
+      || form.category !== initialForm.category
+      || JSON.stringify(selectedByAttr) !== JSON.stringify(initialSelectedByAttr)
 
   // 新規作成時は目録経由（name + gameId）が必須
   if (!isEdit && (!form.name || !form.gameId)) {
@@ -407,15 +436,15 @@ export default function ItemFormPage() {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={analyzing}
-              className="bg-red-900 hover:bg-red-800 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+              disabled={analyzing || (isEdit && !hasItemChanges)}
+              className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-6 py-2.5 text-base font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isEdit ? '更新する' : '追加する'}
+              {isEdit ? '情報を更新する' : '追加する'}
             </button>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded"
+              className="inline-flex items-center justify-center rounded-md border border-zinc-500/70 bg-zinc-900/80 px-5 py-2.5 text-base font-medium text-gray-100 transition hover:border-zinc-400 hover:bg-zinc-800"
             >
               キャンセル
             </button>
