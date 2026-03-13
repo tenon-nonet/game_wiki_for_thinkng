@@ -51,7 +51,7 @@ public class CatalogEntryService {
     }
 
     @Transactional
-    public CatalogEntryResponse create(CatalogEntryRequest request, String username) {
+    public CatalogEntryResponse create(CatalogEntryRequest request) {
         String type = request.getType().trim().toUpperCase();
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -67,7 +67,7 @@ public class CatalogEntryService {
     }
 
     @Transactional
-    public Map<String, Integer> bulkCreate(CatalogBulkRequest request, String username) {
+    public Map<String, Integer> bulkCreate(CatalogBulkRequest request) {
         String type = request.getType().trim().toUpperCase();
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
