@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getBoss, getGames, getTags, createTag, createBoss, updateBoss, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
@@ -11,6 +11,7 @@ export default function BossFormPage() {
   const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
+  const fileInputId = useId()
   const fromCatalog = searchParams.get('from') === 'catalog'
   const fromEncyclopedia = searchParams.get('from') === 'bosses'
   const catalogGameId = searchParams.get('gameId')
@@ -212,12 +213,27 @@ export default function BossFormPage() {
                 className="w-full max-w-[32rem] max-h-[24rem] object-contain rounded mb-3 border border-gray-600 bg-zinc-900"
               />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="text-sm text-gray-400"
-            />
+            <div className="rounded border border-dashed border-gray-500 bg-zinc-900/60 px-3 py-3">
+              <input
+                id={fileInputId}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor={fileInputId}
+                  className="inline-flex items-center rounded border border-zinc-500/70 bg-zinc-900 px-3 py-1.5 text-sm text-gray-100 hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  ファイルを選択
+                </label>
+                <span className="text-sm text-gray-300 truncate">
+                  {image?.name || '未選択'}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-gray-400">JPG / PNG などの画像を選択</p>
+            </div>
           </div>
 
           <div>

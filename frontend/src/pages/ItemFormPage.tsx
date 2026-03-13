@@ -171,6 +171,11 @@ export default function ItemFormPage() {
     tags: allTags.filter((t) => t.attribute === a.name),
   }))
   const hasAnyAttrTags = tagsByAttr.some(({ tags }) => tags.length > 0)
+  const selectedGame = games.find((g) => String(g.id) === form.gameId)
+  const gameCategories = selectedGame?.categories ?? []
+  const categoryOptions = form.category && !gameCategories.includes(form.category)
+    ? [form.category, ...gameCategories]
+    : gameCategories
 
   // 新規作成時は目録経由（name + gameId）が必須
   if (!isEdit && (!form.name || !form.gameId)) {
@@ -265,7 +270,22 @@ export default function ItemFormPage() {
                 className="w-full border border-amber-500/40 rounded px-3 py-2 bg-zinc-800 text-gray-200"
               />
             ) : (
+              <>
               <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                disabled={!form.gameId}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+              >
+                <option value="">未分類</option>
+                {categoryOptions.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              {form.gameId && gameCategories.length === 0 && (
+                <p className="mt-1 text-xs text-gray-400">このゲームにカテゴリマスタは未設定です</p>
+              )}
+              <select style={{ display: 'none' }}
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
                 className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
@@ -278,6 +298,7 @@ export default function ItemFormPage() {
                 <option value="タリスマン">タリスマン</option>
                 <option value="その他">その他</option>
               </select>
+              </>
             )}
           </div>
 
