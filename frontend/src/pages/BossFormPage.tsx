@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getBoss, getGames, getTags, createTag, createBoss, updateBoss, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
@@ -11,6 +11,7 @@ export default function BossFormPage() {
   const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
+  const fileInputId = useId()
   const fromCatalog = searchParams.get('from') === 'catalog'
   const fromEncyclopedia = searchParams.get('from') === 'bosses'
   const catalogGameId = searchParams.get('gameId')
@@ -26,6 +27,7 @@ export default function BossFormPage() {
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [form, setForm] = useState({
     name: searchParams.get('name') ?? '',
+    description: '',
     gameId: searchParams.get('gameId') ?? '',
   })
   const [dialogues, setDialogues] = useState<DialogueEntry[]>([
@@ -46,9 +48,16 @@ export default function BossFormPage() {
         const boss = r.data
         setForm({
           name: boss.name,
+          description: boss.description || '',
           gameId: String(boss.gameId),
         })
-        setDialogues(parseDialogueLines(boss.description ? boss.description.split(/\r?\n/) : []))
+        setDialogues(
+          parseDialogueLines(
+            boss.dialogues && boss.dialogues.length > 0
+              ? boss.dialogues
+              : (boss.description ? boss.description.split(/\r?\n/) : [])
+          )
+        )
         setExistingImage(boss.imagePath)
         getTags(boss.gameId, 'BOSS').then((r2) => {
           setAllTags(r2.data)
@@ -120,12 +129,13 @@ export default function BossFormPage() {
     setError('')
 
     const data = new FormData()
-    const description = serializeDialogueEntries(dialogues).join('\n')
+    const dialogueValues = serializeDialogueEntries(dialogues)
     const json = JSON.stringify({
       name: form.name,
-      description,
+      description: form.description,
       gameId: Number(form.gameId),
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
+      dialogues: dialogueValues,
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -133,7 +143,7 @@ export default function BossFormPage() {
     try {
       if (isEdit) {
         await updateBoss(Number(id), data)
-        navigate(`/bosses/${id}${detailReturnQuery}`)
+        navigate(`/bosses/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
       } else {
         const res = await createBoss(data)
         navigate(`/bosses/${res.data.id}`)
@@ -200,24 +210,58 @@ export default function BossFormPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">
+              説明
+              {analyzing && (
+                <span className="ml-2 text-xs text-gray-100 animate-pulse">
+                  画像からテキストを解析中...
+                </span>
+              )}
+            </label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={4}
+              disabled={analyzing}
+              placeholder={analyzing ? '解析中...' : ''}
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                添付すると自動で文字を入力しますが、結構間違えます
+                添付すると画像解析して説明欄に自動入力されますが、結構間違えますので校閲お願いします
               </span>
             </label>
             {(preview || existingImage) && (
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border border-gray-600"
+                className="w-full max-w-[32rem] max-h-[24rem] object-contain rounded mb-3 border border-gray-600 bg-zinc-900"
               />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="text-sm text-gray-400"
-            />
+            <div className="rounded border border-dashed border-gray-500 bg-zinc-900/60 px-3 py-3">
+              <input
+                id={fileInputId}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor={fileInputId}
+                  className="inline-flex items-center rounded border border-zinc-500/70 bg-zinc-900 px-3 py-1.5 text-sm text-gray-100 hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  ファイルを選択
+                </label>
+                <span className="text-sm text-gray-300 truncate">
+                  {image?.name || '未選択'}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-gray-400">JPG / PNG などの画像を選択</p>
+            </div>
           </div>
 
           <div>
@@ -250,7 +294,7 @@ export default function BossFormPage() {
                       next[i] = { ...next[i], text: e.target.value }
                       setDialogues(next)
                     }}
-                    rows={2}
+                    rows={5}
                     disabled={analyzing}
                     placeholder={analyzing && i === 0 ? '解析中...' : defaultDialogueLabel(i)}
                     className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm disabled:bg-zinc-800 disabled:text-gray-500"

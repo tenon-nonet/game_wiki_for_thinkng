@@ -1,6 +1,8 @@
 ﻿import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
+import { useEffect, useState } from 'react'
+import { onAuthChanged } from './auth'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -22,9 +24,21 @@ import NpcFormPage from './pages/NpcFormPage'
 import CatalogPage from './pages/CatalogPage'
 
 export default function App() {
+  const [authVersion, setAuthVersion] = useState(0)
+
+  useEffect(() => {
+    const unsubscribe = onAuthChanged(() => setAuthVersion((v) => v + 1))
+    const onStorage = () => setAuthVersion((v) => v + 1)
+    window.addEventListener('storage', onStorage)
+    return () => {
+      unsubscribe()
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [])
+
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen flex-col bg-black">
+      <div key={authVersion} className="flex min-h-screen flex-col bg-black">
         <Navbar />
         <main className="flex-1">
           <Routes>

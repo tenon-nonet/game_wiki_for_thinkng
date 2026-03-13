@@ -63,6 +63,7 @@ export interface Boss {
   gameId: number
   gameName: string
   tags: Tag[]
+  dialogues: string[]
   createdAt: string
   updatedAt: string
 }

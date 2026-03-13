@@ -1,15 +1,16 @@
 ﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { getItem, getItems, getGames, getTags, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
+import { getItem, getItems, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
 import { getUsername, isAdmin } from '../auth'
-import type { Item, Comment, Game, Tag } from '../types'
+import type { Item, Comment } from '../types'
 
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
+  const locationState = (location.state as { fromCatalog?: boolean; flashMessage?: string } | null) ?? null
   const [searchParams] = useSearchParams()
-  const fromCatalogInState = Boolean((location.state as { fromCatalog?: boolean } | null)?.fromCatalog)
+  const fromCatalogInState = Boolean(locationState?.fromCatalog)
   const fromCatalog = searchParams.get('from') === 'catalog' || fromCatalogInState
   const catalogGameId = searchParams.get('gameId')
   const catalogTab = searchParams.get('tab') ?? 'ITEM'
@@ -28,13 +29,23 @@ export default function ItemDetailPage() {
   const [editText, setEditText] = useState('')
   const [replyToId, setReplyToId] = useState<number | null>(null)
   const [replyText, setReplyText] = useState('')
-  const [games, setGames] = useState<Game[]>([])
-  const [tags, setTags] = useState<Tag[]>([])
-  const [searchGameId, setSearchGameId] = useState('')
-  const [searchTag, setSearchTag] = useState('')
-  const [searchKeyword, setSearchKeyword] = useState('')
+  const [flashMessage, setFlashMessage] = useState('')
+  const [showFlash, setShowFlash] = useState(false)
   const currentUser = getUsername()
   const admin = isAdmin()
+
+  useEffect(() => {
+    if (!locationState?.flashMessage) return
+    setFlashMessage(locationState.flashMessage)
+    setShowFlash(true)
+  }, [locationState?.flashMessage])
+
+  const closeFlash = () => {
+    setShowFlash(false)
+    if (!locationState?.flashMessage) return
+    const { flashMessage: _flashMessage, ...restState } = locationState
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: restState })
+  }
 
   useEffect(() => {
     const itemId = Number(id)
@@ -142,6 +153,28 @@ export default function ItemDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      {showFlash && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/76 px-4">
+          <div className="w-full max-w-3xl">
+            <div className="mx-auto bg-gradient-to-b from-zinc-800/80 via-zinc-900/90 to-black/90 px-8 py-7 text-center shadow-[0_12px_36px_rgba(0,0,0,0.65)] backdrop-blur-[1px]">
+              <div className="mx-auto mb-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
+              <p className="text-[1.35rem] sm:text-[1.7rem] leading-tight font-serif font-medium tracking-[0.1em] text-amber-100/95 drop-shadow-[0_0_6px_rgba(251,191,36,0.28)]">
+                {flashMessage}
+              </p>
+              <div className="mx-auto mt-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
+            </div>
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={closeFlash}
+                className="rounded-sm border border-amber-100/55 bg-black/70 px-10 py-2 text-sm font-medium tracking-[0.18em] text-amber-50 hover:bg-black/85"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="space-y-2">
         <div className="flex items-center justify-start">
           <Link to={fromCatalog ? catalogUrl : '/items'} className="text-gray-100 hover:underline text-sm">

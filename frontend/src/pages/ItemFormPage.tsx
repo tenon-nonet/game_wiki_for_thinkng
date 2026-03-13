@@ -154,7 +154,7 @@ export default function ItemFormPage() {
     try {
       if (isEdit) {
         await updateItem(Number(id), data)
-        navigate(`/items/${id}${detailReturnQuery}`)
+        navigate(`/items/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
       } else {
         const res = await createItem(data)
         navigate(`/items/${res.data.id}`)
@@ -171,6 +171,11 @@ export default function ItemFormPage() {
     tags: allTags.filter((t) => t.attribute === a.name),
   }))
   const hasAnyAttrTags = tagsByAttr.some(({ tags }) => tags.length > 0)
+  const selectedGame = games.find((g) => String(g.id) === form.gameId)
+  const gameCategories = selectedGame?.categories ?? []
+  const categoryOptions = form.category && !gameCategories.includes(form.category)
+    ? [form.category, ...gameCategories]
+    : gameCategories
 
   // 新規作成時は目録経由（name + gameId）が必須
   if (!isEdit && (!form.name || !form.gameId)) {
@@ -265,7 +270,22 @@ export default function ItemFormPage() {
                 className="w-full border border-amber-500/40 rounded px-3 py-2 bg-zinc-800 text-gray-200"
               />
             ) : (
+              <>
               <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                disabled={!form.gameId}
+                className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+              >
+                <option value="">未分類</option>
+                {categoryOptions.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              {form.gameId && gameCategories.length === 0 && (
+                <p className="mt-1 text-xs text-gray-400">このゲームにカテゴリマスタは未設定です</p>
+              )}
+              <select style={{ display: 'none' }}
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
                 className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
@@ -278,6 +298,7 @@ export default function ItemFormPage() {
                 <option value="タリスマン">タリスマン</option>
                 <option value="その他">その他</option>
               </select>
+              </>
             )}
           </div>
 
@@ -285,14 +306,14 @@ export default function ItemFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                添付すると自動で文字を入力しますが、結構間違えます
+                添付すると画像解析して説明欄に自動入力されますが、結構間違えますので校閲お願いします
               </span>
             </label>
             {(preview || existingImage) && (
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border border-gray-500"
+                className="w-full max-w-[32rem] max-h-[24rem] object-contain rounded mb-3 border border-gray-500 bg-zinc-900"
               />
             )}
             <div className="rounded border border-dashed border-gray-500 bg-zinc-900/60 px-3 py-3">
@@ -330,7 +351,7 @@ export default function ItemFormPage() {
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={6}
+              rows={12}
               disabled={analyzing}
               placeholder={analyzing ? '解析中...' : ''}
               className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"

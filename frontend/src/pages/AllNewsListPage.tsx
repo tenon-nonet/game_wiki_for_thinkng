@@ -1,10 +1,17 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, getNews } from '../api'
+import { getNews } from '../api'
 
 type NewsItem = { title: string; url: string; publishedAt: string; source: string }
 
 const PAGE_SIZE = 30
+const FROM_SOFTWARE_NEWS_QUERY = [
+  'FromSoftware',
+  'フロムソフトウェア',
+  'ELDEN RING',
+  'ダークソウル',
+  'ブラッドボーン',
+].join(' OR ')
 
 export default function AllNewsListPage() {
   const [news, setNews] = useState<NewsItem[]>([])
@@ -12,14 +19,10 @@ export default function AllNewsListPage() {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    getGames().then((res) => {
-      if (res.data.length === 0) { setLoading(false); return }
-      const query = res.data.map((g) => g.name).join(' OR ')
-      getNews(query, 100).then((r) => {
+    getNews(FROM_SOFTWARE_NEWS_QUERY, 100).then((r) => {
         setNews(r.data)
         setLoading(false)
       }).catch(() => setLoading(false))
-    }).catch(() => setLoading(false))
   }, [])
 
   const totalPages = Math.ceil(news.length / PAGE_SIZE)
@@ -29,7 +32,7 @@ export default function AllNewsListPage() {
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
       <Link to="/" className="text-gray-100 hover:underline text-sm">← トップへ戻る</Link>
 
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-100 mt-4 mb-6">ゲーム関連ニュース一覧</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-100 mt-4 mb-6">関連ニュース一覧</h1>
 
       {loading ? (
         <p className="text-gray-500 text-sm">読み込み中...</p>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getNpc, getGames, getTags, createTag, createNpc, updateNpc, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
@@ -11,6 +11,7 @@ export default function NpcFormPage() {
   const [searchParams] = useSearchParams()
   const isEdit = !!id
   const admin = isAdmin()
+  const fileInputId = useId()
   const fromCatalog = searchParams.get('from') === 'catalog'
   const fromEncyclopedia = searchParams.get('from') === 'npcs'
   const catalogGameId = searchParams.get('gameId')
@@ -135,7 +136,7 @@ export default function NpcFormPage() {
     try {
       if (isEdit) {
         await updateNpc(Number(id), data)
-        navigate(`/npcs/${id}${detailReturnQuery}`)
+        navigate(`/npcs/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
       } else {
         const res = await createNpc(data)
         navigate(`/npcs/${res.data.id}`)
@@ -204,22 +205,37 @@ export default function NpcFormPage() {
             <label className="block text-sm font-medium text-gray-200 mb-1">
               画像
               <span className="ml-2 text-xs text-gray-100 font-normal">
-                添付すると自動で文字を入力しますが、結構間違えます
+                添付すると画像解析して説明欄に自動入力されますが、結構間違えますので校閲お願いします
               </span>
             </label>
             {(preview || existingImage) && (
               <img
                 src={preview || `/uploads/${existingImage}`}
                 alt="preview"
-                className="w-40 h-40 object-cover rounded mb-2 border border-gray-600"
+                className="w-full max-w-[32rem] max-h-[24rem] object-contain rounded mb-3 border border-gray-600 bg-zinc-900"
               />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="text-sm text-gray-400"
-            />
+            <div className="rounded border border-dashed border-gray-500 bg-zinc-900/60 px-3 py-3">
+              <input
+                id={fileInputId}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor={fileInputId}
+                  className="inline-flex items-center rounded border border-zinc-500/70 bg-zinc-900 px-3 py-1.5 text-sm text-gray-100 hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  ファイルを選択
+                </label>
+                <span className="text-sm text-gray-300 truncate">
+                  {image?.name || '未選択'}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-gray-400">JPG / PNG などの画像を選択</p>
+            </div>
           </div>
 
           <div>
@@ -264,7 +280,7 @@ export default function NpcFormPage() {
                       next[i] = { ...next[i], text: e.target.value }
                       setDialogues(next)
                     }}
-                    rows={2}
+                    rows={5}
                     className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
                     placeholder={defaultDialogueLabel(i)}
                   />

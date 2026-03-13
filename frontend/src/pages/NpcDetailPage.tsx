@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getNpc, deleteNpc, getItems } from '../api'
 import { isAdmin } from '../auth'
 import { parseDialogueLines } from '../dialogues'
@@ -8,6 +8,8 @@ import type { Npc, Item } from '../types'
 export default function NpcDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const locationState = (location.state as { flashMessage?: string } | null) ?? null
   const [searchParams] = useSearchParams()
   const fromCatalog = searchParams.get('from') === 'catalog'
   const fromEncyclopedia = searchParams.get('from') === 'npcs'
@@ -16,8 +18,23 @@ export default function NpcDetailPage() {
   const detailQueryFromEncyclopedia = '?from=npcs'
   const [npc, setNpc] = useState<Npc | null>(null)
   const [relatedItems, setRelatedItems] = useState<Item[]>([])
+  const [flashMessage, setFlashMessage] = useState('')
+  const [showFlash, setShowFlash] = useState(false)
   const admin = isAdmin()
   const dialogues = parseDialogueLines(npc?.dialogues)
+
+  useEffect(() => {
+    if (!locationState?.flashMessage) return
+    setFlashMessage(locationState.flashMessage)
+    setShowFlash(true)
+  }, [locationState?.flashMessage])
+
+  const closeFlash = () => {
+    setShowFlash(false)
+    if (!locationState?.flashMessage) return
+    const { flashMessage: _flashMessage, ...restState } = locationState
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: restState })
+  }
 
   useEffect(() => {
     const npcId = Number(id)
@@ -49,6 +66,28 @@ export default function NpcDetailPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      {showFlash && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/76 px-4">
+          <div className="w-full max-w-3xl">
+            <div className="mx-auto bg-gradient-to-b from-zinc-800/80 via-zinc-900/90 to-black/90 px-8 py-7 text-center shadow-[0_12px_36px_rgba(0,0,0,0.65)] backdrop-blur-[1px]">
+              <div className="mx-auto mb-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
+              <p className="text-[1.35rem] sm:text-[1.7rem] leading-tight font-serif font-medium tracking-[0.1em] text-amber-100/95 drop-shadow-[0_0_6px_rgba(251,191,36,0.28)]">
+                {flashMessage}
+              </p>
+              <div className="mx-auto mt-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
+            </div>
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={closeFlash}
+                className="rounded-sm border border-amber-100/55 bg-black/70 px-10 py-2 text-sm font-medium tracking-[0.18em] text-amber-50 hover:bg-black/85"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-4">
         <Link to="/npcs" className="text-gray-100 hover:underline text-sm">← NPC一覧</Link>
         {fromCatalog && <Link to={catalogUrl} className="text-gray-400 hover:underline text-sm">← 目録</Link>}

@@ -96,7 +96,7 @@ export default function ItemsPage() {
         )}
       </div>
 
-      <div className="mb-8 flex w-full flex-col flex-wrap gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 shadow-lg sm:flex-row sm:items-end">
+      <div className="mb-5 flex w-full flex-col gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3 shadow-lg sm:w-fit sm:flex-row sm:flex-wrap sm:items-end">
         <div>
           <label className="mb-1 block text-xs text-gray-400">ゲームで絞り込み</label>
           <select

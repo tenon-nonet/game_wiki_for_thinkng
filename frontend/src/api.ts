@@ -180,3 +180,7 @@ export const analyzeImageText = (image: File) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
+
+// Visitors
+export const trackHomeVisit = () =>
+  api.post<{ todayUniqueVisitors: number; totalUniqueDailyVisitors: number }>('/visitors/home')
