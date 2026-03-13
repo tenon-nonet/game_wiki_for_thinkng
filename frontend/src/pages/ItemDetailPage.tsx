@@ -245,7 +245,11 @@ export default function ItemDetailPage() {
         )}
 
         <div className="p-5 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between mb-3 gap-2">
+          <Link to={`/games/${item.gameId}`} className="text-gray-100 hover:underline text-sm">
+            {item.gameName}
+          </Link>
+
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{item.name}</h1>
             {loggedIn && (
               <div className="flex gap-2 flex-shrink-0">
@@ -264,10 +268,6 @@ export default function ItemDetailPage() {
             )}
           </div>
 
-          <Link to={`/games/${item.gameId}`} className="text-gray-100 hover:underline text-sm">
-            {item.gameName}
-          </Link>
-
           {item.description && (
             <p className="text-gray-300 mt-4 whitespace-pre-wrap">{item.description}</p>
           )}
@@ -282,9 +282,10 @@ export default function ItemDetailPage() {
             </div>
           )}
 
-          <p className="text-xs text-gray-500 mt-6">
-            追加日: {new Date(item.createdAt).toLocaleDateString('ja-JP')}
-          </p>
+          <div className="mt-6 space-y-1 text-xs text-gray-500">
+            <p>追加日: {new Date(item.createdAt).toLocaleDateString('ja-JP')}</p>
+            <p>更新日: {new Date(item.updatedAt).toLocaleDateString('ja-JP')}</p>
+          </div>
         </div>
       </div>
 
@@ -469,3 +470,5 @@ export default function ItemDetailPage() {
     </div>
   )
 }
+
+

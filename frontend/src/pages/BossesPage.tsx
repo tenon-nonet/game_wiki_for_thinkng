@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getBosses, getGames, getTags, updateBossOrder } from '../api'
 import { isLoggedIn } from '../auth'
+import EncyclopediaCard from '../components/EncyclopediaCard'
 import type { Boss, Game, Tag } from '../types'
 
 export default function BossesPage() {
@@ -62,8 +63,7 @@ export default function BossesPage() {
     if (tag) params.tag = tag
     if (keyword) params.keyword = keyword
     setSearchParams(params, { replace: true })
-    getBosses(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined)
-      .then((r) => setBosses(r.data))
+    getBosses(gameId ? Number(gameId) : undefined, tag || undefined, keyword || undefined).then((r) => setBosses(r.data))
   }, [gameId, tag, keyword])
 
   const clearFilter = () => {
@@ -73,109 +73,99 @@ export default function BossesPage() {
   }
 
   return (
-    <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
-      <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">ボス図録</h1>
+    <div className="w-full px-4 py-6 sm:px-8 sm:py-10">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-100 sm:text-3xl">ボス図録</h1>
+          <p className="mt-1 text-sm text-zinc-500">印象的なボス画像を大きなカードで並べて一覧できます。</p>
+        </div>
         {loggedIn && (
           <Link
             to="/catalog"
-            className="bg-red-900 hover:bg-red-800 text-white px-3 py-2 rounded text-sm whitespace-nowrap"
+            className="rounded bg-red-900 px-3 py-2 text-sm text-white transition hover:bg-red-800"
           >
             目録から登録
           </Link>
         )}
       </div>
 
-      <div className="bg-zinc-800 rounded-lg shadow p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-end w-full">
-        <div className="w-full sm:w-auto">
-          <label className="block text-xs text-gray-400 mb-1">ゲームで絞り込み</label>
+      <div className="mb-8 flex w-full flex-col flex-wrap gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 shadow-lg sm:flex-row sm:items-end">
+        <div>
+          <label className="mb-1 block text-xs text-gray-400">ゲームで絞り込み</label>
           <select
             value={gameId}
             onChange={(e) => setGameId(e.target.value)}
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-auto"
           >
             <option value="">すべて</option>
             {games.map((g) => (
-              <option key={g.id} value={g.id}>{g.name}</option>
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
             ))}
           </select>
         </div>
-        <div className="w-full sm:w-auto">
-          <label className="block text-xs text-gray-400 mb-1">タグで絞り込み</label>
+        <div>
+          <label className="mb-1 block text-xs text-gray-400">タグで絞り込み</label>
           <select
             value={tag}
             onChange={(e) => setTag(e.target.value)}
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800"
+            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-auto"
           >
             <option value="">すべて</option>
             {tags.map((t) => (
-              <option key={t.id} value={t.name}>{t.name}</option>
+              <option key={t.id} value={t.name}>
+                {t.name}
+              </option>
             ))}
           </select>
         </div>
-        <div className="w-full sm:w-auto">
-          <label className="block text-xs text-gray-400 mb-1">名前・説明文キーワード</label>
+        <div>
+          <label className="mb-1 block text-xs text-gray-400">名前・説明文キーワード</label>
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="例: マルギット"
-            className="w-full sm:w-56 border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
+            placeholder="例: マルゴー"
+            className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-64"
           />
         </div>
         {(gameId || tag || keyword) && (
-          <button onClick={clearFilter} className="bg-zinc-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded text-sm">
+          <button onClick={clearFilter} className="rounded bg-zinc-700 px-3 py-2 text-sm text-gray-200 transition hover:bg-gray-600">
             クリア
           </button>
         )}
       </div>
 
       {bosses.length === 0 ? (
-        <p className="text-gray-500 text-center py-12">ボスがありません</p>
+        <p className="py-12 text-center text-gray-500">ボスがありません</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {bosses.map((boss, index) => (
-            <div
+            <EncyclopediaCard
               key={boss.id}
+              to={`/bosses/${boss.id}`}
+              name={boss.name}
+              gameName={boss.gameName}
+              imagePath={boss.imagePath}
+              description={boss.description}
+              createdAt={boss.createdAt}
+              updatedAt={boss.updatedAt}
+              imageHeightClass="h-[22rem]"
+              bodyMinHeightClass="min-h-[16rem] sm:min-h-[18rem]"
               draggable={loggedIn}
-              onDragStart={() => loggedIn && handleDragStart(index)}
-              onDragOver={(e) => loggedIn && handleDragOver(e, index)}
-              onDrop={() => loggedIn && handleDrop(index)}
+              onDragStart={loggedIn ? () => handleDragStart(index) : undefined}
+              onDragOver={loggedIn ? (e) => handleDragOver(e, index) : undefined}
+              onDrop={loggedIn ? () => handleDrop(index) : undefined}
               onDragEnd={handleDragEnd}
-              className={`group bg-zinc-800 rounded-xl shadow overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${loggedIn ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
-            >
-              <Link to={`/bosses/${boss.id}`} className="block">
-                <div className="overflow-hidden">
-                  {boss.imagePath ? (
-                    <img
-                      src={`/uploads/${boss.imagePath}`}
-                      alt={boss.name}
-                      className="w-full h-48 object-contain bg-zinc-900 transition-transform duration-500 ease-out group-hover:scale-125"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-zinc-700 flex items-center justify-center text-gray-500 text-xs">
-                      画像なし
-                    </div>
-                  )}
-                </div>
-                <div className="p-3 flex flex-col gap-1">
-                  <p className="text-xs text-gray-400">{boss.gameName}</p>
-                  <p className="font-semibold text-gray-100 text-sm line-clamp-2">{boss.name}</p>
-                  {boss.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {boss.tags.map((t) => (
-                        <span key={t.id} className="bg-red-950 text-white text-xs px-2 py-0.5 rounded-full">
-                          {t.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            </div>
+              isDragTarget={dragOverIndex === index && dragIndex !== index}
+            />
           ))}
         </div>
       )}
     </div>
   )
 }
+
+
+
