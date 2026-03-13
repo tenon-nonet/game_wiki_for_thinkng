@@ -34,7 +34,6 @@ public class ItemController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ItemResponse> create(
             @Valid @RequestPart("data") ItemRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image) {
@@ -42,7 +41,6 @@ public class ItemController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ItemResponse> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") ItemRequest request,

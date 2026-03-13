@@ -1,4 +1,4 @@
-import type { CatalogEntry } from '../../types'
+﻿import type { CatalogEntry } from '../../types'
 import type { TabType } from '../../pages/catalogUtils'
 
 type Group = {

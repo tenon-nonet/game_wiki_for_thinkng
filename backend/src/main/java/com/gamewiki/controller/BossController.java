@@ -34,7 +34,6 @@ public class BossController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BossResponse> create(
             @Valid @RequestPart("data") BossRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image) {
@@ -42,7 +41,6 @@ public class BossController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BossResponse> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") BossRequest request,

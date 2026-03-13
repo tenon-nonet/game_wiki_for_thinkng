@@ -17,8 +17,8 @@ export default function Navbar() {
     <nav className="bg-zinc-900 text-white shadow">
       <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
         <Link to="/" className="text-lg sm:text-2xl font-bold text-gray-100 hover:text-gray-300 leading-tight">
-          <span className="hidden sm:inline">fromdex.com</span>
-          <span className="sm:hidden">fromdex.com</span>
+          <span className="hidden sm:inline">FROMDEX.com</span>
+          <span className="sm:hidden">FROMDEX.com</span>
         </Link>
 
         {/* Desktop nav */}

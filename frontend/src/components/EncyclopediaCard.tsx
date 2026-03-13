@@ -26,8 +26,8 @@ export default function EncyclopediaCard({
   description,
   createdAt,
   updatedAt,
-  imageHeightClass = 'h-[25rem]',
-  bodyMinHeightClass = 'min-h-[20rem] sm:min-h-[22rem]',
+  imageHeightClass = 'h-[clamp(18rem,30vw,25rem)]',
+  bodyMinHeightClass = 'min-h-[clamp(14rem,18vw,20rem)] sm:min-h-[clamp(15rem,20vw,22rem)]',
   draggable = false,
   onDragStart,
   onDragOver,
@@ -42,9 +42,9 @@ export default function EncyclopediaCard({
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
-      className={`group overflow-hidden rounded-lg border border-zinc-800 bg-zinc-800 shadow-[0_20px_50px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-red-900/60 hover:shadow-[0_28px_64px_rgba(0,0,0,0.38)] ${draggable ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragTarget ? 'ring-2 ring-red-700/80 opacity-80' : ''}`}
+      className={`group h-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-800 shadow-[0_20px_50px_rgba(0,0,0,0.28)] transition duration-300 hover:-translate-y-1 hover:border-red-900/60 hover:shadow-[0_28px_64px_rgba(0,0,0,0.38)] ${draggable ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragTarget ? 'ring-2 ring-red-700/80 opacity-80' : ''}`}
     >
-      <Link to={to} className="block">
+      <Link to={to} className="flex h-full flex-col">
         <div className="relative overflow-hidden bg-zinc-900">
           {imagePath ? (
             <img
@@ -59,19 +59,19 @@ export default function EncyclopediaCard({
           )}
         </div>
 
-        <div className={`${bodyMinHeightClass} p-6 sm:p-7`}>
+        <div className={`flex flex-1 flex-col ${bodyMinHeightClass} p-5 sm:p-6`}>
           <p className="text-sm text-gray-100">{gameName}</p>
           <div className="mb-3 mt-2 flex flex-wrap items-start justify-between gap-2">
-            <h2 className="text-2xl font-bold leading-tight text-gray-100">{name}</h2>
+            <h2 className="text-xl font-bold leading-tight text-gray-100 sm:text-2xl">{name}</h2>
           </div>
 
           {description ? (
-            <p className="mt-5 line-clamp-7 whitespace-pre-wrap text-gray-300">{description}</p>
+            <p className="mt-4 line-clamp-6 whitespace-pre-wrap break-words text-gray-300 sm:line-clamp-7">{description}</p>
           ) : (
-            <p className="mt-5 text-sm text-zinc-500">説明未登録</p>
+            <p className="mt-4 text-sm text-zinc-500">説明未登録</p>
           )}
 
-          <div className="mt-6 space-y-1 text-xs text-gray-500">
+          <div className="mt-auto space-y-1 pt-5 text-xs text-gray-500">
             <p>追加日: {new Date(createdAt).toLocaleDateString('ja-JP')}</p>
             <p>更新日: {new Date(updatedAt).toLocaleDateString('ja-JP')}</p>
           </div>
