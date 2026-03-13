@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { getItem, getGames, getTags, getTagAttributes, createItem, updateItem, analyzeImageText, getCatalogEntries } from '../api'
+import { getItem, getGames, getTags, getTagAttributes, createItem, updateItem, analyzeImageText } from '../api'
 import { isAdmin } from '../auth'
-import type { CatalogEntry, Game, Tag, TagAttribute } from '../types'
+import type { Game, Tag, TagAttribute } from '../types'
 
 export default function ItemFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -48,17 +48,13 @@ export default function ItemFormPage() {
     if (isEdit) {
       getItem(Number(id)).then((r) => {
         const item = r.data
-        getCatalogEntries(item.gameId, 'ITEM').then((cRes) => {
-          const fromCatalog = (cRes.data as CatalogEntry[]).find((e) => e.name.trim().toLowerCase() === item.name.trim().toLowerCase())
-          const catalogCat = fromCatalog?.category || item.category || ''
-          setCatalogCategory(catalogCat)
-          setForm((prev) => ({ ...prev, category: catalogCat }))
-        })
+        const itemCategory = item.category || ''
+        setCatalogCategory(itemCategory)
         setForm({
           name: item.name,
           description: item.description || '',
           gameId: String(item.gameId),
-          category: item.category || '',
+          category: itemCategory,
         })
         setExistingImage(item.imagePath)
         Promise.all([
