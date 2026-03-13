@@ -27,6 +27,7 @@ export default function BossFormPage() {
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [form, setForm] = useState({
     name: searchParams.get('name') ?? '',
+    description: '',
     gameId: searchParams.get('gameId') ?? '',
   })
   const [dialogues, setDialogues] = useState<DialogueEntry[]>([
@@ -47,9 +48,16 @@ export default function BossFormPage() {
         const boss = r.data
         setForm({
           name: boss.name,
+          description: boss.description || '',
           gameId: String(boss.gameId),
         })
-        setDialogues(parseDialogueLines(boss.description ? boss.description.split(/\r?\n/) : []))
+        setDialogues(
+          parseDialogueLines(
+            boss.dialogues && boss.dialogues.length > 0
+              ? boss.dialogues
+              : (boss.description ? boss.description.split(/\r?\n/) : [])
+          )
+        )
         setExistingImage(boss.imagePath)
         getTags(boss.gameId, 'BOSS').then((r2) => {
           setAllTags(r2.data)
@@ -121,12 +129,13 @@ export default function BossFormPage() {
     setError('')
 
     const data = new FormData()
-    const description = serializeDialogueEntries(dialogues).join('\n')
+    const dialogueValues = serializeDialogueEntries(dialogues)
     const json = JSON.stringify({
       name: form.name,
-      description,
+      description: form.description,
       gameId: Number(form.gameId),
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
+      dialogues: dialogueValues,
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -197,6 +206,25 @@ export default function BossFormPage() {
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-1">
+              説明
+              {analyzing && (
+                <span className="ml-2 text-xs text-gray-100 animate-pulse">
+                  画像からテキストを解析中...
+                </span>
+              )}
+            </label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={4}
+              disabled={analyzing}
+              placeholder={analyzing ? '解析中...' : ''}
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
+            />
           </div>
 
           <div>

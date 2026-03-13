@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -16,6 +17,7 @@ public class BossResponse {
     private Long gameId;
     private String gameName;
     private Set<TagResponse> tags;
+    private List<String> dialogues;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

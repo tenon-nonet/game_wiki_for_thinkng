@@ -21,7 +21,7 @@ export default function BossDetailPage() {
   const [flashMessage, setFlashMessage] = useState('')
   const [showFlash, setShowFlash] = useState(false)
   const admin = isAdmin()
-  const dialogues = parseDialogueLines(boss?.description ? boss.description.split(/\r?\n/) : [])
+  const dialogues = parseDialogueLines(boss?.dialogues)
 
   useEffect(() => {
     if (!locationState?.flashMessage) return
@@ -128,7 +128,11 @@ export default function BossDetailPage() {
             </div>
           </div>
 
-          {dialogues.some((entry) => entry.text) && (
+          {boss.description && (
+            <p className="text-gray-300 mt-4 whitespace-pre-wrap">{boss.description}</p>
+          )}
+
+          {boss.dialogues?.length > 0 && (
             <div className="mt-6">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">セリフ</h2>
               <div className="space-y-2">

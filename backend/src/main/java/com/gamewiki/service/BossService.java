@@ -3,6 +3,7 @@ package com.gamewiki.service;
 import com.gamewiki.dto.BossRequest;
 import com.gamewiki.dto.BossResponse;
 import com.gamewiki.entity.Boss;
+import com.gamewiki.entity.BossDialogue;
 import com.gamewiki.entity.Game;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
@@ -63,6 +64,7 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        setDialogues(boss, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
             boss.setImagePath(fileStorageService.store(image));
@@ -83,6 +85,8 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.getDialogues().clear();
+        setDialogues(boss, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(boss.getImagePath());
@@ -111,6 +115,19 @@ public class BossService {
         ).collect(Collectors.toSet());
     }
 
+    private void setDialogues(Boss boss, List<String> texts) {
+        if (texts == null) return;
+        for (int i = 0; i < texts.size(); i++) {
+            String text = texts.get(i);
+            if (text == null || text.isBlank()) continue;
+            BossDialogue d = new BossDialogue();
+            d.setBoss(boss);
+            d.setText(text.trim());
+            d.setOrderIndex(i);
+            boss.getDialogues().add(d);
+        }
+    }
+
     private BossResponse toResponse(Boss boss) {
         BossResponse r = new BossResponse();
         r.setId(boss.getId());
@@ -120,6 +137,7 @@ public class BossService {
         r.setGameId(boss.getGame().getId());
         r.setGameName(boss.getGame().getName());
         r.setTags(boss.getTags().stream().map(tagService::toResponse).collect(Collectors.toSet()));
+        r.setDialogues(boss.getDialogues().stream().map(BossDialogue::getText).toList());
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
         return r;
