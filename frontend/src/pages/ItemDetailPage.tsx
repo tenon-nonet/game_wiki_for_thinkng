@@ -154,20 +154,22 @@ export default function ItemDetailPage() {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
       {showFlash && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/72 px-4">
-          <div className="w-full max-w-2xl rounded-sm border border-amber-200/55 bg-gradient-to-b from-zinc-900/95 via-zinc-950/95 to-black/95 p-1 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
-            <div className="rounded-sm border border-amber-100/25 px-8 py-8 text-center">
-              <div className="mx-auto mb-5 h-px w-40 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
-              <p className="text-2xl sm:text-3xl font-serif font-medium tracking-[0.08em] text-amber-100 drop-shadow-[0_0_6px_rgba(251,191,36,0.35)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/76 px-4">
+          <div className="w-full max-w-3xl">
+            <div className="mx-auto bg-gradient-to-b from-zinc-800/80 via-zinc-900/90 to-black/90 px-8 py-7 text-center shadow-[0_12px_36px_rgba(0,0,0,0.65)] backdrop-blur-[1px]">
+              <div className="mx-auto mb-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
+              <p className="text-[1.35rem] sm:text-[1.7rem] leading-tight font-serif font-medium tracking-[0.1em] text-amber-100/95 drop-shadow-[0_0_6px_rgba(251,191,36,0.28)]">
                 {flashMessage}
               </p>
-              <div className="mx-auto mt-5 h-px w-40 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
+              <div className="mx-auto mt-4 h-px w-[92%] bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
+            </div>
+            <div className="mt-4 flex justify-center">
               <button
                 type="button"
                 onClick={closeFlash}
-                className="mt-7 min-w-28 rounded-sm border border-amber-200/60 bg-gradient-to-b from-zinc-800 to-zinc-900 px-5 py-2 text-sm tracking-[0.14em] text-amber-50 hover:from-zinc-700 hover:to-zinc-800"
+                className="rounded-sm border border-amber-100/55 bg-black/70 px-10 py-2 text-sm font-medium tracking-[0.18em] text-amber-50 hover:bg-black/85"
               >
-                OK
+                閉じる
               </button>
             </div>
           </div>
