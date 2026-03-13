@@ -97,8 +97,8 @@ export default function BossesPage() {
         )}
       </div>
 
-      <div className="bg-zinc-800 rounded-lg shadow p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end w-full sm:w-fit">
-        <div>
+      <div className="bg-zinc-800 rounded-lg shadow p-4 mb-6 flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-end w-full">
+        <div className="w-full sm:w-auto">
           <label className="block text-xs text-gray-400 mb-1">ゲームで絞り込み</label>
           <select
             value={gameId}
@@ -111,7 +111,7 @@ export default function BossesPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-xs text-gray-400 mb-1">タグで絞り込み</label>
           <select
             value={tag}
@@ -124,14 +124,14 @@ export default function BossesPage() {
             ))}
           </select>
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-xs text-gray-400 mb-1">名前・説明文キーワード</label>
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="例: マルギット"
-            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
+            className="w-full sm:w-56 border border-gray-600 rounded px-3 py-2 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
           />
         </div>
         {(gameId || tag || keyword) && (
@@ -144,7 +144,7 @@ export default function BossesPage() {
       {bosses.length === 0 && unregisteredEntries.length === 0 ? (
         <p className="text-gray-500 text-center py-12">ボスが登録されていません</p>
       ) : (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {bosses.map((boss, index) => (
             <div
               key={boss.id}

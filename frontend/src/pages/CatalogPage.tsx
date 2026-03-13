@@ -352,15 +352,15 @@ export default function CatalogPage() {
       <h1 className="text-2xl font-bold text-gray-100 mb-6">目録</h1>
 
       {/* ゲーム選択 + キーワード絞り込み + タブ */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-stretch sm:items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <select
             value={selectedGameId}
             onChange={(e) => {
               setSelectedGameId(Number(e.target.value))
               setKeyword('')
             }}
-            className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
+            className="w-full sm:w-auto border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
           >
             <option value={0}>すべて</option>
             {games.map((g) => (
@@ -376,10 +376,10 @@ export default function CatalogPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="アイテム名で絞り込み..."
-          className="border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm w-56"
+          className="w-full sm:w-56 border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
         />
 
-        <div className="flex gap-1 bg-zinc-900 rounded-lg p-1">
+        <div className="flex flex-wrap gap-1 bg-zinc-900 rounded-lg p-1 w-full sm:w-auto">
           {TAB_CONFIG.map((tab) => {
             const { registered: r, total: t } = progress(tab.key)
             return (
@@ -402,13 +402,13 @@ export default function CatalogPage() {
         </div>
 
         {isAdmin() && selectedGameId > 0 && (
-          <div className="ml-2 sm:ml-4 flex flex-wrap items-center gap-1.5">
+          <div className="ml-0 sm:ml-4 flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
             <span className="text-sm text-gray-400 mr-1">目録追加</span>
             {activeTab === 'ITEM' && (
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="border border-gray-600 rounded px-2 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
+                className="w-full sm:w-auto border border-gray-600 rounded px-2 py-2 bg-zinc-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
               >
                 <option value="">カテゴリ</option>
                 {gameCategories.map((c) => (
@@ -422,7 +422,7 @@ export default function CatalogPage() {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
               placeholder="名称を入力..."
-              className="w-56 border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
+              className="w-full sm:w-56 border border-gray-600 rounded px-3 py-2 bg-zinc-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
             />
             <button
               onClick={handleAdd}
@@ -463,7 +463,7 @@ export default function CatalogPage() {
                 {bulkOpen ? '▼' : '▶'} 一括登録
               </button>
               {bulkOpen && (
-                <div className="absolute right-0 top-full mt-1 z-10 w-72 bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-lg space-y-2">
+                <div className="absolute right-0 top-full mt-1 z-10 w-[min(18rem,calc(100vw-2rem))] bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-lg space-y-2">
                   {activeTab === 'ITEM' && (
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500 shrink-0">カテゴリ</span>
