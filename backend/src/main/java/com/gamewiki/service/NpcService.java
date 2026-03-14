@@ -31,6 +31,7 @@ public class NpcService {
     private final TagRepository tagRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
+    private final EditHistoryService editHistoryService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -53,7 +54,7 @@ public class NpcService {
         return toResponse(getNpc(id));
     }
 
-    public NpcResponse create(NpcRequest request, MultipartFile image) {
+    public NpcResponse create(NpcRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
@@ -64,17 +65,20 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.setUpdatedBy(editorUsername);
         setDialogues(npc, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
             npc.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(npcRepository.save(npc));
+        Npc saved = npcRepository.save(npc);
+        editHistoryService.record(editorUsername, "NPC", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     @Transactional
-    public NpcResponse update(Long id, NpcRequest request, MultipartFile image) {
+    public NpcResponse update(Long id, NpcRequest request, MultipartFile image, String editorUsername) {
         Npc npc = getNpc(id);
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
 
@@ -85,6 +89,7 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.setUpdatedBy(editorUsername);
         npc.getDialogues().clear();
         setDialogues(npc, request.getDialogues());
 
@@ -93,7 +98,9 @@ public class NpcService {
             npc.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(npcRepository.save(npc));
+        Npc saved = npcRepository.save(npc);
+        editHistoryService.record(editorUsername, "NPC", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     public void delete(Long id) {
@@ -140,6 +147,7 @@ public class NpcService {
         r.setDialogues(npc.getDialogues().stream().map(NpcDialogue::getText).toList());
         r.setCreatedAt(npc.getCreatedAt());
         r.setUpdatedAt(npc.getUpdatedAt());
+        r.setUpdatedBy(npc.getUpdatedBy());
         return r;
     }
 

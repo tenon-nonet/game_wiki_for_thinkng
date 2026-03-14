@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -184,3 +184,10 @@ export const analyzeImageText = (image: File) => {
 // Visitors
 export const trackHomeVisit = () =>
   api.post<{ todayUniqueVisitors: number; totalUniqueDailyVisitors: number }>('/visitors/home')
+
+// My Page
+export const getMyEditHistories = () =>
+  api.get<EditHistory[]>('/mypage/edit-histories')
+
+export const getMyComments = () =>
+  api.get<MyComment[]>('/mypage/comments')

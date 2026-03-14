@@ -42,6 +42,24 @@ export interface Comment {
   replies: Comment[]
 }
 
+export interface EditHistory {
+  id: number
+  entityType: 'ITEM' | 'BOSS' | 'NPC'
+  entityId: number
+  entityName: string
+  actionType: 'CREATE' | 'UPDATE'
+  gameName: string
+  createdAt: string
+}
+
+export interface MyComment {
+  id: number
+  itemId: number
+  itemName: string
+  content: string
+  createdAt: string
+}
+
 export interface Item {
   id: number
   name: string
@@ -53,6 +71,7 @@ export interface Item {
   category: string | null
   createdAt: string
   updatedAt: string
+  updatedBy: string | null
 }
 
 export interface Boss {
@@ -66,6 +85,7 @@ export interface Boss {
   dialogues: string[]
   createdAt: string
   updatedAt: string
+  updatedBy: string | null
 }
 
 export interface CatalogEntry {
@@ -89,4 +109,5 @@ export interface Npc {
   dialogues: string[]
   createdAt: string
   updatedAt: string
+  updatedBy: string | null
 }

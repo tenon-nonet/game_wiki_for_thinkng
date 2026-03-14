@@ -231,6 +231,7 @@ export default function ItemDetailPage() {
           <div className="mt-6 space-y-1 text-xs text-gray-500">
             <p>追加日: {new Date(item.createdAt).toLocaleDateString('ja-JP')}</p>
             <p>更新日: {new Date(item.updatedAt).toLocaleDateString('ja-JP')}</p>
+            {item.updatedBy && <p>最終編集者: {item.updatedBy}</p>}
           </div>
         </div>
       </div>

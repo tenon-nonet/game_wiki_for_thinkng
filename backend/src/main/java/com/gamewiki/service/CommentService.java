@@ -1,6 +1,7 @@
 package com.gamewiki.service;
 
 import com.gamewiki.dto.CommentResponse;
+import com.gamewiki.dto.MyCommentResponse;
 import com.gamewiki.entity.Comment;
 import com.gamewiki.entity.CommentLike;
 import com.gamewiki.entity.Item;
@@ -117,6 +118,13 @@ public class CommentService {
         return r;
     }
 
+    public List<MyCommentResponse> findByUsername(String username) {
+        return commentRepository.findTop100ByUsernameOrderByCreatedAtDesc(username)
+                .stream()
+                .map(this::toMyCommentResponse)
+                .toList();
+    }
+
     private CommentResponse toResponse(Comment comment, long likeCount, boolean likedByMe) {
         CommentResponse r = new CommentResponse();
         r.setId(comment.getId());
@@ -126,5 +134,15 @@ public class CommentService {
         r.setLikeCount(likeCount);
         r.setLikedByMe(likedByMe);
         return r;
+    }
+
+    private MyCommentResponse toMyCommentResponse(Comment comment) {
+        MyCommentResponse response = new MyCommentResponse();
+        response.setId(comment.getId());
+        response.setItemId(comment.getItem().getId());
+        response.setItemName(comment.getItem().getName());
+        response.setContent(comment.getContent());
+        response.setCreatedAt(comment.getCreatedAt());
+        return response;
     }
 }

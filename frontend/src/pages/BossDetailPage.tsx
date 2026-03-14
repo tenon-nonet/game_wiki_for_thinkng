@@ -141,6 +141,7 @@ export default function BossDetailPage() {
           <div className="mt-6 space-y-1 text-xs text-gray-500">
             <p>追加日: {new Date(boss.createdAt).toLocaleDateString('ja-JP')}</p>
             <p>更新日: {new Date(boss.updatedAt).toLocaleDateString('ja-JP')}</p>
+            {boss.updatedBy && <p>最終編集者: {boss.updatedBy}</p>}
           </div>
         </div>
       </div>

@@ -31,6 +31,7 @@ public class BossService {
     private final TagRepository tagRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
+    private final EditHistoryService editHistoryService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -53,7 +54,7 @@ public class BossService {
         return toResponse(getBoss(id));
     }
 
-    public BossResponse create(BossRequest request, MultipartFile image) {
+    public BossResponse create(BossRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
@@ -64,17 +65,20 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.setUpdatedBy(editorUsername);
         setDialogues(boss, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
             boss.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(bossRepository.save(boss));
+        Boss saved = bossRepository.save(boss);
+        editHistoryService.record(editorUsername, "BOSS", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     @Transactional
-    public BossResponse update(Long id, BossRequest request, MultipartFile image) {
+    public BossResponse update(Long id, BossRequest request, MultipartFile image, String editorUsername) {
         Boss boss = getBoss(id);
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
 
@@ -85,6 +89,7 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.setUpdatedBy(editorUsername);
         boss.getDialogues().clear();
         setDialogues(boss, request.getDialogues());
 
@@ -93,7 +98,9 @@ public class BossService {
             boss.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(bossRepository.save(boss));
+        Boss saved = bossRepository.save(boss);
+        editHistoryService.record(editorUsername, "BOSS", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     public void delete(Long id) {
@@ -140,6 +147,7 @@ public class BossService {
         r.setDialogues(boss.getDialogues().stream().map(BossDialogue::getText).toList());
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
+        r.setUpdatedBy(boss.getUpdatedBy());
         return r;
     }
 

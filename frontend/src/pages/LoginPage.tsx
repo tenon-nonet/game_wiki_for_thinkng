@@ -26,6 +26,7 @@ export default function LoginPage() {
       <div className="bg-zinc-800 rounded-lg shadow p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-gray-100">ログイン</h1>
         {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
+        <p className="text-gray-100 text-sm mb-4">ログインするとマイページが追加され、編集履歴やメッセージ履歴が確認できます。</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">ユーザー名</label>

@@ -19,4 +19,5 @@ public class ItemResponse {
     private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String updatedBy;
 }

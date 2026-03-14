@@ -141,6 +141,7 @@ export default function NpcDetailPage() {
           <div className="mt-6 space-y-1 text-xs text-gray-500">
             <p>追加日: {new Date(npc.createdAt).toLocaleDateString('ja-JP')}</p>
             <p>更新日: {new Date(npc.updatedAt).toLocaleDateString('ja-JP')}</p>
+            {npc.updatedBy && <p>最終編集者: {npc.updatedBy}</p>}
           </div>
         </div>
       </div>
