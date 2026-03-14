@@ -1,4 +1,4 @@
-﻿package com.gamewiki.controller;
+package com.gamewiki.controller;
 
 import com.gamewiki.dto.CommentResponse;
 import com.gamewiki.service.CommentService;
