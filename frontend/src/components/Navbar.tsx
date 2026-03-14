@@ -1,20 +1,32 @@
 ﻿import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearAuth, getUsername, isLoggedIn, isAdmin } from '../auth'
+import MessageOverlay from './MessageOverlay'
 
 export default function Navbar() {
   const navigate = useNavigate()
   const loggedIn = isLoggedIn()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showLogoutOverlay, setShowLogoutOverlay] = useState(false)
 
   const handleLogout = () => {
-    clearAuth()
-    navigate('/')
     setMenuOpen(false)
+    setShowLogoutOverlay(true)
   }
 
   return (
-    <nav className="bg-zinc-900 text-white shadow">
+    <>
+      {showLogoutOverlay && (
+        <MessageOverlay
+          message="ログアウトしました"
+          onClose={() => {
+            setShowLogoutOverlay(false)
+            clearAuth()
+            navigate('/')
+          }}
+        />
+      )}
+      <nav className="bg-zinc-900 text-white shadow">
       <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
         <Link to="/" className="text-lg sm:text-2xl font-bold text-gray-100 hover:text-gray-300 leading-tight">
           <span className="hidden sm:inline">FROMDEX.com</span>
@@ -98,6 +110,7 @@ export default function Navbar() {
           )}
         </div>
       )}
-    </nav>
+      </nav>
+    </>
   )
 }

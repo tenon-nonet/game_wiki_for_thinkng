@@ -6,7 +6,7 @@ export interface DialogueEntry {
 const DIALOGUE_SEPARATOR = '\t'
 
 export function defaultDialogueLabel(index: number) {
-  return `セリフ${index + 1}`
+  return `#${index + 1}`
 }
 
 export function parseDialogueLine(line: string, index: number): DialogueEntry {

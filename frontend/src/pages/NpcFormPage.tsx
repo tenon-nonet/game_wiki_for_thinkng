@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { getNpc, getGames, getTags, createTag, createNpc, updateNpc, analyzeImageText } from '../api'
+import { getNpc, getGames, getTags, createTag, createNpc, updateNpc } from '../api'
 import { isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { defaultDialogueLabel, parseDialogueLines, serializeDialogueEntries, type DialogueEntry } from '../dialogues'
@@ -38,7 +38,7 @@ export default function NpcFormPage() {
     gameId: string
   } | null>(null)
   const [dialogues, setDialogues] = useState<DialogueEntry[]>([
-    { label: defaultDialogueLabel(0), text: '' },
+    { label: '', text: '' },
   ])
   const [initialDialogues, setInitialDialogues] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
@@ -49,7 +49,6 @@ export default function NpcFormPage() {
   const [existingImage, setExistingImage] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [overlayMessage, setOverlayMessage] = useState('')
-  const [analyzing, setAnalyzing] = useState(false)
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
@@ -112,7 +111,7 @@ export default function NpcFormPage() {
     }
   }
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
     if (!isImageFileSizeValid(file)) {
       setOverlayMessage(IMAGE_FILE_SIZE_ERROR)
@@ -124,23 +123,6 @@ export default function NpcFormPage() {
     setImage(file)
     if (file) {
       setPreview(URL.createObjectURL(file))
-      setAnalyzing(true)
-      try {
-        const res = await analyzeImageText(file)
-        const extracted = res.data.text.trim()
-        if (extracted) {
-          setDialogues((prev) => (
-            prev.some((entry) => entry.text.trim())
-              ? prev
-              : [{ label: defaultDialogueLabel(0), text: extracted }]
-          ))
-        }
-      } catch (err: any) {
-        const msg = err.response?.data?.error || err.message || '不明なエラー'
-        setError('画像解析に失敗しました: ' + msg)
-      } finally {
-        setAnalyzing(false)
-      }
     }
   }
 
@@ -244,12 +226,7 @@ export default function NpcFormPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-1">
-              画像
-              <span className="ml-2 text-xs text-gray-100 font-normal">
-                添付すると画像解析して説明欄に自動入力されますが、結構間違えますので校閲お願いします
-              </span>
-            </label>
+            <label className="block text-sm font-medium text-gray-200 mb-1">画像</label>
             {(preview || existingImage) && (
               <img
                 src={preview || `/uploads/${existingImage}`}
@@ -282,20 +259,13 @@ export default function NpcFormPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">
-              説明
-              {analyzing && (
-                <span className="ml-2 text-xs text-gray-100 animate-pulse">
-                  画像からテキストを解析中...
-                </span>
-              )}
+              詳細、背景など
             </label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={4}
-              disabled={analyzing}
-              placeholder={analyzing ? '解析中...' : ''}
-              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 disabled:bg-zinc-800 disabled:text-gray-500"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
           </div>
 
@@ -322,9 +292,9 @@ export default function NpcFormPage() {
                       next[i] = { ...next[i], text: e.target.value }
                       setDialogues(next)
                     }}
-                    rows={5}
+                    rows={1}
                     className="flex-1 border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800 text-sm"
-                    placeholder={defaultDialogueLabel(i)}
+                    placeholder="セリフを入力"
                   />
                   {dialogues.length > 1 && (
                     <button
@@ -340,7 +310,7 @@ export default function NpcFormPage() {
             </div>
             <button
               type="button"
-              onClick={() => setDialogues([...dialogues, { label: defaultDialogueLabel(dialogues.length), text: '' }])}
+              onClick={() => setDialogues([...dialogues, { label: '', text: '' }])}
               className="mt-2 text-sm text-gray-400 hover:text-gray-200 border border-gray-600 rounded px-3 py-1 hover:border-gray-400 transition"
             >
               ＋ セリフを追加
@@ -400,7 +370,7 @@ export default function NpcFormPage() {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={analyzing || (isEdit && !hasNpcChanges)}
+              disabled={isEdit && !hasNpcChanges}
               className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-6 py-2.5 text-base font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isEdit ? '情報を更新する' : '追加する'}

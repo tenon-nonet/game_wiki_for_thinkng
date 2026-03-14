@@ -93,7 +93,7 @@ export default function NpcDetailPage() {
 
           <div className="mt-2 flex flex-wrap items-start justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{npc.name}</h1>
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="hidden flex-shrink-0 items-center gap-3 sm:flex">
               <Link
                 to={`/npcs/${npc.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
                 className="inline-flex items-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-2.5 text-base font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"
@@ -111,6 +111,15 @@ export default function NpcDetailPage() {
           {npc.description && (
             <p className="text-gray-300 mt-4 whitespace-pre-wrap">{npc.description}</p>
           )}
+
+          <div className="mt-4 sm:hidden">
+            <Link
+              to={`/npcs/${npc.id}/edit${fromCatalog ? detailQueryFromCatalog : fromEncyclopedia ? detailQueryFromEncyclopedia : ''}`}
+              className="inline-flex w-full items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-2.5 text-base font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"
+            >
+              情報を追加する
+            </Link>
+          </div>
 
           {npc.dialogues?.length > 0 && (
             <div className="mt-6">

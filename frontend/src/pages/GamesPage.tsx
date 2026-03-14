@@ -230,8 +230,11 @@ export default function GamesPage() {
                   )}
                 </dl>
                 <p className="text-xs text-gray-500 mb-4">追加日: {new Date(game.createdAt).toLocaleDateString('ja-JP')}</p>
-                <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
-                  アイテムを見る
+                <Link
+                  to={`/items?gameId=${game.id}`}
+                  className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-4 py-2 text-sm font-semibold tracking-[0.08em] text-amber-50 shadow-[0_0_22px_rgba(245,158,11,0.16)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"
+                >
+                  図録を見る
                 </Link>
               </div>
             </div>
