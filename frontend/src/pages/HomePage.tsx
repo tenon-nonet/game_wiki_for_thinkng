@@ -213,20 +213,20 @@ export default function HomePage() {
                   <div>
                     <p className="text-[0.75rem] leading-6 text-zinc-400 sm:text-base sm:leading-7">
                       FROMDEXは、誰でも編集可能なゲームwiki
-                      <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
-                      <br />難解かつ緻密、或いは理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
+                      <br />断片的に記されたゲーム内テキスト情報を収集、編纂する
+                      <br />難解かつ緻密、或いは理解不能な世界感を考察、啓蒙を高める
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">目録</p>
                     <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      全体を俯瞰し、未登録情報や気になる情報を見つけ、情報を追加する
+                      全体を俯瞰し、全情報を確認。未登録情報に情報を追加できる
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">図録</p>
                     <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      集約された画像と情報を眺める場所。編集やコメントもできる
+                      集約された画像と情報を眺める。情報追加やコメントもできる
                     </p>
                   </div>
                   <div>

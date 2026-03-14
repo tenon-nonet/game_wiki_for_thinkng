@@ -83,11 +83,11 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-700 px-4 py-3 flex flex-col gap-3">
-          <Link to="/games" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ゲーム一覧</Link>
-          <Link to="/bosses" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ボス一覧</Link>
-          <Link to="/npcs" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">NPC一覧</Link>
-          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム一覧</Link>
           <Link to="/catalog" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">目録</Link>
+          <Link to="/items" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">アイテム図録</Link>
+          <Link to="/bosses" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ボス図録</Link>
+          <Link to="/npcs" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">NPC図録</Link>
+          <Link to="/games" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ゲーム一覧</Link>
           {loggedIn ? (
             <>
               <Link to="/mypage" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">マイページ</Link>
