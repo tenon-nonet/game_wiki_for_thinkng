@@ -28,6 +28,10 @@ import {
 } from './catalogUtils'
 
 export default function CatalogPage() {
+  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
+    const saved = localStorage.getItem('catalog_view_mode')
+    return saved === 'list' ? 'list' : 'card'
+  })
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [games, setGames] = useState<Game[]>([])
@@ -53,6 +57,10 @@ export default function CatalogPage() {
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem('catalog_view_mode', viewMode)
+  }, [viewMode])
 
   useEffect(() => {
     const params: Record<string, string> = {}
@@ -206,11 +214,30 @@ export default function CatalogPage() {
     )
   }
 
+  const renderListRow = (entry: CatalogEntry, tab: TabType) => {
+    const status = getEntryStatus(entry, tab, items, bosses, npcs)
+    const rowPath = `/${wikiPath(tab)}/${entry.id}?from=catalog${selectedGameId > 0 ? `&gameId=${selectedGameId}` : ''}&tab=${tab}`
+    const markerClass =
+      status === 'REGISTERED' ? 'bg-green-400' : status === 'IN_PROGRESS' ? 'bg-amber-400' : 'bg-zinc-600'
+
+    return (
+      <button
+        key={`${entry.type}-${entry.id}`}
+        onClick={() => navigate(rowPath)}
+        className="inline-flex max-w-full items-center gap-2 rounded border border-zinc-800/80 bg-zinc-900/60 px-2.5 py-1.5 text-left transition hover:border-zinc-600 hover:bg-zinc-900"
+      >
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${markerClass}`} />
+        <span className="max-w-full whitespace-nowrap text-[13px] leading-5 text-gray-200">{entry.name}</span>
+      </button>
+    )
+  }
+
   return (
     <div className="w-full px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-100">目録</h1>
 
       <CatalogControls
+        viewMode={viewMode}
         games={games}
         selectedGameId={selectedGameId}
         activeTab={activeTab}
@@ -229,6 +256,7 @@ export default function CatalogPage() {
           setActiveTab(tab)
           setAddError('')
         }}
+        onViewModeChange={setViewMode}
         onNewNameChange={setNewName}
         onNewCategoryChange={setNewCategory}
         onAdd={handleAdd}
@@ -250,6 +278,7 @@ export default function CatalogPage() {
       <CatalogProgressBar registered={registered} total={total} />
 
       <CatalogEntryGrid
+        viewMode={viewMode}
         activeTab={activeTab}
         total={total}
         currentEntries={currentEntries}
@@ -257,6 +286,7 @@ export default function CatalogPage() {
         groupedItemByGameAndCategory={groupedItemByGameAndCategory}
         groupedByGame={groupedByGame}
         renderCard={renderCard}
+        renderListRow={renderListRow}
       />
     </div>
   )

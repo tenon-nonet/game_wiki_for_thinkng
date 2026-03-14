@@ -5,6 +5,7 @@ import { TAB_CONFIG, type TabType } from '../../pages/catalogUtils'
 type ProgressByTab = Record<TabType, { registered: number; total: number }>
 
 type Props = {
+  viewMode: 'card' | 'list'
   games: Game[]
   selectedGameId: number
   activeTab: TabType
@@ -17,6 +18,7 @@ type Props = {
   onGameChange: (gameId: number) => void
   onKeywordChange: (keyword: string) => void
   onTabChange: (tab: TabType) => void
+  onViewModeChange: (mode: 'card' | 'list') => void
   onNewNameChange: (name: string) => void
   onNewCategoryChange: (category: string) => void
   onAdd: () => void
@@ -33,6 +35,7 @@ type Props = {
 }
 
 export default function CatalogControls({
+  viewMode,
   games,
   selectedGameId,
   activeTab,
@@ -45,6 +48,7 @@ export default function CatalogControls({
   onGameChange,
   onKeywordChange,
   onTabChange,
+  onViewModeChange,
   onNewNameChange,
   onNewCategoryChange,
   onAdd,
@@ -118,6 +122,29 @@ export default function CatalogControls({
             </button>
           )
         })}
+      </div>
+
+      <div className="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
+        <button
+          onClick={() => onViewModeChange('card')}
+          className={`rounded border px-3 py-2 text-sm transition ${
+            viewMode === 'card'
+              ? 'border-amber-400/70 bg-amber-300/10 text-amber-100'
+              : 'border-zinc-700 bg-zinc-900/80 text-gray-400 hover:border-zinc-500 hover:text-gray-200'
+          }`}
+        >
+          カード表示
+        </button>
+        <button
+          onClick={() => onViewModeChange('list')}
+          className={`rounded border px-3 py-2 text-sm transition ${
+            viewMode === 'list'
+              ? 'border-amber-400/70 bg-amber-300/10 text-amber-100'
+              : 'border-zinc-700 bg-zinc-900/80 text-gray-400 hover:border-zinc-500 hover:text-gray-200'
+          }`}
+        >
+          目次表示
+        </button>
       </div>
 
       {admin && selectedGameId > 0 && (
