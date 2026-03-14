@@ -154,7 +154,7 @@ export default function HomePage() {
     <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
       <section className="mb-8 w-full">
         <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
-          <div className="grid gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)] lg:items-end">
+          <div className="grid gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,1fr)] lg:items-stretch">
             <div className="space-y-4">
               <div className="space-y-3">
                 <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-zinc-100 sm:text-4xl lg:text-[1rem]">
@@ -162,7 +162,7 @@ export default function HomePage() {
                   それ故に私は百智卿であり続ける。<br />
                   導きも、或いはそうなのかもしれぬ。<br />
                   その戦いが終わる時、我らは我らで在り続けるものか？
-                  <br />
+                  <br /><br />
                   ...ああ、君は、どう考えるね、
                   <br />エルデの王にならんとする者よ 
                   <br/>―百智卿、ギデオン=オーフニール
@@ -186,9 +186,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-zinc-800/80 bg-black/30 p-4 backdrop-blur-sm">
+            <div className="rounded-3xl border border-zinc-800/80 bg-black/30 p-5 backdrop-blur-sm lg:min-h-full">
               <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-4 space-y-5">
                 <div>
                   <p className="text-sm font-medium text-zinc-100">目録</p>
                   <p className="mt-1 text-sm leading-6 text-zinc-400">
