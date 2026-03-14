@@ -141,7 +141,7 @@ export default function HomePage() {
   const actionVariant: 'bold' | 'calm' = 'calm'
   const primaryActionClassByVariant = {
     bold: 'block w-full bg-gradient-to-r from-red-900 via-red-800 to-red-900 hover:from-red-800 hover:via-red-700 hover:to-red-800 text-white text-sm font-semibold tracking-wide px-4 py-2.5 rounded-md text-center transition',
-    calm: 'block w-full border border-white/25 hover:border-white/45 bg-zinc-900 hover:bg-zinc-800 text-gray-100 text-sm font-medium px-4 py-2 rounded-md text-center transition',
+    calm: 'block w-full rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-4 py-2.5 text-center text-sm font-semibold tracking-[0.08em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white',
   } as const
   const secondaryActionClassByVariant = {
     bold: 'inline-block border border-red-500/60 hover:border-red-300 text-red-100 hover:text-white bg-zinc-900/70 text-xs px-3 py-2 rounded-md text-center transition',
@@ -151,17 +151,79 @@ export default function HomePage() {
   const secondaryActionClass = secondaryActionClassByVariant[actionVariant]
 
   return (
-    <div className="w-full px-4 sm:px-8 py-6 sm:py-10">
-      {/* ゲーム一覧 */}
-      <section>
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <div className="text-xs text-gray-400">
-            {admin && totalVisitors !== null ? `訪問者数: ${totalVisitors}` : ''}
+    <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
+      <section className="mb-8 w-full">
+        <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
+          <div className="grid gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)] lg:items-end">
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-zinc-100 sm:text-4xl lg:text-[1rem]">
+                  知ることに終わりはなく、また完全もない。<br />
+                  それ故に私は百智卿であり続ける。<br />
+                  導きも、或いはそうなのかもしれぬ。<br />
+                  その戦いが終わる時、我らは我らで在り続けるものか？
+                  <br />
+                  ...ああ、君は、どう考えるね、
+                  <br />エルデの王にならんとする者よ 
+                  <br/>―百智卿、ギデオン=オーフニール
+                </h1>
+                <p className="max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
+                  FROMDEXは、誰でも編集可能なゲームwiki
+                  <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
+                  <br />難解かつ緻密、時には理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
+                  <br />「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
+                  収録ゲーム: <span className="text-zinc-100">{games.length}</span>
+                </div>
+                {admin && totalVisitors !== null && (
+                  <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
+                    訪問者数: <span className="text-zinc-100">{totalVisitors}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-zinc-800/80 bg-black/30 p-4 backdrop-blur-sm">
+              <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
+              <div className="mt-3 space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-zinc-100">目録</p>
+                  <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    全体の収録状況を俯瞰し、未登録や情報不足を見つける場所。
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-zinc-100">図録</p>
+                  <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    画像と情報を大きく並べて眺め、作品世界を鑑賞する場所。
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-zinc-100">情報追加</p>
+                  <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    気づいた内容を追記し、図録を少しずつ豊かにしていきます。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full">
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div className="space-y-2">
+            <p className="text-xs font-medium tracking-[0.2em] text-zinc-500">GAME COLLECTION</p>
+            <h2 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">ゲーム一覧</h2>
+            <p className="text-sm text-zinc-400">作品ごとの目録・図録・詳細ページへの入口です。</p>
           </div>
           {admin && (
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded text-sm whitespace-nowrap"
+              className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-2.5 text-sm font-semibold tracking-[0.1em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"
             >
               + ゲーム追加
             </button>
@@ -169,7 +231,7 @@ export default function HomePage() {
         </div>
 
         {showForm && (
-          <form onSubmit={handleCreate} className="bg-zinc-800 rounded-lg shadow p-4 mb-6 space-y-3">
+          <form onSubmit={handleCreate} className="mb-6 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/90 p-5 shadow-lg">
             {error && <p className="text-gray-100 text-sm">{error}</p>}
             <input
               type="text"
@@ -201,11 +263,11 @@ export default function HomePage() {
         {games.length === 0 ? (
           <p className="text-gray-500 text-sm">まだゲームが登録されていません</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {games.map((game, index) => (
               <div
                 key={game.id}
-                className={`group bg-zinc-800 rounded-xl shadow overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
+                className={`group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/90 shadow-[0_16px_48px_rgba(0,0,0,0.32)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(0,0,0,0.42)] ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
                 draggable={admin}
                 onDragStart={() => admin && handleDragStart(index)}
                 onDragOver={(e) => admin && handleDragOver(e, index)}
@@ -243,14 +305,14 @@ export default function HomePage() {
                   <>
                     <div className="block overflow-hidden">
                       {game.imagePath ? (
-                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-64 object-contain bg-zinc-900 transition-all duration-300 ease-out group-hover:opacity-75 group-hover:blur-[2px]" />
+                        <img src={`/uploads/${game.imagePath}`} alt={game.name} className="w-full h-72 object-contain bg-[linear-gradient(180deg,rgba(24,24,27,0.82),rgba(9,9,11,0.95))] px-6 transition-all duration-300 ease-out group-hover:opacity-75 group-hover:blur-[2px]" />
                       ) : (
-                        <div className="w-full h-64 bg-zinc-700 flex items-center justify-center text-gray-500 text-sm">画像なし</div>
+                        <div className="flex h-72 items-center justify-center bg-zinc-800 text-sm text-gray-500">画像なし</div>
                       )}
                     </div>
-                    <div className="p-5 flex flex-col gap-1">
-                      <div className="flex items-start justify-between">
-                        <span className="text-xl font-semibold text-gray-100">
+                    <div className="flex flex-col gap-2 p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="text-xl font-semibold tracking-[0.02em] text-gray-100">
                           {game.name}
                         </span>
                         {admin && (
@@ -260,8 +322,9 @@ export default function HomePage() {
                           </div>
                         )}
                       </div>
-                      {game.description && <p className="text-gray-400 text-sm line-clamp-2">{game.description}</p>}
-                      <div className="mt-4 space-y-2">
+                      {game.description && <p className="min-h-[2.8rem] text-sm leading-6 text-gray-400 line-clamp-2">{game.description}</p>}
+                      {!game.description && <div className="min-h-[2.8rem]" />}
+                      <div className="mt-3 space-y-2">
                         <Link
                           to={`/catalog?gameId=${game.id}`}
                           className={primaryActionClass}
@@ -306,9 +369,12 @@ export default function HomePage() {
 
       {/* 関連ニュース */}
       {(newsLoading || news.length > 0) && (
-        <section className="mt-12 max-w-3xl mx-auto">
+        <section className="mt-14 w-full">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">関連ニュース</h2>
+            <div className="space-y-2">
+              <p className="text-xs font-medium tracking-[0.2em] text-zinc-500">NEWS</p>
+              <h2 className="text-xl font-semibold text-gray-200 sm:text-2xl">関連ニュース</h2>
+            </div>
             {!newsLoading && news.length > 0 && (
               <Link to="/news" className="text-gray-100 hover:underline text-sm">
                 関連ニュース一覧へ →
@@ -320,7 +386,7 @@ export default function HomePage() {
           ) : (
             <ul className="space-y-2">
               {news.map((item, i) => (
-                <li key={i} className="bg-zinc-800 rounded-lg px-4 py-3">
+                <li key={i} className="rounded-xl border border-zinc-800 bg-zinc-900/85 px-4 py-3 shadow-lg">
                   <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-100 text-sm hover:text-gray-300 transition line-clamp-2">
                     {item.title}
                   </a>
