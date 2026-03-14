@@ -1,4 +1,4 @@
-import { isAdmin } from '../../auth'
+﻿import { isAdmin } from '../../auth'
 import type { Game } from '../../types'
 import { TAB_CONFIG, type TabType } from '../../pages/catalogUtils'
 
@@ -21,6 +21,15 @@ type Props = {
   onNewCategoryChange: (category: string) => void
   onAdd: () => void
   progressByTab: ProgressByTab
+  bulkOpen: boolean
+  bulkText: string
+  bulkCategory: string
+  bulkResult: { added: number; skipped: number } | null
+  bulking: boolean
+  onBulkToggle: () => void
+  onBulkTextChange: (text: string) => void
+  onBulkCategoryChange: (category: string) => void
+  onBulk: () => void
 }
 
 export default function CatalogControls({
@@ -40,6 +49,15 @@ export default function CatalogControls({
   onNewCategoryChange,
   onAdd,
   progressByTab,
+  bulkOpen,
+  bulkText,
+  bulkCategory,
+  bulkResult,
+  bulking,
+  onBulkToggle,
+  onBulkTextChange,
+  onBulkCategoryChange,
+  onBulk,
 }: Props) {
   const admin = isAdmin()
 
@@ -64,7 +82,13 @@ export default function CatalogControls({
         type="text"
         value={keyword}
         onChange={(event) => onKeywordChange(event.target.value)}
-        placeholder={activeTab === 'ITEM' ? 'アイテム名で絞り込み...' : activeTab === 'BOSS' ? 'ボス名で絞り込み...' : 'NPC名で絞り込み...'}
+        placeholder={
+          activeTab === 'ITEM'
+            ? 'アイテム名で絞り込み...'
+            : activeTab === 'BOSS'
+              ? 'ボス名で絞り込み...'
+              : 'NPC名で絞り込み...'
+        }
         className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 sm:w-56"
       />
 
@@ -130,6 +154,56 @@ export default function CatalogControls({
           >
             追加
           </button>
+          <div className="relative w-full sm:w-auto">
+            <button
+              onClick={onBulkToggle}
+              className="w-full rounded border border-zinc-600 px-3 py-2 text-sm text-gray-300 transition hover:border-zinc-400 hover:text-gray-100 sm:w-auto"
+            >
+              {bulkOpen ? '−' : '+'} 一括目録追加
+            </button>
+            {bulkOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1 w-[min(32rem,calc(100vw-2rem))] space-y-2 rounded-lg border border-zinc-700 bg-zinc-900 p-3 shadow-lg">
+                {activeTab === 'ITEM' && (
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 text-xs text-gray-500">カテゴリ</span>
+                    <select
+                      value={bulkCategory}
+                      onChange={(event) => onBulkCategoryChange(event.target.value)}
+                      className="flex-1 rounded border border-gray-600 bg-zinc-800 px-2 py-1 text-xs text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-800"
+                    >
+                      <option value="">未分類</option>
+                      {gameCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <textarea
+                  value={bulkText}
+                  onChange={(event) => onBulkTextChange(event.target.value)}
+                  rows={16}
+                  placeholder={'名前1\n名前2\n名前3\n...'}
+                  className="w-full rounded border border-gray-600 bg-zinc-800 px-2 py-1.5 font-mono text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-800"
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={onBulk}
+                    disabled={bulking || !bulkText.trim()}
+                    className="rounded bg-red-900 px-3 py-1 text-xs text-white transition hover:bg-red-800 disabled:opacity-50"
+                  >
+                    {bulking ? '追加中...' : '一括追加'}
+                  </button>
+                  {bulkResult && (
+                    <span className="text-xs text-green-400">
+                      {bulkResult.added}件追加・{bulkResult.skipped}件スキップ
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           {addError && <span className="text-xs text-red-400">{addError}</span>}
         </div>
       )}
