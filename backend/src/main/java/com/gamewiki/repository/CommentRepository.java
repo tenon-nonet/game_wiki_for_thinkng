@@ -8,4 +8,5 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByItemIdAndParentIdIsNullOrderByCreatedAtDesc(Long itemId);
     List<Comment> findByParentIdInOrderByCreatedAtAsc(List<Long> parentIds);
+    List<Comment> findTop100ByUsernameOrderByCreatedAtDesc(String username);
 }

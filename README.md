@@ -16,7 +16,7 @@ npm run dev
 ### バックエンド
 ```bash
 cd backend
-mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 # http://localhost:8080
 ```
 

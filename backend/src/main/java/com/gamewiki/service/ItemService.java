@@ -30,6 +30,7 @@ public class ItemService {
     private final TagRepository tagRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
+    private final EditHistoryService editHistoryService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -70,7 +71,9 @@ public class ItemService {
             item.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(itemRepository.save(item));
+        Item saved = itemRepository.save(item);
+        editHistoryService.record(editorUsername, "ITEM", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     @Transactional
@@ -93,7 +96,9 @@ public class ItemService {
             item.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(itemRepository.save(item));
+        Item saved = itemRepository.save(item);
+        editHistoryService.record(editorUsername, "ITEM", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     public void delete(Long id) {

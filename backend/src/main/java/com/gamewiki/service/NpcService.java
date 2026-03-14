@@ -31,6 +31,7 @@ public class NpcService {
     private final TagRepository tagRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
+    private final EditHistoryService editHistoryService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -71,7 +72,9 @@ public class NpcService {
             npc.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(npcRepository.save(npc));
+        Npc saved = npcRepository.save(npc);
+        editHistoryService.record(editorUsername, "NPC", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     @Transactional
@@ -95,7 +98,9 @@ public class NpcService {
             npc.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(npcRepository.save(npc));
+        Npc saved = npcRepository.save(npc);
+        editHistoryService.record(editorUsername, "NPC", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     public void delete(Long id) {

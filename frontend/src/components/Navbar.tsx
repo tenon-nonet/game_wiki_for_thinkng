@@ -30,6 +30,7 @@ export default function Navbar() {
           <Link to="/games" className="hover:text-gray-300 text-base">ゲーム一覧</Link>
           {loggedIn ? (
             <>
+              <Link to="/mypage" className="hover:text-gray-300 text-base">マイページ</Link>
               {isAdmin() && (
                 <Link to="/tags" className="hover:text-gray-300 text-base">タグ管理</Link>
               )}
@@ -77,6 +78,7 @@ export default function Navbar() {
           <Link to="/catalog" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">目録</Link>
           {loggedIn ? (
             <>
+              <Link to="/mypage" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">マイページ</Link>
               {isAdmin() && (
                 <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">タグ管理</Link>
               )}

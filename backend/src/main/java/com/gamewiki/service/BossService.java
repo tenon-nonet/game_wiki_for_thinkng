@@ -31,6 +31,7 @@ public class BossService {
     private final TagRepository tagRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
+    private final EditHistoryService editHistoryService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -71,7 +72,9 @@ public class BossService {
             boss.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(bossRepository.save(boss));
+        Boss saved = bossRepository.save(boss);
+        editHistoryService.record(editorUsername, "BOSS", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     @Transactional
@@ -95,7 +98,9 @@ public class BossService {
             boss.setImagePath(fileStorageService.store(image));
         }
 
-        return toResponse(bossRepository.save(boss));
+        Boss saved = bossRepository.save(boss);
+        editHistoryService.record(editorUsername, "BOSS", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        return toResponse(saved);
     }
 
     public void delete(Long id) {
