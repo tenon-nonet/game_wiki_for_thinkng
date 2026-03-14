@@ -205,8 +205,11 @@ export default function GameDetailPage() {
       </div>
 
       <div className="mt-6 flex items-center justify-between">
-        <Link to={`/items?gameId=${game.id}`} className="border border-white/40 hover:border-white/70 text-white bg-transparent text-sm px-4 py-2 rounded transition">
-          アイテム一覧を見る →
+        <Link
+          to={`/items?gameId=${game.id}`}
+          className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-4 py-2 text-sm font-semibold tracking-[0.08em] text-amber-50 shadow-[0_0_22px_rgba(245,158,11,0.16)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"
+        >
+          図録を見る →
         </Link>
       </div>
 
@@ -216,7 +219,7 @@ export default function GameDetailPage() {
           <h2 className="text-lg font-bold text-gray-100">関連ニュース</h2>
           {!newsLoading && news.length > 0 && (
             <Link to={`/games/${game.id}/news`} className="text-gray-100 hover:underline text-sm">
-              関連ニュース一覧はコチラ →
+              関連ニュース一覧 →
             </Link>
           )}
         </div>
