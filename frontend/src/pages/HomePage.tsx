@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit } from '../api'
+import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit, getItems, getBosses, getNpcs } from '../api'
 import { isAdmin } from '../auth'
 import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
@@ -30,11 +30,25 @@ export default function HomePage() {
   const [news, setNews] = useState<{ title: string; url: string; publishedAt: string; source: string }[]>([])
   const [newsLoading, setNewsLoading] = useState(false)
   const [totalVisitors, setTotalVisitors] = useState<number | null>(null)
+  const [totalItems, setTotalItems] = useState<number | null>(null)
+  const [totalBosses, setTotalBosses] = useState<number | null>(null)
+  const [totalNpcs, setTotalNpcs] = useState<number | null>(null)
 
   const load = async (q?: string) => {
     const res = await getGames(q)
     setGames(res.data)
     if (!q) {
+      Promise.all([getItems(), getBosses(), getNpcs()])
+        .then(([itemsRes, bossesRes, npcsRes]) => {
+          setTotalItems(itemsRes.data.length)
+          setTotalBosses(bossesRes.data.length)
+          setTotalNpcs(npcsRes.data.length)
+        })
+        .catch(() => {
+          setTotalItems(null)
+          setTotalBosses(null)
+          setTotalNpcs(null)
+        })
       setNewsLoading(true)
       getNews(FROM_SOFTWARE_NEWS_QUERY, 5).then((r) => {
         setNews(r.data)
@@ -154,7 +168,7 @@ export default function HomePage() {
     <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
       <section className="mb-8 w-full">
         <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
-          <div className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-3 lg:items-start">
+          <div className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
             <div className="space-y-3 pt-1">
               <h1 className="text-3xl font-semibold leading-tight text-zinc-100 sm:text-4xl lg:text-[1rem]">
                   知ることに終わりはなく、また完全もない。<br />
@@ -181,35 +195,51 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="-ml-3 flex items-start pt-1 lg:-ml-20">
-              <p className="text-sm leading-7 text-zinc-400 sm:text-base">
-                FROMDEXは、誰でも編集可能なゲームwiki
-                <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
-                <br />難解かつ緻密、時には理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
-              </p>
+            <div className="-ml-12 space-y-4 pt-1 lg:-ml-40">
+              <div className="px-4">
+                <p className="text-sm leading-7 text-zinc-400 sm:text-base">
+                  FROMDEXは、誰でも編集可能なゲームwiki
+                  <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
+                  <br />難解かつ緻密、時には理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
+                </p>
+              </div>
+              <div className="rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm">
+                <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
+                <div className="mt-2 space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-zinc-100">目録</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      全体の収録状況を俯瞰し、未登録や情報不足を見つける場所。
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-zinc-100">図録</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      画像と情報を大きく並べて眺め、作品世界を鑑賞する場所。
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-zinc-100">情報追加</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                      気づいた内容を追記し、図録を少しずつ豊かにしていきます。
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-3xl border border-zinc-800/80 bg-black/30 p-4 pt-5 backdrop-blur-sm lg:min-h-full">
-              <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
-              <div className="mt-3 space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-zinc-100">目録</p>
-                  <p className="mt-1 text-sm leading-6 text-zinc-400">
-                    全体の収録状況を俯瞰し、未登録や情報不足を見つける場所。
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-zinc-100">図録</p>
-                  <p className="mt-1 text-sm leading-6 text-zinc-400">
-                    画像と情報を大きく並べて眺め、作品世界を鑑賞する場所。
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-zinc-100">情報追加</p>
-                  <p className="mt-1 text-sm leading-6 text-zinc-400">
-                    気づいた内容を追記し、図録を少しずつ豊かにしていきます。
-                  </p>
-                </div>
+            <div className="space-y-3 pt-1">
+              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL ITEMS</p>
+                <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalItems ?? '-'}</p>
+              </div>
+              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL BOSSES</p>
+                <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalBosses ?? '-'}</p>
+              </div>
+              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL NPCS</p>
+                <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalNpcs ?? '-'}</p>
               </div>
             </div>
           </div>
