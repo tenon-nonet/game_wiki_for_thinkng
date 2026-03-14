@@ -186,9 +186,11 @@ export default function HomePage() {
                   <br />―上位者の叡智
               </h1>
               <div className="flex flex-wrap gap-2 text-sm">
-                <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
-                  収録ゲーム: <span className="text-zinc-100">{games.length}</span>
-                </div>
+                {admin && (
+                  <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
+                    収録ゲーム: <span className="text-zinc-100">{games.length}</span>
+                  </div>
+                )}
                 {admin && totalVisitors !== null && (
                   <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
                     訪問者数: <span className="text-zinc-100">{totalVisitors}</span>
