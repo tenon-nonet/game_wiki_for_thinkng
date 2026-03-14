@@ -17,6 +17,7 @@ type GroupedItemsByGame = {
 }
 
 type Props = {
+  viewMode: 'card' | 'list'
   activeTab: TabType
   total: number
   currentEntries: CatalogEntry[]
@@ -24,6 +25,7 @@ type Props = {
   groupedItemByGameAndCategory: GroupedItemsByGame[] | null
   groupedByGame: GroupedByGame[] | null
   renderCard: (entry: CatalogEntry, tab: TabType) => React.ReactNode
+  renderListRow: (entry: CatalogEntry, tab: TabType) => React.ReactNode
 }
 
 function EmptyState({ total }: { total: number }) {
@@ -35,6 +37,7 @@ function EmptyState({ total }: { total: number }) {
 }
 
 export default function CatalogEntryGrid({
+  viewMode,
   activeTab,
   total,
   currentEntries,
@@ -42,7 +45,19 @@ export default function CatalogEntryGrid({
   groupedItemByGameAndCategory,
   groupedByGame,
   renderCard,
+  renderListRow,
 }: Props) {
+  const renderEntries = (entries: CatalogEntry[], tab: TabType) =>
+    viewMode === 'card' ? (
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
+        {entries.map((entry) => renderCard(entry, tab))}
+      </div>
+    ) : (
+      <div className="flex flex-wrap gap-2 rounded border border-zinc-800 bg-zinc-950/60 p-3">
+        {entries.map((entry) => renderListRow(entry, tab))}
+      </div>
+    )
+
   if (groupedItemByGameAndCategory) {
     return (
       <div className="space-y-8">
@@ -59,9 +74,7 @@ export default function CatalogEntryGrid({
                       {category.label}
                       <span className="ml-2 text-zinc-600 normal-case font-normal">{category.entries.length}件</span>
                     </h3>
-                    <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-                      {category.entries.map((entry) => renderCard(entry, 'ITEM'))}
-                    </div>
+                    {renderEntries(category.entries, 'ITEM')}
                   </div>
                 ))}
               </div>
@@ -84,9 +97,7 @@ export default function CatalogEntryGrid({
                 {group.label}
                 <span className="ml-2 text-zinc-600 normal-case font-normal">{group.entries.length}件</span>
               </h2>
-              <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-                {group.entries.map((entry) => renderCard(entry, 'ITEM'))}
-              </div>
+              {renderEntries(group.entries, 'ITEM')}
             </div>
           ))
         )}
@@ -106,9 +117,7 @@ export default function CatalogEntryGrid({
                 {gameName}
                 <span className="ml-2 text-xs font-normal text-zinc-500">{entries.length}件</span>
               </h2>
-              <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-                {entries.map((entry) => renderCard(entry, activeTab))}
-              </div>
+              {renderEntries(entries, activeTab)}
             </div>
           ))
         )}
@@ -121,9 +130,7 @@ export default function CatalogEntryGrid({
       {currentEntries.length === 0 ? (
         <EmptyState total={total} />
       ) : (
-        <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10">
-          {currentEntries.map((entry) => renderCard(entry, activeTab))}
-        </div>
+        renderEntries(currentEntries, activeTab)
       )}
     </div>
   )
