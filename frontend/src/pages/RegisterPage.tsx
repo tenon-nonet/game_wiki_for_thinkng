@@ -3,8 +3,14 @@ import { useNavigate, Link } from 'react-router-dom'
 import { register } from '../api'
 import { saveAuth } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
+import { usePageMeta } from '../seo'
 
 export default function RegisterPage() {
+  usePageMeta({
+    title: '新規登録 | FROMDEX.com',
+    description: 'FROMDEX.com の新規登録ページ。登録するとマイページで自分の編集記録やメッセージ記録を確認できます。',
+  })
+
   const navigate = useNavigate()
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')

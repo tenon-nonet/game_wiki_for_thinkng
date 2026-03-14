@@ -4,6 +4,7 @@ import { getNpc, deleteNpc, getItems } from '../api'
 import { isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { parseDialogueLines } from '../dialogues'
+import { excerpt, usePageMeta } from '../seo'
 import type { Npc, Item } from '../types'
 
 export default function NpcDetailPage() {
@@ -23,6 +24,11 @@ export default function NpcDetailPage() {
   const [showFlash, setShowFlash] = useState(false)
   const admin = isAdmin()
   const dialogues = parseDialogueLines(npc?.dialogues)
+
+  usePageMeta({
+    title: `${npc?.name ?? 'NPC詳細'} | FROMDEX.com`,
+    description: excerpt(npc?.description, 120) || 'NPCの詳細、関連情報、セリフを掲載しています。',
+  })
 
   useEffect(() => {
     if (!locationState?.flashMessage) return

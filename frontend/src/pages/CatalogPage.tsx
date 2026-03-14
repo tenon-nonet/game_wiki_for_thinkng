@@ -15,6 +15,7 @@ import CatalogControls from '../components/catalog/CatalogControls'
 import CatalogEntryCard from '../components/catalog/CatalogEntryCard'
 import CatalogEntryGrid from '../components/catalog/CatalogEntryGrid'
 import CatalogProgressBar from '../components/catalog/CatalogProgressBar'
+import { usePageMeta } from '../seo'
 import type { Boss, CatalogEntry, Game, Item, Npc } from '../types'
 import {
   filterEntries,
@@ -28,6 +29,11 @@ import {
 } from './catalogUtils'
 
 export default function CatalogPage() {
+  usePageMeta({
+    title: '目録 | FROMDEX.com',
+    description: 'ゲーム内データを整理するための目録ページ。カード表示と目次表示を切り替えて確認できます。',
+  })
+
   const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
     const saved = localStorage.getItem('catalog_view_mode')
     return saved === 'list' ? 'list' : 'card'

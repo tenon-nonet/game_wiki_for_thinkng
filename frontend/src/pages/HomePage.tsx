@@ -2,10 +2,16 @@
 import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit, getItems, getBosses, getNpcs } from '../api'
 import { isAdmin } from '../auth'
+import { usePageMeta } from '../seo'
 import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
 
 export default function HomePage() {
+  usePageMeta({
+    title: 'FROMDEX.com | FromSoftwareゲームWiki',
+    description: 'FROMDEXは、誰でも編集可能なFromSoftware作品向けゲームwiki。ゲーム内テキスト情報を収集・整理し、図録と目録で閲覧できます。',
+  })
+
   const FROM_SOFTWARE_NEWS_QUERY = [
     'FromSoftware',
     'フロムソフトウェア',
