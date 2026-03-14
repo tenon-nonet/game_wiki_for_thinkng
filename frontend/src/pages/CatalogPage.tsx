@@ -233,67 +233,21 @@ export default function CatalogPage() {
         onNewCategoryChange={setNewCategory}
         onAdd={handleAdd}
         progressByTab={progressByTab}
+        bulkOpen={bulkOpen}
+        bulkText={bulkText}
+        bulkCategory={bulkCategory}
+        bulkResult={bulkResult}
+        bulking={bulking}
+        onBulkToggle={() => {
+          setBulkOpen(!bulkOpen)
+          setBulkResult(null)
+        }}
+        onBulkTextChange={setBulkText}
+        onBulkCategoryChange={setBulkCategory}
+        onBulk={handleBulk}
       />
 
       <CatalogProgressBar registered={registered} total={total} />
-
-      {isAdmin() && selectedGameId > 0 && (
-        <div className="mb-5 flex flex-wrap items-start gap-2">
-          <div className="relative">
-            <button
-              onClick={() => {
-                setBulkOpen(!bulkOpen)
-                setBulkResult(null)
-              }}
-              className="rounded border border-zinc-600 px-3 py-1.5 text-xs text-gray-400 transition hover:border-zinc-400 hover:text-gray-200"
-            >
-              {bulkOpen ? '−' : '+'} 一括目録追加
-            </button>
-            {bulkOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1 w-[min(18rem,calc(100vw-2rem))] space-y-2 rounded-lg border border-zinc-700 bg-zinc-900 p-3 shadow-lg">
-                {activeTab === 'ITEM' && (
-                  <div className="flex items-center gap-2">
-                    <span className="shrink-0 text-xs text-gray-500">カテゴリ</span>
-                    <select
-                      value={bulkCategory}
-                      onChange={(event) => setBulkCategory(event.target.value)}
-                      className="flex-1 rounded border border-gray-600 bg-zinc-800 px-2 py-1 text-xs text-gray-100 focus:outline-none focus:ring-1 focus:ring-red-800"
-                    >
-                      <option value="">未分類</option>
-                      {gameCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <textarea
-                  value={bulkText}
-                  onChange={(event) => setBulkText(event.target.value)}
-                  rows={5}
-                  placeholder={'名前1\n名前2\n名前3\n...'}
-                  className="w-full rounded border border-gray-600 bg-zinc-800 px-2 py-1.5 font-mono text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-800"
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleBulk}
-                    disabled={bulking || !bulkText.trim()}
-                    className="rounded bg-red-900 px-3 py-1 text-xs text-white transition hover:bg-red-800 disabled:opacity-50"
-                  >
-                    {bulking ? '追加中...' : '一括追加'}
-                  </button>
-                  {bulkResult && (
-                    <span className="text-xs text-green-400">
-                      {bulkResult.added}件追加・{bulkResult.skipped}件スキップ
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       <CatalogEntryGrid
         activeTab={activeTab}
