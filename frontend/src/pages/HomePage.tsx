@@ -168,9 +168,9 @@ export default function HomePage() {
     <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
       <section className="mb-8 w-full">
         <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
-          <div className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
+          <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
             <div className="space-y-3 pt-1">
-              <h1 className="text-3xl font-semibold leading-tight text-zinc-100 sm:text-4xl lg:text-[1rem]">
+              <h1 className="text-[1.35rem] font-semibold leading-snug text-zinc-100 sm:text-4xl lg:text-[1rem]">
                   <br/>知ることに終わりはなく、また完全もない。<br />
                   それ故に私は百智卿であり続ける。<br />
                   導きも、或いはそうなのかもしれぬ。<br />
@@ -199,8 +199,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="-ml-12 space-y-4 pt-1 lg:-ml-60">
-              <div className="w-full max-w-[50rem] rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm">
+            <div className="space-y-3 pt-1 lg:-ml-60 lg:space-y-4">
+              <div className="w-full rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm lg:max-w-[50rem]">
                 <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
                 <div className="mt-2 space-y-3">
                   <div>
@@ -233,7 +233,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="space-y-3 pt-1">
+            <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-3 lg:grid-cols-1 lg:gap-3">
               <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
                 <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL ITEMS</p>
                 <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalItems ?? '-'}</p>
