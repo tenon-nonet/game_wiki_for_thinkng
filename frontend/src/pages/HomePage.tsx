@@ -167,14 +167,14 @@ export default function HomePage() {
   return (
     <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
       <section className="mb-8 w-full">
-        <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
+        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
           <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
             <div className="space-y-3 pt-1">
               <h1 className="text-[0.82rem] font-semibold leading-snug text-zinc-100 sm:text-4xl lg:text-[1rem]">
                 <span className="sm:hidden">
                   かつてビルゲンワースのウィレームは喝破した<br />
-                  「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」<br />
-                  ―上位者の叡智
+                  「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」
+                  <span className="block text-right">―上位者の叡智</span>
                 </span>
                 <span className="hidden sm:inline">
                   <br/>知ることに終わりはなく、また完全もない。<br />
@@ -207,7 +207,7 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-3 pt-1 lg:-ml-60 lg:space-y-4">
-              <div className="-mx-1 w-auto rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm sm:mx-0 sm:w-full">
+              <div className="-mx-1 w-auto rounded-xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm sm:mx-0 sm:w-full">
                 <p className="text-sm font-semibold tracking-[0.28em] text-amber-200 sm:text-base">SITE GUIDE</p>
                 <div className="mt-2 space-y-3">
                   <div>
@@ -220,20 +220,20 @@ export default function HomePage() {
                   <div>
                     <p className="text-sm font-medium text-zinc-100">目録</p>
                     <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      全体を俯瞰し、未登録情報や気になる情報を見つけたり、情報を追加する場所。
+                      全体を俯瞰し、未登録情報や気になる情報を見つけ、情報を追加する
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">図録</p>
                     <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      画像と情報を並べて眺める場所。お酒を飲みながらだと尚良い。編集もできる。
+                      集約された画像と情報を眺める場所。編集やコメントもできる
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">情報の追加方法</p>
                     <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      目録から情報を追加するデータを選択、情報追加画面で画像、テキストを入力する。
-                      <br/>既存の情報も変更できるので、より良い画像に差し替えたり校閲できる。
+                      目録から情報を選択、編集画面で画像、テキストを入力する。
+                      既存の情報も変更できるので、より良い画像に差し替えたり校閲する
                     </p>
                   </div>
                 </div>
@@ -241,15 +241,15 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-2 pt-1 lg:grid-cols-1 lg:gap-3">
-              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
                 <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL ITEMS</p>
                 <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalItems ?? '-'}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
                 <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL BOSSES</p>
                 <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalBosses ?? '-'}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
                 <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL NPCS</p>
                 <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalNpcs ?? '-'}</p>
               </div>
@@ -271,7 +271,7 @@ export default function HomePage() {
         </div>
 
         {showForm && (
-          <form onSubmit={handleCreate} className="mb-6 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/90 p-5 shadow-lg">
+          <form onSubmit={handleCreate} className="mb-6 space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/90 p-5 shadow-lg">
             {error && <p className="text-gray-100 text-sm">{error}</p>}
             <input
               type="text"
@@ -307,7 +307,7 @@ export default function HomePage() {
             {games.map((game, index) => (
               <div
                 key={game.id}
-                className={`group overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/90 shadow-[0_16px_48px_rgba(0,0,0,0.32)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(0,0,0,0.42)] ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
+                className={`group overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/90 shadow-[0_16px_48px_rgba(0,0,0,0.32)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(0,0,0,0.42)] ${admin ? 'cursor-grab active:cursor-grabbing' : ''} ${dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-red-700 opacity-75' : ''}`}
                 draggable={admin}
                 onDragStart={() => admin && handleDragStart(index)}
                 onDragOver={(e) => admin && handleDragOver(e, index)}
