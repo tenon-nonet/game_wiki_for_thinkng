@@ -238,7 +238,7 @@ export default function CatalogPage() {
       <CatalogProgressBar registered={registered} total={total} />
 
       {isAdmin() && selectedGameId > 0 && (
-        <div className="mb-5 flex flex-wrap items-start gap-2">
+        <div className="mb-5 flex flex-wrap items-start justify-end gap-2">
           <div className="relative">
             <button
               onClick={() => {
