@@ -170,7 +170,13 @@ export default function HomePage() {
         <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
           <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
             <div className="space-y-3 pt-1">
-              <h1 className="text-[1.35rem] font-semibold leading-snug text-zinc-100 sm:text-4xl lg:text-[1rem]">
+              <h1 className="text-[0.82rem] font-semibold leading-snug text-zinc-100 sm:text-4xl lg:text-[1rem]">
+                <span className="sm:hidden">
+                  かつてビルゲンワースのウィレームは喝破した<br />
+                  「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」<br />
+                  ―上位者の叡智
+                </span>
+                <span className="hidden sm:inline">
                   <br/>知ることに終わりはなく、また完全もない。<br />
                   それ故に私は百智卿であり続ける。<br />
                   導きも、或いはそうなのかもしれぬ。<br />
@@ -184,6 +190,7 @@ export default function HomePage() {
                   かつてビルゲンワースのウィレームは喝破した<br/>
                   「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」
                   <br />―上位者の叡智
+                </span>
               </h1>
               <div className="flex flex-wrap gap-2 text-sm">
                 {admin && (
@@ -200,11 +207,11 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-3 pt-1 lg:-ml-60 lg:space-y-4">
-              <div className="w-full rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm lg:max-w-[50rem]">
-                <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
+              <div className="-mx-1 w-auto rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm sm:mx-0 sm:w-full">
+                <p className="text-sm font-semibold tracking-[0.28em] text-amber-200 sm:text-base">SITE GUIDE</p>
                 <div className="mt-2 space-y-3">
                   <div>
-                    <p className="text-sm leading-7 text-zinc-400 sm:text-base">
+                    <p className="text-[0.75rem] leading-6 text-zinc-400 sm:text-base sm:leading-7">
                       FROMDEXは、誰でも編集可能なゲームwiki
                       <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
                       <br />難解かつ緻密、或いは理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
@@ -212,19 +219,19 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">目録</p>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
                       全体を俯瞰し、未登録情報や気になる情報を見つけたり、情報を追加する場所。
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">図録</p>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
                       画像と情報を並べて眺める場所。お酒を飲みながらだと尚良い。編集もできる。
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">情報の追加方法</p>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
                       目録から情報を追加するデータを選択、情報追加画面で画像、テキストを入力する。
                       <br/>既存の情報も変更できるので、より良い画像に差し替えたり校閲できる。
                     </p>
@@ -233,18 +240,18 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-3 lg:grid-cols-1 lg:gap-3">
-              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL ITEMS</p>
-                <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalItems ?? '-'}</p>
+            <div className="grid grid-cols-3 gap-2 pt-1 lg:grid-cols-1 lg:gap-3">
+              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL ITEMS</p>
+                <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalItems ?? '-'}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL BOSSES</p>
-                <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalBosses ?? '-'}</p>
+              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL BOSSES</p>
+                <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalBosses ?? '-'}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <p className="text-[11px] tracking-[0.18em] text-zinc-500">TOTAL NPCS</p>
-                <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalNpcs ?? '-'}</p>
+              <div className="rounded-2xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL NPCS</p>
+                <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalNpcs ?? '-'}</p>
               </div>
             </div>
           </div>
@@ -253,11 +260,6 @@ export default function HomePage() {
 
       <section className="w-full">
         <div className="mb-4 flex items-end justify-between gap-3">
-          <div className="space-y-2">
-            <p className="text-xs font-medium tracking-[0.2em] text-zinc-500">GAME COLLECTION</p>
-            <h2 className="text-2xl font-semibold text-zinc-100 sm:text-3xl">ゲーム一覧</h2>
-            <p className="text-sm text-zinc-400">作品ごとの目録・図録・詳細ページへの入口です。</p>
-          </div>
           {admin && (
             <button
               onClick={() => setShowForm(!showForm)}
