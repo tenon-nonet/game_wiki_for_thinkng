@@ -3,9 +3,15 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getNpcs, getGames, getTags, updateNpcOrder } from '../api'
 import { isLoggedIn } from '../auth'
 import EncyclopediaCard from '../components/EncyclopediaCard'
+import { usePageMeta } from '../seo'
 import type { Game, Npc, Tag } from '../types'
 
 export default function NpcsPage() {
+  usePageMeta({
+    title: 'NPC図録 | FROMDEX.com',
+    description: 'FromSoftware作品のNPC図録一覧。ゲームやタグで絞り込みながら閲覧できます。',
+  })
+
   const [searchParams, setSearchParams] = useSearchParams()
   const [npcs, setNpcs] = useState<Npc[]>([])
   const [games, setGames] = useState<Game[]>([])

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { getMyEditHistories } from '../api'
 import { isLoggedIn } from '../auth'
+import { usePageMeta } from '../seo'
 import type { EditHistory } from '../types'
 
 const detailPathByType: Record<EditHistory['entityType'], string> = {
@@ -22,6 +23,11 @@ const labelByAction: Record<EditHistory['actionType'], string> = {
 }
 
 export default function MyEditHistoriesPage() {
+  usePageMeta({
+    title: '編集記録一覧 | FROMDEX.com',
+    description: 'ログインユーザーの編集記録一覧ページです。',
+  })
+
   const [histories, setHistories] = useState<EditHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

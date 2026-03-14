@@ -2,9 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { getMyComments } from '../api'
 import { isLoggedIn } from '../auth'
+import { usePageMeta } from '../seo'
 import type { MyComment } from '../types'
 
 export default function MyCommentsPage() {
+  usePageMeta({
+    title: 'メッセージ投稿履歴 | FROMDEX.com',
+    description: 'ログインユーザーのメッセージ投稿履歴一覧ページです。',
+  })
+
   const [comments, setComments] = useState<MyComment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

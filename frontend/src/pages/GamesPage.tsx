@@ -3,10 +3,16 @@ import { Link } from 'react-router-dom'
 import { getGames, createGame, updateGameOrder } from '../api'
 import type { GameFormData } from '../api'
 import { isAdmin } from '../auth'
+import { usePageMeta } from '../seo'
 import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
 
 export default function GamesPage() {
+  usePageMeta({
+    title: 'ゲーム一覧 | FROMDEX.com',
+    description: 'FromSoftware作品のゲーム一覧ページ。各作品の詳細、図録、関連情報へ移動できます。',
+  })
+
   const [games, setGames] = useState<Game[]>([])
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)

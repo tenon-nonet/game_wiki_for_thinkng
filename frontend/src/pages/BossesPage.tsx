@@ -3,9 +3,15 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getBosses, getGames, getTags, updateBossOrder } from '../api'
 import { isLoggedIn } from '../auth'
 import EncyclopediaCard from '../components/EncyclopediaCard'
+import { usePageMeta } from '../seo'
 import type { Boss, Game, Tag } from '../types'
 
 export default function BossesPage() {
+  usePageMeta({
+    title: 'ボス図録 | FROMDEX.com',
+    description: 'FromSoftware作品のボス図録一覧。ゲームやタグで絞り込みながら閲覧できます。',
+  })
+
   const [searchParams, setSearchParams] = useSearchParams()
   const [bosses, setBosses] = useState<Boss[]>([])
   const [games, setGames] = useState<Game[]>([])

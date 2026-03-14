@@ -3,8 +3,14 @@ import { useNavigate, Link } from 'react-router-dom'
 import { login } from '../api'
 import { saveAuth } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
+import { usePageMeta } from '../seo'
 
 export default function LoginPage() {
+  usePageMeta({
+    title: 'ログイン | FROMDEX.com',
+    description: 'FROMDEX.com のログインページ。ログインするとマイページから編集記録やメッセージ記録を確認できます。',
+  })
+
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')

@@ -2,6 +2,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { getGame, getNews } from '../api'
 import type { Game } from '../types'
+import { usePageMeta } from '../seo'
 
 type NewsItem = { title: string; url: string; publishedAt: string; source: string }
 
@@ -13,6 +14,11 @@ export default function NewsListPage() {
   const [news, setNews] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
+
+  usePageMeta({
+    title: `${game?.name ?? 'ゲーム関連ニュース'} | FROMDEX.com`,
+    description: `${game?.name ?? 'ゲーム'} に関連するニュース一覧ページです。`,
+  })
 
   useEffect(() => {
     getGame(Number(id)).then((res) => {

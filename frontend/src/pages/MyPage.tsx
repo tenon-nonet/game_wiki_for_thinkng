@@ -2,6 +2,7 @@
 import { Link, Navigate } from 'react-router-dom'
 import { getMyComments, getMyEditHistories } from '../api'
 import { getUsername, isLoggedIn } from '../auth'
+import { usePageMeta } from '../seo'
 import type { EditHistory, MyComment } from '../types'
 
 const detailPathByType: Record<EditHistory['entityType'], string> = {
@@ -22,6 +23,11 @@ const labelByAction: Record<EditHistory['actionType'], string> = {
 }
 
 export default function MyPage() {
+  usePageMeta({
+    title: 'マイページ | FROMDEX.com',
+    description: '自分の編集記録とメッセージ投稿履歴を確認できるマイページです。',
+  })
+
   const [histories, setHistories] = useState<EditHistory[]>([])
   const [comments, setComments] = useState<MyComment[]>([])
   const [loading, setLoading] = useState(true)

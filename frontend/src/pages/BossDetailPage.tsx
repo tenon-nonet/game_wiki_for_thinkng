@@ -4,6 +4,7 @@ import { getBoss, deleteBoss, getItems } from '../api'
 import { isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { parseDialogueLines } from '../dialogues'
+import { excerpt, usePageMeta } from '../seo'
 import type { Boss, Item } from '../types'
 
 export default function BossDetailPage() {
@@ -23,6 +24,11 @@ export default function BossDetailPage() {
   const [showFlash, setShowFlash] = useState(false)
   const admin = isAdmin()
   const dialogues = parseDialogueLines(boss?.dialogues)
+
+  usePageMeta({
+    title: `${boss?.name ?? 'ボス詳細'} | FROMDEX.com`,
+    description: excerpt(boss?.description, 120) || 'ボスの詳細、関連情報、セリフを掲載しています。',
+  })
 
   useEffect(() => {
     if (!locationState?.flashMessage) return

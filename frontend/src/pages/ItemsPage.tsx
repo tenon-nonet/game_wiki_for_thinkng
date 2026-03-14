@@ -3,9 +3,15 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getItems, getGames, getTags, updateItemOrder } from '../api'
 import { isLoggedIn } from '../auth'
 import EncyclopediaCard from '../components/EncyclopediaCard'
+import { usePageMeta } from '../seo'
 import type { Game, Item, Tag } from '../types'
 
 export default function ItemsPage() {
+  usePageMeta({
+    title: 'アイテム図録 | FROMDEX.com',
+    description: 'FromSoftware作品のアイテム図録一覧。ゲームやタグで絞り込みながら閲覧できます。',
+  })
+
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState<Item[]>([])
   const [games, setGames] = useState<Game[]>([])
