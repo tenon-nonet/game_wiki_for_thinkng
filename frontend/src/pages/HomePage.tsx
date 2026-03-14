@@ -171,7 +171,7 @@ export default function HomePage() {
           <div className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
             <div className="space-y-3 pt-1">
               <h1 className="text-3xl font-semibold leading-tight text-zinc-100 sm:text-4xl lg:text-[1rem]">
-                  知ることに終わりはなく、また完全もない。<br />
+                  <br/>知ることに終わりはなく、また完全もない。<br />
                   それ故に私は百智卿であり続ける。<br />
                   導きも、或いはそうなのかもしれぬ。<br />
                   その戦いが終わる時、我らは我らで在り続けるものか？
@@ -180,7 +180,9 @@ export default function HomePage() {
                   <br />エルデの王にならんとする者よ 
                   <br/>―百智卿、ギデオン=オーフニール
 
-                  <br /><br />「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」
+                  <br /><br /><br/>
+                  かつてビルゲンワースのウィレームは喝破した<br/>
+                  「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」
                   <br />―上位者の叡智
               </h1>
               <div className="flex flex-wrap gap-2 text-sm">
@@ -195,33 +197,34 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="-ml-12 space-y-4 pt-1 lg:-ml-40">
-              <div className="px-4">
-                <p className="text-sm leading-7 text-zinc-400 sm:text-base">
-                  FROMDEXは、誰でも編集可能なゲームwiki
-                  <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
-                  <br />難解かつ緻密、時には理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
-                </p>
-              </div>
-              <div className="rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm">
+            <div className="-ml-12 space-y-4 pt-1 lg:-ml-60">
+              <div className="w-full max-w-[50rem] rounded-3xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm">
                 <p className="text-xs font-medium tracking-[0.22em] text-zinc-500">SITE GUIDE</p>
                 <div className="mt-2 space-y-3">
                   <div>
+                    <p className="text-sm leading-7 text-zinc-400 sm:text-base">
+                      FROMDEXは、誰でも編集可能なゲームwiki
+                      <br />断片的に記された、ゲーム内テキスト情報を収集し、編纂し、集約する。
+                      <br />難解かつ緻密、或いは理解不能に構築されたゲームの世界感を考察し、啓蒙を高める。
+                    </p>
+                  </div>
+                  <div>
                     <p className="text-sm font-medium text-zinc-100">目録</p>
                     <p className="mt-1 text-sm leading-6 text-zinc-400">
-                      全体の収録状況を俯瞰し、未登録や情報不足を見つける場所。
+                      全体を俯瞰し、未登録情報や気になる情報を見つけたり、情報を追加する場所。
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-100">図録</p>
                     <p className="mt-1 text-sm leading-6 text-zinc-400">
-                      画像と情報を大きく並べて眺め、作品世界を鑑賞する場所。
+                      画像と情報を並べて眺める場所。お酒を飲みながらだと尚良い。編集もできる。
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-zinc-100">情報追加</p>
+                    <p className="text-sm font-medium text-zinc-100">情報の追加方法</p>
                     <p className="mt-1 text-sm leading-6 text-zinc-400">
-                      気づいた内容を追記し、図録を少しずつ豊かにしていきます。
+                      目録から情報を追加するデータを選択、情報追加画面で画像、テキストを入力する。
+                      <br/>既存の情報も変更できるので、より良い画像に差し替えたり校閲できる。
                     </p>
                   </div>
                 </div>
