@@ -53,7 +53,7 @@ public class NpcService {
         return toResponse(getNpc(id));
     }
 
-    public NpcResponse create(NpcRequest request, MultipartFile image) {
+    public NpcResponse create(NpcRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
@@ -64,6 +64,7 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.setUpdatedBy(editorUsername);
         setDialogues(npc, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
@@ -74,7 +75,7 @@ public class NpcService {
     }
 
     @Transactional
-    public NpcResponse update(Long id, NpcRequest request, MultipartFile image) {
+    public NpcResponse update(Long id, NpcRequest request, MultipartFile image, String editorUsername) {
         Npc npc = getNpc(id);
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
 
@@ -85,6 +86,7 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.setUpdatedBy(editorUsername);
         npc.getDialogues().clear();
         setDialogues(npc, request.getDialogues());
 
@@ -140,6 +142,7 @@ public class NpcService {
         r.setDialogues(npc.getDialogues().stream().map(NpcDialogue::getText).toList());
         r.setCreatedAt(npc.getCreatedAt());
         r.setUpdatedAt(npc.getUpdatedAt());
+        r.setUpdatedBy(npc.getUpdatedBy());
         return r;
     }
 

@@ -49,6 +49,9 @@ public class Npc {
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int sortOrder = 0;
 
+    @Column(length = 100)
+    private String updatedBy;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

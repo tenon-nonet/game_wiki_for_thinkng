@@ -52,7 +52,7 @@ public class ItemService {
         return toResponse(getItem(id));
     }
 
-    public ItemResponse create(ItemRequest request, MultipartFile image) {
+    public ItemResponse create(ItemRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateItem(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
@@ -64,6 +64,7 @@ public class ItemService {
         item.setCategory(request.getCategory());
         item.setGame(game);
         item.setTags(resolveTags(request.getTags(), request.getGameId()));
+        item.setUpdatedBy(editorUsername);
 
         if (image != null && !image.isEmpty()) {
             item.setImagePath(fileStorageService.store(image));
@@ -73,7 +74,7 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemResponse update(Long id, ItemRequest request, MultipartFile image) {
+    public ItemResponse update(Long id, ItemRequest request, MultipartFile image, String editorUsername) {
         Item item = getItem(id);
         ensureNoDuplicateItem(request.getName(), request.getGameId(), id);
 
@@ -85,6 +86,7 @@ public class ItemService {
         item.setCategory(request.getCategory());
         item.setGame(game);
         item.setTags(resolveTags(request.getTags(), request.getGameId()));
+        item.setUpdatedBy(editorUsername);
 
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(item.getImagePath());
@@ -125,6 +127,7 @@ public class ItemService {
         r.setCategory(item.getCategory());
         r.setCreatedAt(item.getCreatedAt());
         r.setUpdatedAt(item.getUpdatedAt());
+        r.setUpdatedBy(item.getUpdatedBy());
         return r;
     }
 

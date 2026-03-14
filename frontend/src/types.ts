@@ -53,6 +53,7 @@ export interface Item {
   category: string | null
   createdAt: string
   updatedAt: string
+  updatedBy: string | null
 }
 
 export interface Boss {
@@ -66,6 +67,7 @@ export interface Boss {
   dialogues: string[]
   createdAt: string
   updatedAt: string
+  updatedBy: string | null
 }
 
 export interface CatalogEntry {
@@ -89,4 +91,5 @@ export interface Npc {
   dialogues: string[]
   createdAt: string
   updatedAt: string
+  updatedBy: string | null
 }

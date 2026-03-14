@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,16 +38,18 @@ public class ItemController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemResponse> create(
             @Valid @RequestPart("data") ItemRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        return ResponseEntity.ok(itemService.create(request, image));
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(itemService.create(request, image, userDetails != null ? userDetails.getUsername() : null));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemResponse> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") ItemRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        return ResponseEntity.ok(itemService.update(id, request, image));
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(itemService.update(id, request, image, userDetails != null ? userDetails.getUsername() : null));
     }
 
     @PutMapping("/order")

@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,16 +38,18 @@ public class NpcController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<NpcResponse> create(
             @Valid @RequestPart("data") NpcRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        return ResponseEntity.ok(npcService.create(request, image));
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(npcService.create(request, image, userDetails != null ? userDetails.getUsername() : null));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<NpcResponse> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") NpcRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        return ResponseEntity.ok(npcService.update(id, request, image));
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(npcService.update(id, request, image, userDetails != null ? userDetails.getUsername() : null));
     }
 
     @PutMapping("/order")

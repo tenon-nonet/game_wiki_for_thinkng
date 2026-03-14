@@ -53,7 +53,7 @@ public class BossService {
         return toResponse(getBoss(id));
     }
 
-    public BossResponse create(BossRequest request, MultipartFile image) {
+    public BossResponse create(BossRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
@@ -64,6 +64,7 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.setUpdatedBy(editorUsername);
         setDialogues(boss, request.getDialogues());
 
         if (image != null && !image.isEmpty()) {
@@ -74,7 +75,7 @@ public class BossService {
     }
 
     @Transactional
-    public BossResponse update(Long id, BossRequest request, MultipartFile image) {
+    public BossResponse update(Long id, BossRequest request, MultipartFile image, String editorUsername) {
         Boss boss = getBoss(id);
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
 
@@ -85,6 +86,7 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.setUpdatedBy(editorUsername);
         boss.getDialogues().clear();
         setDialogues(boss, request.getDialogues());
 
@@ -140,6 +142,7 @@ public class BossService {
         r.setDialogues(boss.getDialogues().stream().map(BossDialogue::getText).toList());
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
+        r.setUpdatedBy(boss.getUpdatedBy());
         return r;
     }
 

@@ -20,4 +20,5 @@ public class NpcResponse {
     private List<String> dialogues;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String updatedBy;
 }
