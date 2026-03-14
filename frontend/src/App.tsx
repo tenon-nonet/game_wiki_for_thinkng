@@ -23,6 +23,8 @@ import NpcDetailPage from './pages/NpcDetailPage'
 import NpcFormPage from './pages/NpcFormPage'
 import CatalogPage from './pages/CatalogPage'
 import MyPage from './pages/MyPage'
+import MyEditHistoriesPage from './pages/MyEditHistoriesPage'
+import MyCommentsPage from './pages/MyCommentsPage'
 
 export default function App() {
   const [authVersion, setAuthVersion] = useState(0)
@@ -64,6 +66,8 @@ export default function App() {
             <Route path="/npcs/:id/edit" element={<NpcFormPage />} />
             <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/mypage/edit-histories" element={<MyEditHistoriesPage />} />
+            <Route path="/mypage/comments" element={<MyCommentsPage />} />
             <Route path="/tags" element={<TagsAdminPage />} />
             <Route path="/news" element={<AllNewsListPage />} />
           </Routes>

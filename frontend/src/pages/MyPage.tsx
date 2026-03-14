@@ -27,6 +27,8 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const username = getUsername()
+  const previewHistories = histories.slice(0, 10)
+  const previewComments = comments.slice(0, 10)
 
   useEffect(() => {
     Promise.all([getMyEditHistories(), getMyComments()])
@@ -65,7 +67,7 @@ export default function MyPage() {
             <p className="text-sm text-gray-400">まだ編集履歴はありません</p>
           ) : (
             <div className="space-y-3">
-              {histories.map((history) => (
+              {previewHistories.map((history) => (
                 <Link
                   key={history.id}
                   to={`/${detailPathByType[history.entityType]}/${history.entityId}`}
@@ -86,6 +88,13 @@ export default function MyPage() {
                   </div>
                 </Link>
               ))}
+              {histories.length > 10 && (
+                <div className="pt-2">
+                  <Link to="/mypage/edit-histories" className="text-sm text-amber-200 hover:text-amber-100">
+                    すべての編集記録を見る →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -102,7 +111,7 @@ export default function MyPage() {
             <p className="text-sm text-gray-400">まだメッセージ投稿履歴はありません</p>
           ) : (
             <div className="space-y-3">
-              {comments.map((comment) => (
+              {previewComments.map((comment) => (
                 <Link
                   key={comment.id}
                   to={`/items/${comment.itemId}`}
@@ -119,6 +128,13 @@ export default function MyPage() {
                   </div>
                 </Link>
               ))}
+              {comments.length > 10 && (
+                <div className="pt-2">
+                  <Link to="/mypage/comments" className="text-sm text-amber-200 hover:text-amber-100">
+                    すべてのメッセージ投稿記録を見る →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </section>
