@@ -55,6 +55,14 @@ public class ItemService {
 
     public ItemResponse create(ItemRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateItem(request.getName(), request.getGameId(), null);
+        gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        String storedImagePath = image != null && !image.isEmpty() ? fileStorageService.store(image) : null;
+        return createFromStoredImage(request, storedImagePath, editorUsername);
+    }
+
+    public ItemResponse createFromStoredImage(ItemRequest request, String storedImagePath, String editorUsername) {
+        ensureNoDuplicateItem(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -67,8 +75,8 @@ public class ItemService {
         item.setTags(resolveTags(request.getTags(), request.getGameId()));
         item.setUpdatedBy(editorUsername);
 
-        if (image != null && !image.isEmpty()) {
-            item.setImagePath(fileStorageService.store(image));
+        if (storedImagePath != null && !storedImagePath.isBlank()) {
+            item.setImagePath(storedImagePath);
         }
 
         Item saved = itemRepository.save(item);
@@ -78,6 +86,16 @@ public class ItemService {
 
     @Transactional
     public ItemResponse update(Long id, ItemRequest request, MultipartFile image, String editorUsername) {
+        getItem(id);
+        ensureNoDuplicateItem(request.getName(), request.getGameId(), id);
+        gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        String storedImagePath = image != null && !image.isEmpty() ? fileStorageService.store(image) : null;
+        return updateFromStoredImage(id, request, storedImagePath, editorUsername);
+    }
+
+    @Transactional
+    public ItemResponse updateFromStoredImage(Long id, ItemRequest request, String storedImagePath, String editorUsername) {
         Item item = getItem(id);
         ensureNoDuplicateItem(request.getName(), request.getGameId(), id);
 
@@ -91,9 +109,9 @@ public class ItemService {
         item.setTags(resolveTags(request.getTags(), request.getGameId()));
         item.setUpdatedBy(editorUsername);
 
-        if (image != null && !image.isEmpty()) {
+        if (storedImagePath != null && !storedImagePath.isBlank()) {
             fileStorageService.delete(item.getImagePath());
-            item.setImagePath(fileStorageService.store(image));
+            item.setImagePath(storedImagePath);
         }
 
         Item saved = itemRepository.save(item);

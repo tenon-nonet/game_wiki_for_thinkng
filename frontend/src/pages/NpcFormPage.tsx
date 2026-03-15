@@ -49,6 +49,7 @@ export default function NpcFormPage() {
   const [existingImage, setExistingImage] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [overlayMessage, setOverlayMessage] = useState('')
+  const [overlayRedirect, setOverlayRedirect] = useState<string | null>(null)
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
@@ -143,11 +144,22 @@ export default function NpcFormPage() {
 
     try {
       if (isEdit) {
-        await updateNpc(Number(id), data)
-        navigate(`/npcs/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
+        const res = await updateNpc(Number(id), data)
+        if ('pendingApproval' in res.data && res.data.pendingApproval) {
+          setOverlayMessage(res.data.message || '編集申請を送信しました')
+          setOverlayRedirect(`/npcs/${id}${detailReturnQuery}`)
+        } else {
+          navigate(`/npcs/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
+        }
       } else {
         const res = await createNpc(data)
-        navigate(`/npcs/${res.data.id}`)
+        const created = res.data
+        if ('pendingApproval' in created && created.pendingApproval) {
+          setOverlayMessage(created.message || '編集申請を送信しました')
+          setOverlayRedirect(fromCatalog ? `/catalog${catalogGameId ? `?gameId=${catalogGameId}&tab=NPC` : '?tab=NPC'}` : '/npcs')
+        } else if ('id' in created) {
+          navigate(`/npcs/${created.id}`)
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || '保存に失敗しました')
@@ -183,7 +195,12 @@ export default function NpcFormPage() {
       {overlayMessage && (
         <MessageOverlay
           message={overlayMessage}
-          onClose={() => setOverlayMessage('')}
+          onClose={() => {
+            const redirectTo = overlayRedirect
+            setOverlayMessage('')
+            setOverlayRedirect(null)
+            if (redirectTo) navigate(redirectTo)
+          }}
         />
       )}
       <div className="flex items-center gap-4">

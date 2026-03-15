@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -64,10 +64,10 @@ export const getItem = (id: number) =>
   api.get<Item>(`/items/${id}`)
 
 export const createItem = (data: FormData) =>
-  api.post<Item>('/items', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.post<Item | { pendingApproval: boolean; message: string }>('/items', data, { headers: { 'Content-Type': 'multipart/form-data' } })
 
 export const updateItem = (id: number, data: FormData) =>
-  api.put<Item>(`/items/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.put<Item | { pendingApproval: boolean; message: string }>(`/items/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
 
 export const deleteItem = (id: number) =>
   api.delete(`/items/${id}`)
@@ -83,10 +83,10 @@ export const getBoss = (id: number) =>
   api.get<Boss>(`/bosses/${id}`)
 
 export const createBoss = (data: FormData) =>
-  api.post<Boss>('/bosses', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.post<Boss | { pendingApproval: boolean; message: string }>('/bosses', data, { headers: { 'Content-Type': 'multipart/form-data' } })
 
 export const updateBoss = (id: number, data: FormData) =>
-  api.put<Boss>(`/bosses/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.put<Boss | { pendingApproval: boolean; message: string }>(`/bosses/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
 
 export const deleteBoss = (id: number) =>
   api.delete(`/bosses/${id}`)
@@ -102,10 +102,10 @@ export const getNpc = (id: number) =>
   api.get<Npc>(`/npcs/${id}`)
 
 export const createNpc = (data: FormData) =>
-  api.post<Npc>('/npcs', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.post<Npc | { pendingApproval: boolean; message: string }>('/npcs', data, { headers: { 'Content-Type': 'multipart/form-data' } })
 
 export const updateNpc = (id: number, data: FormData) =>
-  api.put<Npc>(`/npcs/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+  api.put<Npc | { pendingApproval: boolean; message: string }>(`/npcs/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
 
 export const deleteNpc = (id: number) =>
   api.delete(`/npcs/${id}`)
@@ -191,3 +191,12 @@ export const getMyEditHistories = () =>
 
 export const getMyComments = () =>
   api.get<MyComment[]>('/mypage/comments')
+
+export const getEditRequests = () =>
+  api.get<EditRequest[]>('/edit-requests')
+
+export const approveEditRequest = (id: number) =>
+  api.post<EditRequest>(`/edit-requests/${id}/approve`)
+
+export const rejectEditRequest = (id: number, reviewComment?: string) =>
+  api.post<EditRequest>(`/edit-requests/${id}/reject`, reviewComment ? { reviewComment } : {})

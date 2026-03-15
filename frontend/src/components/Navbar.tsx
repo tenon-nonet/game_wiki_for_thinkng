@@ -44,7 +44,10 @@ export default function Navbar() {
             <>
               <Link to="/mypage" className="hover:text-gray-300 text-base">マイページ</Link>
               {isAdmin() && (
-                <Link to="/tags" className="hover:text-gray-300 text-base">タグ管理</Link>
+                <>
+                  <Link to="/edit-requests" className="hover:text-gray-300 text-base">編集承認</Link>
+                  <Link to="/tags" className="hover:text-gray-300 text-base">タグ管理</Link>
+                </>
               )}
               <span className="text-gray-400 text-base">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
@@ -92,7 +95,10 @@ export default function Navbar() {
             <>
               <Link to="/mypage" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">マイページ</Link>
               {isAdmin() && (
-                <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">タグ管理</Link>
+                <>
+                  <Link to="/edit-requests" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">編集承認</Link>
+                  <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">タグ管理</Link>
+                </>
               )}
               <span className="text-gray-400 py-1">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button

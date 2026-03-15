@@ -2,6 +2,8 @@ package com.gamewiki.controller;
 
 import com.gamewiki.dto.NpcRequest;
 import com.gamewiki.dto.NpcResponse;
+import com.gamewiki.dto.EditSubmissionResponse;
+import com.gamewiki.service.EditRequestService;
 import com.gamewiki.service.NpcService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.List;
 public class NpcController {
 
     private final NpcService npcService;
+    private final EditRequestService editRequestService;
 
     @GetMapping
     public ResponseEntity<List<NpcResponse>> findAll(
@@ -36,20 +39,28 @@ public class NpcController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<NpcResponse> create(
+    public ResponseEntity<?> create(
             @Valid @RequestPart("data") NpcRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(npcService.create(request, image, userDetails != null ? userDetails.getUsername() : null));
+        if (isAdmin(userDetails)) {
+            return ResponseEntity.ok(npcService.create(request, image, userDetails.getUsername()));
+        }
+        editRequestService.createNpcRequest("CREATE", null, request, image, userDetails != null ? userDetails.getUsername() : null);
+        return ResponseEntity.accepted().body(new EditSubmissionResponse(true, "編集申請を送信しました"));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<NpcResponse> update(
+    public ResponseEntity<?> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") NpcRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(npcService.update(id, request, image, userDetails != null ? userDetails.getUsername() : null));
+        if (isAdmin(userDetails)) {
+            return ResponseEntity.ok(npcService.update(id, request, image, userDetails.getUsername()));
+        }
+        editRequestService.createNpcRequest("UPDATE", id, request, image, userDetails != null ? userDetails.getUsername() : null);
+        return ResponseEntity.accepted().body(new EditSubmissionResponse(true, "編集申請を送信しました"));
     }
 
     @PutMapping("/order")
@@ -64,5 +75,10 @@ public class NpcController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         npcService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }
