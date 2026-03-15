@@ -40,6 +40,7 @@ export default function Navbar() {
           <Link to="/bosses" className="hover:text-gray-300 text-base">ボス図録</Link>
           <Link to="/npcs" className="hover:text-gray-300 text-base">NPC図録</Link>
           <Link to="/games" className="hover:text-gray-300 text-base">ゲーム一覧</Link>
+          <Link to="/boards" className="hover:text-gray-300 text-base">掲示板</Link>
           {loggedIn ? (
             <>
               <Link to="/mypage" className="hover:text-gray-300 text-base">マイページ</Link>
@@ -91,6 +92,7 @@ export default function Navbar() {
           <Link to="/bosses" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ボス図録</Link>
           <Link to="/npcs" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">NPC図録</Link>
           <Link to="/games" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">ゲーム一覧</Link>
+          <Link to="/boards" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">掲示板</Link>
           {loggedIn ? (
             <>
               <Link to="/mypage" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">マイページ</Link>
