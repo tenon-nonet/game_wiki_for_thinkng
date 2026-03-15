@@ -209,8 +209,8 @@ export const getBoardGames = () =>
 export const getBoardThreads = (gameId: number) =>
   api.get<BoardThreadSummary[]>(`/boards/${gameId}/threads`)
 
-export const createBoardThread = (gameId: number, title: string, content: string) =>
-  api.post<BoardThreadSummary>(`/boards/${gameId}/threads`, { title, content })
+export const createBoardThread = (gameId: number, title: string, content: string, pinned = false) =>
+  api.post<BoardThreadSummary>(`/boards/${gameId}/threads`, { title, content, pinned })
 
 export const getBoardThread = (gameId: number, threadId: number) =>
   api.get<BoardThreadDetail>(`/boards/${gameId}/threads/${threadId}`)
@@ -221,14 +221,26 @@ export const createBoardPost = (gameId: number, threadId: number, content: strin
 export const getGeneralBoardThreads = () =>
   api.get<BoardThreadSummary[]>('/boards/general/threads')
 
-export const createGeneralBoardThread = (title: string, content: string) =>
-  api.post<BoardThreadSummary>('/boards/general/threads', { title, content })
+export const createGeneralBoardThread = (title: string, content: string, pinned = false) =>
+  api.post<BoardThreadSummary>('/boards/general/threads', { title, content, pinned })
 
 export const getGeneralBoardThread = (threadId: number) =>
   api.get<BoardThreadDetail>(`/boards/general/threads/${threadId}`)
 
 export const createGeneralBoardPost = (threadId: number, content: string) =>
   api.post<BoardPost>(`/boards/general/threads/${threadId}/posts`, { content })
+
+export const deleteBoardThread = (gameId: number, threadId: number) =>
+  api.delete(`/boards/${gameId}/threads/${threadId}`)
+
+export const deleteGeneralBoardThread = (threadId: number) =>
+  api.delete(`/boards/general/threads/${threadId}`)
+
+export const deleteBoardPost = (gameId: number, threadId: number, postId: number) =>
+  api.delete(`/boards/${gameId}/threads/${threadId}/posts/${postId}`)
+
+export const deleteGeneralBoardPost = (threadId: number, postId: number) =>
+  api.delete(`/boards/general/threads/${threadId}/posts/${postId}`)
 
 // Reports
 export const createBoardThreadReport = (threadId: number, reason: string) =>

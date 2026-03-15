@@ -105,7 +105,7 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardThreadSummaryResponse createThread(Long gameId, BoardThreadRequest request, String username, String authorKey) {
+    public BoardThreadSummaryResponse createThread(Long gameId, BoardThreadRequest request, String username, String authorKey, boolean canPin) {
         Game game = getVisibleGame(gameId);
         validateThreadRequest(request, authorKey);
 
@@ -116,13 +116,14 @@ public class BoardService {
         thread.setContent(request.getContent().trim());
         thread.setUsername(username);
         thread.setAuthorKey(authorKey);
+        thread.setPinned(canPin && request.isPinned());
         thread.setLastPostedAt(LocalDateTime.now());
 
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
     @Transactional
-    public BoardThreadSummaryResponse createGeneralThread(BoardThreadRequest request, String username, String authorKey) {
+    public BoardThreadSummaryResponse createGeneralThread(BoardThreadRequest request, String username, String authorKey, boolean canPin) {
         validateThreadRequest(request, authorKey);
 
         BoardThread thread = new BoardThread();
@@ -132,6 +133,7 @@ public class BoardService {
         thread.setContent(request.getContent().trim());
         thread.setUsername(username);
         thread.setAuthorKey(authorKey);
+        thread.setPinned(canPin && request.isPinned());
         thread.setLastPostedAt(LocalDateTime.now());
 
         return toThreadSummary(boardThreadRepository.save(thread));
@@ -179,6 +181,44 @@ public class BoardService {
         boardThreadRepository.save(thread);
 
         return toPostResponse(saved);
+    }
+
+    @Transactional
+    public void deleteThread(Long gameId, Long threadId) {
+        BoardThread thread = getThreadEntity(gameId, threadId);
+        boardPostRepository.deleteByThreadId(thread.getId());
+        boardThreadRepository.delete(thread);
+    }
+
+    @Transactional
+    public void deleteGeneralThread(Long threadId) {
+        BoardThread thread = getGeneralThreadEntity(threadId);
+        boardPostRepository.deleteByThreadId(thread.getId());
+        boardThreadRepository.delete(thread);
+    }
+
+    @Transactional
+    public void deletePost(Long gameId, Long threadId, Long postId) {
+        BoardThread thread = getThreadEntity(gameId, threadId);
+        BoardPost post = boardPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found: " + postId));
+        if (!post.getThread().getId().equals(thread.getId())) {
+            throw new IllegalArgumentException("Post not found: " + postId);
+        }
+        boardPostRepository.delete(post);
+        syncThreadAfterPostDelete(thread);
+    }
+
+    @Transactional
+    public void deleteGeneralPost(Long threadId, Long postId) {
+        BoardThread thread = getGeneralThreadEntity(threadId);
+        BoardPost post = boardPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found: " + postId));
+        if (!post.getThread().getId().equals(thread.getId())) {
+            throw new IllegalArgumentException("Post not found: " + postId);
+        }
+        boardPostRepository.delete(post);
+        syncThreadAfterPostDelete(thread);
     }
 
     private Game getVisibleGame(Long gameId) {
@@ -247,6 +287,16 @@ public class BoardService {
         if (banService.isBanned(authorKey)) {
             throw new IllegalArgumentException("現在この環境からは投稿できません");
         }
+    }
+
+    private void syncThreadAfterPostDelete(BoardThread thread) {
+        long replyCount = boardPostRepository.countByThreadId(thread.getId());
+        thread.setReplyCount((int) replyCount);
+        LocalDateTime lastPostedAt = boardPostRepository.findTopByThreadIdOrderByCreatedAtDescIdDesc(thread.getId())
+                .map(BoardPost::getCreatedAt)
+                .orElse(thread.getCreatedAt());
+        thread.setLastPostedAt(lastPostedAt);
+        boardThreadRepository.save(thread);
     }
 
     private void validateUrlCount(String text) {

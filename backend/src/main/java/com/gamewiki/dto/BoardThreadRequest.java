@@ -15,4 +15,6 @@ public class BoardThreadRequest {
     @NotBlank
     @Size(max = 300)
     private String content;
+
+    private boolean pinned;
 }
