@@ -105,9 +105,9 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardThreadSummaryResponse createThread(Long gameId, BoardThreadRequest request, String username, String authorKey, boolean canPin) {
+    public BoardThreadSummaryResponse createThread(Long gameId, BoardThreadRequest request, String username, String authorKey, boolean canModerate) {
         Game game = getVisibleGame(gameId);
-        validateThreadRequest(request, authorKey);
+        validateThreadRequest(request, authorKey, canModerate);
 
         BoardThread thread = new BoardThread();
         thread.setGame(game);
@@ -116,15 +116,15 @@ public class BoardService {
         thread.setContent(request.getContent().trim());
         thread.setUsername(username);
         thread.setAuthorKey(authorKey);
-        thread.setPinned(canPin && request.isPinned());
+        thread.setPinned(canModerate && request.isPinned());
         thread.setLastPostedAt(LocalDateTime.now());
 
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
     @Transactional
-    public BoardThreadSummaryResponse createGeneralThread(BoardThreadRequest request, String username, String authorKey, boolean canPin) {
-        validateThreadRequest(request, authorKey);
+    public BoardThreadSummaryResponse createGeneralThread(BoardThreadRequest request, String username, String authorKey, boolean canModerate) {
+        validateThreadRequest(request, authorKey, canModerate);
 
         BoardThread thread = new BoardThread();
         thread.setGame(null);
@@ -133,19 +133,19 @@ public class BoardService {
         thread.setContent(request.getContent().trim());
         thread.setUsername(username);
         thread.setAuthorKey(authorKey);
-        thread.setPinned(canPin && request.isPinned());
+        thread.setPinned(canModerate && request.isPinned());
         thread.setLastPostedAt(LocalDateTime.now());
 
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
     @Transactional
-    public BoardPostResponse createPost(Long gameId, Long threadId, BoardPostRequest request, String username, String authorKey) {
+    public BoardPostResponse createPost(Long gameId, Long threadId, BoardPostRequest request, String username, String authorKey, boolean canModerate) {
         BoardThread thread = getThreadEntity(gameId, threadId);
         if (thread.isLocked()) {
             throw new IllegalArgumentException("このスレッドはロックされています");
         }
-        validatePostRequest(request, authorKey);
+        validatePostRequest(request, authorKey, canModerate);
 
         BoardPost post = new BoardPost();
         post.setThread(thread);
@@ -162,12 +162,12 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardPostResponse createGeneralPost(Long threadId, BoardPostRequest request, String username, String authorKey) {
+    public BoardPostResponse createGeneralPost(Long threadId, BoardPostRequest request, String username, String authorKey, boolean canModerate) {
         BoardThread thread = getGeneralThreadEntity(threadId);
         if (thread.isLocked()) {
             throw new IllegalArgumentException("このスレッドはロックされています");
         }
-        validatePostRequest(request, authorKey);
+        validatePostRequest(request, authorKey, canModerate);
 
         BoardPost post = new BoardPost();
         post.setThread(thread);
@@ -241,12 +241,15 @@ public class BoardService {
                 .orElseThrow(() -> new IllegalArgumentException("Thread not found: " + threadId));
     }
 
-    private void validateThreadRequest(BoardThreadRequest request, String authorKey) {
+    private void validateThreadRequest(BoardThreadRequest request, String authorKey, boolean canModerate) {
         ensureNotBanned(authorKey);
         String normalizedBody = normalizeText(request.getContent());
         String normalizedTitle = normalizeText(request.getTitle());
-        if (normalizedBody.length() > 300) {
+        if (!canModerate && normalizedBody.length() > 300) {
             throw new IllegalArgumentException("スレッド本文は300文字以内で入力してください");
+        }
+        if (canModerate) {
+            return;
         }
         validateUrlCount(normalizedTitle + "\n" + normalizedBody);
 
@@ -263,11 +266,14 @@ public class BoardService {
         }
     }
 
-    private void validatePostRequest(BoardPostRequest request, String authorKey) {
+    private void validatePostRequest(BoardPostRequest request, String authorKey, boolean canModerate) {
         ensureNotBanned(authorKey);
         String normalizedBody = normalizeText(request.getContent());
-        if (normalizedBody.length() > 300) {
+        if (!canModerate && normalizedBody.length() > 300) {
             throw new IllegalArgumentException("返信は300文字以内で入力してください");
+        }
+        if (canModerate) {
+            return;
         }
         validateUrlCount(normalizedBody);
 

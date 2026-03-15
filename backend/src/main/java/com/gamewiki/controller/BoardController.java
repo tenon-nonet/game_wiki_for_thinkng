@@ -57,7 +57,7 @@ public class BoardController {
             @AuthenticationPrincipal UserDetails userDetails,
             HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createThread(gameId, request, username, resolveAuthorKey(httpServletRequest), canPin(userDetails)));
+        return ResponseEntity.ok(boardService.createThread(gameId, request, username, resolveAuthorKey(httpServletRequest), canModerate(userDetails)));
     }
 
     @PostMapping("/general/threads")
@@ -66,7 +66,7 @@ public class BoardController {
             @AuthenticationPrincipal UserDetails userDetails,
             HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createGeneralThread(request, username, resolveAuthorKey(httpServletRequest), canPin(userDetails)));
+        return ResponseEntity.ok(boardService.createGeneralThread(request, username, resolveAuthorKey(httpServletRequest), canModerate(userDetails)));
     }
 
     @PostMapping("/{gameId}/threads/{threadId}/posts")
@@ -77,7 +77,7 @@ public class BoardController {
             @AuthenticationPrincipal UserDetails userDetails,
             HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createPost(gameId, threadId, request, username, resolveAuthorKey(httpServletRequest)));
+        return ResponseEntity.ok(boardService.createPost(gameId, threadId, request, username, resolveAuthorKey(httpServletRequest), canModerate(userDetails)));
     }
 
     @PostMapping("/general/threads/{threadId}/posts")
@@ -87,7 +87,7 @@ public class BoardController {
             @AuthenticationPrincipal UserDetails userDetails,
             HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createGeneralPost(threadId, request, username, resolveAuthorKey(httpServletRequest)));
+        return ResponseEntity.ok(boardService.createGeneralPost(threadId, request, username, resolveAuthorKey(httpServletRequest), canModerate(userDetails)));
     }
 
     @DeleteMapping("/{gameId}/threads/{threadId}")
@@ -127,7 +127,7 @@ public class BoardController {
         return remoteAddr != null && !remoteAddr.isBlank() ? remoteAddr : "unknown";
     }
 
-    private boolean canPin(UserDetails userDetails) {
+    private boolean canModerate(UserDetails userDetails) {
         return userDetails != null && userDetails.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }

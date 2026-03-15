@@ -6,6 +6,41 @@ import { usePageMeta } from '../seo'
 import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
 
+const SITE_STARTED_AT = new Date('2026-03-12T00:00:00+09:00')
+
+function getElapsedParts(now: Date) {
+  let years = now.getFullYear() - SITE_STARTED_AT.getFullYear()
+  let months = now.getMonth() - SITE_STARTED_AT.getMonth()
+  let days = now.getDate() - SITE_STARTED_AT.getDate()
+  let hours = now.getHours() - SITE_STARTED_AT.getHours()
+  let minutes = now.getMinutes() - SITE_STARTED_AT.getMinutes()
+  let seconds = now.getSeconds() - SITE_STARTED_AT.getSeconds()
+
+  if (seconds < 0) {
+    seconds += 60
+    minutes -= 1
+  }
+  if (minutes < 0) {
+    minutes += 60
+    hours -= 1
+  }
+  if (hours < 0) {
+    hours += 24
+    days -= 1
+  }
+  if (days < 0) {
+    const previousMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate()
+    days += previousMonthLastDay
+    months -= 1
+  }
+  if (months < 0) {
+    months += 12
+    years -= 1
+  }
+
+  return { years, months, days, hours, minutes, seconds }
+}
+
 export default function HomePage() {
   usePageMeta({
     title: 'FROMDEX.com | FromSoftwareゲームWiki',
@@ -39,6 +74,7 @@ export default function HomePage() {
   const [totalItems, setTotalItems] = useState<number | null>(null)
   const [totalBosses, setTotalBosses] = useState<number | null>(null)
   const [totalNpcs, setTotalNpcs] = useState<number | null>(null)
+  const [elapsed, setElapsed] = useState(() => getElapsedParts(new Date()))
 
   const load = async (q?: string) => {
     const res = await getGames(q)
@@ -68,6 +104,13 @@ export default function HomePage() {
     trackHomeVisit()
       .then((r) => setTotalVisitors(r.data.totalUniqueDailyVisitors))
       .catch(() => setTotalVisitors(null))
+  }, [])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setElapsed(getElapsedParts(new Date()))
+    }, 1000)
+    return () => window.clearInterval(timer)
   }, [])
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -204,11 +247,6 @@ export default function HomePage() {
                     収録ゲーム: <span className="text-zinc-100">{games.length}</span>
                   </div>
                 )}
-                {admin && totalVisitors !== null && (
-                  <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
-                    訪問者数: <span className="text-zinc-100">{totalVisitors}</span>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -246,18 +284,34 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-1 lg:grid-cols-1 lg:gap-3">
-              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL ITEMS</p>
+            <div className="hidden lg:grid lg:grid-cols-1 lg:gap-3">
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL ITEMS DATA</p>
                 <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalItems ?? '-'}</p>
               </div>
-              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL BOSSES</p>
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL BOSSES DATA</p>
                 <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalBosses ?? '-'}</p>
               </div>
-              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-2 py-2 sm:px-4 sm:py-3">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL NPCS</p>
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL NPCS DATA</p>
                 <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalNpcs ?? '-'}</p>
+              </div>
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <div className="grid grid-cols-2 items-start gap-3">
+                  <div>
+                    <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">SINCE SITE OPEN</p>
+                    <p className="mt-1 text-[11px] leading-5 text-zinc-300 sm:text-xs sm:leading-6">
+                      {elapsed.years}y {elapsed.months}m {elapsed.days}d
+                      <br />
+                      {elapsed.hours}:{elapsed.minutes}:{elapsed.seconds}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL VISITORS</p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalVisitors ?? '-'}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
