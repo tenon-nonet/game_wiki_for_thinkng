@@ -9,6 +9,9 @@ import {
   getGames,
   getItems,
   getNpcs,
+  updateBossOrder,
+  updateItemOrder,
+  updateNpcOrder,
 } from '../api'
 import { isAdmin } from '../auth'
 import CatalogControls from '../components/catalog/CatalogControls'
@@ -201,6 +204,32 @@ export default function CatalogPage() {
 
     return groupEntriesByGame(currentEntries, games)
   })()
+  const canReorder = isAdmin() && selectedGameId > 0 && !keyword.trim()
+
+  const persistOrder = async (orderedEntries: CatalogEntry[]) => {
+    const ids = orderedEntries.map((entry) => entry.id)
+    if (activeTab === 'ITEM') {
+      await updateItemOrder(ids)
+    } else if (activeTab === 'BOSS') {
+      await updateBossOrder(ids)
+    } else {
+      await updateNpcOrder(ids)
+    }
+    loadCatalog()
+    loadWikiEntries(activeTab)
+  }
+
+  const handleReorderEntries = async (orderedEntries: CatalogEntry[]) => {
+    await persistOrder(orderedEntries)
+  }
+
+  const handleReorderItemGroup = async (groupLabel: string, orderedEntries: CatalogEntry[]) => {
+    if (!groupedItemEntries) return
+    const flattened = groupedItemEntries.flatMap((group) => (
+      group.label === groupLabel ? orderedEntries : group.entries
+    ))
+    await persistOrder(flattened)
+  }
 
   const renderCard = (entry: CatalogEntry, tab: TabType) => {
     const wiki = findWikiEntity(entry, tab, items, bosses, npcs)
@@ -291,8 +320,11 @@ export default function CatalogPage() {
         groupedItemEntries={groupedItemEntries}
         groupedItemByGameAndCategory={groupedItemByGameAndCategory}
         groupedByGame={groupedByGame}
+        canReorder={canReorder}
         renderCard={renderCard}
         renderListRow={renderListRow}
+        onReorderEntries={handleReorderEntries}
+        onReorderItemGroup={handleReorderItemGroup}
       />
     </div>
   )
