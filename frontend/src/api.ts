@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, Report, Ban, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -201,3 +201,65 @@ export const approveEditRequest = (id: number) =>
 
 export const rejectEditRequest = (id: number, reviewComment?: string) =>
   api.post<EditRequest>(`/edit-requests/${id}/reject`, reviewComment ? { reviewComment } : {})
+
+// Boards
+export const getBoardGames = () =>
+  api.get<BoardGameSummary[]>('/boards')
+
+export const getBoardThreads = (gameId: number) =>
+  api.get<BoardThreadSummary[]>(`/boards/${gameId}/threads`)
+
+export const createBoardThread = (gameId: number, title: string, content: string, pinned = false) =>
+  api.post<BoardThreadSummary>(`/boards/${gameId}/threads`, { title, content, pinned })
+
+export const getBoardThread = (gameId: number, threadId: number) =>
+  api.get<BoardThreadDetail>(`/boards/${gameId}/threads/${threadId}`)
+
+export const createBoardPost = (gameId: number, threadId: number, content: string) =>
+  api.post<BoardPost>(`/boards/${gameId}/threads/${threadId}/posts`, { content })
+
+export const getGeneralBoardThreads = () =>
+  api.get<BoardThreadSummary[]>('/boards/general/threads')
+
+export const createGeneralBoardThread = (title: string, content: string, pinned = false) =>
+  api.post<BoardThreadSummary>('/boards/general/threads', { title, content, pinned })
+
+export const getGeneralBoardThread = (threadId: number) =>
+  api.get<BoardThreadDetail>(`/boards/general/threads/${threadId}`)
+
+export const createGeneralBoardPost = (threadId: number, content: string) =>
+  api.post<BoardPost>(`/boards/general/threads/${threadId}/posts`, { content })
+
+export const deleteBoardThread = (gameId: number, threadId: number) =>
+  api.delete(`/boards/${gameId}/threads/${threadId}`)
+
+export const deleteGeneralBoardThread = (threadId: number) =>
+  api.delete(`/boards/general/threads/${threadId}`)
+
+export const deleteBoardPost = (gameId: number, threadId: number, postId: number) =>
+  api.delete(`/boards/${gameId}/threads/${threadId}/posts/${postId}`)
+
+export const deleteGeneralBoardPost = (threadId: number, postId: number) =>
+  api.delete(`/boards/general/threads/${threadId}/posts/${postId}`)
+
+// Reports
+export const createBoardThreadReport = (threadId: number, reason: string) =>
+  api.post<Report>(`/reports/board-threads/${threadId}`, { reason })
+
+export const createBoardPostReport = (postId: number, reason: string) =>
+  api.post<Report>(`/reports/board-posts/${postId}`, { reason })
+
+export const getReports = () =>
+  api.get<Report[]>('/reports')
+
+export const updateReportStatus = (id: number, status: Report['status']) =>
+  api.put<Report>(`/reports/${id}/status`, { status })
+
+export const banReportedAuthor = (id: number) =>
+  api.post<Report>(`/reports/${id}/ban`)
+
+export const getBans = () =>
+  api.get<Ban[]>('/reports/bans')
+
+export const removeBan = (id: number) =>
+  api.delete(`/reports/bans/${id}`)

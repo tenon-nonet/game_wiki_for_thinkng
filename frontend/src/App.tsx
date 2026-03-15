@@ -22,10 +22,14 @@ import NpcsPage from './pages/NpcsPage'
 import NpcDetailPage from './pages/NpcDetailPage'
 import NpcFormPage from './pages/NpcFormPage'
 import CatalogPage from './pages/CatalogPage'
+import BoardsPage from './pages/BoardsPage'
+import BoardThreadsPage from './pages/BoardThreadsPage'
+import BoardThreadDetailPage from './pages/BoardThreadDetailPage'
 import MyPage from './pages/MyPage'
 import MyEditHistoriesPage from './pages/MyEditHistoriesPage'
 import MyCommentsPage from './pages/MyCommentsPage'
 import EditRequestsPage from './pages/EditRequestsPage'
+import ReportsPage from './pages/ReportsPage'
 
 export default function App() {
   const [authVersion, setAuthVersion] = useState(0)
@@ -66,10 +70,16 @@ export default function App() {
             <Route path="/npcs/:id" element={<NpcDetailPage />} />
             <Route path="/npcs/:id/edit" element={<NpcFormPage />} />
             <Route path="/catalog" element={<CatalogPage />} />
+            <Route path="/boards" element={<BoardsPage />} />
+            <Route path="/boards/general" element={<BoardThreadsPage />} />
+            <Route path="/boards/general/:threadId" element={<BoardThreadDetailPage />} />
+            <Route path="/boards/:gameId" element={<BoardThreadsPage />} />
+            <Route path="/boards/:gameId/:threadId" element={<BoardThreadDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/edit-histories" element={<MyEditHistoriesPage />} />
             <Route path="/mypage/comments" element={<MyCommentsPage />} />
             <Route path="/edit-requests" element={<EditRequestsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/tags" element={<TagsAdminPage />} />
             <Route path="/news" element={<AllNewsListPage />} />
           </Routes>
