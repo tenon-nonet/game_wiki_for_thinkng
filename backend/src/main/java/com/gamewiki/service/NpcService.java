@@ -56,6 +56,14 @@ public class NpcService {
 
     public NpcResponse create(NpcRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), null);
+        gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        String storedImagePath = image != null && !image.isEmpty() ? fileStorageService.store(image) : null;
+        return createFromStoredImage(request, storedImagePath, editorUsername);
+    }
+
+    public NpcResponse createFromStoredImage(NpcRequest request, String storedImagePath, String editorUsername) {
+        ensureNoDuplicateNpc(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -68,8 +76,8 @@ public class NpcService {
         npc.setUpdatedBy(editorUsername);
         setDialogues(npc, request.getDialogues());
 
-        if (image != null && !image.isEmpty()) {
-            npc.setImagePath(fileStorageService.store(image));
+        if (storedImagePath != null && !storedImagePath.isBlank()) {
+            npc.setImagePath(storedImagePath);
         }
 
         Npc saved = npcRepository.save(npc);
@@ -79,6 +87,16 @@ public class NpcService {
 
     @Transactional
     public NpcResponse update(Long id, NpcRequest request, MultipartFile image, String editorUsername) {
+        getNpc(id);
+        ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
+        gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        String storedImagePath = image != null && !image.isEmpty() ? fileStorageService.store(image) : null;
+        return updateFromStoredImage(id, request, storedImagePath, editorUsername);
+    }
+
+    @Transactional
+    public NpcResponse updateFromStoredImage(Long id, NpcRequest request, String storedImagePath, String editorUsername) {
         Npc npc = getNpc(id);
         ensureNoDuplicateNpc(request.getName(), request.getGameId(), id);
 
@@ -93,9 +111,9 @@ public class NpcService {
         npc.getDialogues().clear();
         setDialogues(npc, request.getDialogues());
 
-        if (image != null && !image.isEmpty()) {
+        if (storedImagePath != null && !storedImagePath.isBlank()) {
             fileStorageService.delete(npc.getImagePath());
-            npc.setImagePath(fileStorageService.store(image));
+            npc.setImagePath(storedImagePath);
         }
 
         Npc saved = npcRepository.save(npc);

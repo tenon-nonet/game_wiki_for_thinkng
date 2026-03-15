@@ -49,6 +49,7 @@ export default function BossFormPage() {
   const [existingImage, setExistingImage] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [overlayMessage, setOverlayMessage] = useState('')
+  const [overlayRedirect, setOverlayRedirect] = useState<string | null>(null)
 
   useEffect(() => {
     getGames().then((r) => setGames(r.data))
@@ -148,11 +149,22 @@ export default function BossFormPage() {
 
     try {
       if (isEdit) {
-        await updateBoss(Number(id), data)
-        navigate(`/bosses/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
+        const res = await updateBoss(Number(id), data)
+        if ('pendingApproval' in res.data && res.data.pendingApproval) {
+          setOverlayMessage(res.data.message || '編集申請を送信しました')
+          setOverlayRedirect(`/bosses/${id}${detailReturnQuery}`)
+        } else {
+          navigate(`/bosses/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
+        }
       } else {
         const res = await createBoss(data)
-        navigate(`/bosses/${res.data.id}`)
+        const created = res.data
+        if ('pendingApproval' in created && created.pendingApproval) {
+          setOverlayMessage(created.message || '編集申請を送信しました')
+          setOverlayRedirect(fromCatalog ? `/catalog${catalogGameId ? `?gameId=${catalogGameId}&tab=BOSS` : '?tab=BOSS'}` : '/bosses')
+        } else if ('id' in created) {
+          navigate(`/bosses/${created.id}`)
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || '保存に失敗しました')
@@ -188,7 +200,12 @@ export default function BossFormPage() {
       {overlayMessage && (
         <MessageOverlay
           message={overlayMessage}
-          onClose={() => setOverlayMessage('')}
+          onClose={() => {
+            const redirectTo = overlayRedirect
+            setOverlayMessage('')
+            setOverlayRedirect(null)
+            if (redirectTo) navigate(redirectTo)
+          }}
         />
       )}
       <div className="flex items-center gap-4">

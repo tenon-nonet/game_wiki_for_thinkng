@@ -56,6 +56,14 @@ public class BossService {
 
     public BossResponse create(BossRequest request, MultipartFile image, String editorUsername) {
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
+        gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        String storedImagePath = image != null && !image.isEmpty() ? fileStorageService.store(image) : null;
+        return createFromStoredImage(request, storedImagePath, editorUsername);
+    }
+
+    public BossResponse createFromStoredImage(BossRequest request, String storedImagePath, String editorUsername) {
+        ensureNoDuplicateBoss(request.getName(), request.getGameId(), null);
 
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
@@ -68,8 +76,8 @@ public class BossService {
         boss.setUpdatedBy(editorUsername);
         setDialogues(boss, request.getDialogues());
 
-        if (image != null && !image.isEmpty()) {
-            boss.setImagePath(fileStorageService.store(image));
+        if (storedImagePath != null && !storedImagePath.isBlank()) {
+            boss.setImagePath(storedImagePath);
         }
 
         Boss saved = bossRepository.save(boss);
@@ -79,6 +87,16 @@ public class BossService {
 
     @Transactional
     public BossResponse update(Long id, BossRequest request, MultipartFile image, String editorUsername) {
+        getBoss(id);
+        ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
+        gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        String storedImagePath = image != null && !image.isEmpty() ? fileStorageService.store(image) : null;
+        return updateFromStoredImage(id, request, storedImagePath, editorUsername);
+    }
+
+    @Transactional
+    public BossResponse updateFromStoredImage(Long id, BossRequest request, String storedImagePath, String editorUsername) {
         Boss boss = getBoss(id);
         ensureNoDuplicateBoss(request.getName(), request.getGameId(), id);
 
@@ -93,9 +111,9 @@ public class BossService {
         boss.getDialogues().clear();
         setDialogues(boss, request.getDialogues());
 
-        if (image != null && !image.isEmpty()) {
+        if (storedImagePath != null && !storedImagePath.isBlank()) {
             fileStorageService.delete(boss.getImagePath());
-            boss.setImagePath(fileStorageService.store(image));
+            boss.setImagePath(storedImagePath);
         }
 
         Boss saved = bossRepository.save(boss);

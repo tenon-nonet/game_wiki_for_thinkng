@@ -2,6 +2,8 @@ package com.gamewiki.controller;
 
 import com.gamewiki.dto.ItemRequest;
 import com.gamewiki.dto.ItemResponse;
+import com.gamewiki.dto.EditSubmissionResponse;
+import com.gamewiki.service.EditRequestService;
 import com.gamewiki.service.ItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final EditRequestService editRequestService;
 
     @GetMapping
     public ResponseEntity<List<ItemResponse>> findAll(
@@ -36,20 +39,28 @@ public class ItemController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ItemResponse> create(
+    public ResponseEntity<?> create(
             @Valid @RequestPart("data") ItemRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(itemService.create(request, image, userDetails != null ? userDetails.getUsername() : null));
+        if (isAdmin(userDetails)) {
+            return ResponseEntity.ok(itemService.create(request, image, userDetails.getUsername()));
+        }
+        editRequestService.createItemRequest("CREATE", null, request, image, userDetails != null ? userDetails.getUsername() : null);
+        return ResponseEntity.accepted().body(new EditSubmissionResponse(true, "編集申請を送信しました"));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ItemResponse> update(
+    public ResponseEntity<?> update(
             @PathVariable Long id,
             @Valid @RequestPart("data") ItemRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(itemService.update(id, request, image, userDetails != null ? userDetails.getUsername() : null));
+        if (isAdmin(userDetails)) {
+            return ResponseEntity.ok(itemService.update(id, request, image, userDetails.getUsername()));
+        }
+        editRequestService.createItemRequest("UPDATE", id, request, image, userDetails != null ? userDetails.getUsername() : null);
+        return ResponseEntity.accepted().body(new EditSubmissionResponse(true, "編集申請を送信しました"));
     }
 
     @PutMapping("/order")
@@ -64,5 +75,10 @@ public class ItemController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         itemService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

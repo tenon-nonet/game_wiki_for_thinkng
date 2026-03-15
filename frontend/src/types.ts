@@ -60,6 +60,24 @@ export interface MyComment {
   createdAt: string
 }
 
+export interface EditRequest {
+  id: number
+  entityType: 'ITEM' | 'BOSS' | 'NPC'
+  entityId: number | null
+  actionType: 'CREATE' | 'UPDATE'
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  requestedBy: string
+  reviewedBy: string | null
+  entityName: string | null
+  gameId: number | null
+  gameName: string | null
+  payload: Record<string, unknown> | null
+  pendingImagePath: string | null
+  reviewComment: string | null
+  reviewedAt: string | null
+  createdAt: string
+}
+
 export interface Item {
   id: number
   name: string

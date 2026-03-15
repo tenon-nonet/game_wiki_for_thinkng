@@ -48,6 +48,7 @@ export default function ItemFormPage() {
   const [catalogCategory, setCatalogCategory] = useState(searchParams.get('category') ?? '')
   const [error, setError] = useState('')
   const [overlayMessage, setOverlayMessage] = useState('')
+  const [overlayRedirect, setOverlayRedirect] = useState<string | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const adminLockedInEdit = isEdit && !admin
 
@@ -184,11 +185,22 @@ export default function ItemFormPage() {
 
     try {
       if (isEdit) {
-        await updateItem(Number(id), data)
-        navigate(`/items/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
+        const res = await updateItem(Number(id), data)
+        if ('pendingApproval' in res.data && res.data.pendingApproval) {
+          setOverlayMessage(res.data.message || '編集申請を送信しました')
+          setOverlayRedirect(`/items/${id}${detailReturnQuery}`)
+        } else {
+          navigate(`/items/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
+        }
       } else {
         const res = await createItem(data)
-        navigate(`/items/${res.data.id}`)
+        const created = res.data
+        if ('pendingApproval' in created && created.pendingApproval) {
+          setOverlayMessage(created.message || '編集申請を送信しました')
+          setOverlayRedirect(fromCatalog ? `/catalog${catalogGameId ? `?gameId=${catalogGameId}&tab=ITEM` : '?tab=ITEM'}` : '/items')
+        } else if ('id' in created) {
+          navigate(`/items/${created.id}`)
+        }
       }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } } }
@@ -236,7 +248,12 @@ export default function ItemFormPage() {
       {overlayMessage && (
         <MessageOverlay
           message={overlayMessage}
-          onClose={() => setOverlayMessage('')}
+          onClose={() => {
+            const redirectTo = overlayRedirect
+            setOverlayMessage('')
+            setOverlayRedirect(null)
+            if (redirectTo) navigate(redirectTo)
+          }}
         />
       )}
       <div className="flex items-center gap-4">
