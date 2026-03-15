@@ -80,9 +80,11 @@ export default function BoardThreadDetailPage() {
           onChange={(e) => setContent(e.target.value)}
           placeholder="返信内容"
           required
+          maxLength={100}
           rows={5}
           className="w-full rounded border border-gray-600 bg-zinc-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
         />
+        <p className="text-xs text-gray-500">{content.length}/100</p>
         <button
           type="submit"
           className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-2 text-sm font-semibold tracking-[0.08em] text-amber-50 shadow-[0_0_22px_rgba(245,158,11,0.16)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white"

@@ -12,9 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +26,9 @@ import java.util.stream.Collectors;
 public class BoardService {
     private static final String BOARD_TYPE_GAME = "GAME";
     private static final String BOARD_TYPE_GENERAL = "GENERAL";
+    private static final long THREAD_INTERVAL_MINUTES = 5;
+    private static final long POST_INTERVAL_SECONDS = 10;
+    private static final Pattern URL_PATTERN = Pattern.compile("(?i)\\b(?:https?://|www\\.)\\S+");
 
     private final GameRepository gameRepository;
     private final BoardThreadRepository boardThreadRepository;
@@ -92,8 +99,9 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardThreadSummaryResponse createThread(Long gameId, BoardThreadRequest request, String username) {
+    public BoardThreadSummaryResponse createThread(Long gameId, BoardThreadRequest request, String username, String authorKey) {
         Game game = getVisibleGame(gameId);
+        validateThreadRequest(request, authorKey);
 
         BoardThread thread = new BoardThread();
         thread.setGame(game);
@@ -101,35 +109,41 @@ public class BoardService {
         thread.setTitle(request.getTitle().trim());
         thread.setContent(request.getContent().trim());
         thread.setUsername(username);
+        thread.setAuthorKey(authorKey);
         thread.setLastPostedAt(LocalDateTime.now());
 
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
     @Transactional
-    public BoardThreadSummaryResponse createGeneralThread(BoardThreadRequest request, String username) {
+    public BoardThreadSummaryResponse createGeneralThread(BoardThreadRequest request, String username, String authorKey) {
+        validateThreadRequest(request, authorKey);
+
         BoardThread thread = new BoardThread();
         thread.setGame(null);
         thread.setBoardType(BOARD_TYPE_GENERAL);
         thread.setTitle(request.getTitle().trim());
         thread.setContent(request.getContent().trim());
         thread.setUsername(username);
+        thread.setAuthorKey(authorKey);
         thread.setLastPostedAt(LocalDateTime.now());
 
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
     @Transactional
-    public BoardPostResponse createPost(Long gameId, Long threadId, BoardPostRequest request, String username) {
+    public BoardPostResponse createPost(Long gameId, Long threadId, BoardPostRequest request, String username, String authorKey) {
         BoardThread thread = getThreadEntity(gameId, threadId);
         if (thread.isLocked()) {
             throw new IllegalArgumentException("このスレッドはロックされています");
         }
+        validatePostRequest(request, authorKey);
 
         BoardPost post = new BoardPost();
         post.setThread(thread);
         post.setContent(request.getContent().trim());
         post.setUsername(username);
+        post.setAuthorKey(authorKey);
         BoardPost saved = boardPostRepository.save(post);
 
         thread.setReplyCount(thread.getReplyCount() + 1);
@@ -140,16 +154,18 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardPostResponse createGeneralPost(Long threadId, BoardPostRequest request, String username) {
+    public BoardPostResponse createGeneralPost(Long threadId, BoardPostRequest request, String username, String authorKey) {
         BoardThread thread = getGeneralThreadEntity(threadId);
         if (thread.isLocked()) {
             throw new IllegalArgumentException("このスレッドはロックされています");
         }
+        validatePostRequest(request, authorKey);
 
         BoardPost post = new BoardPost();
         post.setThread(thread);
         post.setContent(request.getContent().trim());
         post.setUsername(username);
+        post.setAuthorKey(authorKey);
         BoardPost saved = boardPostRepository.save(post);
 
         thread.setReplyCount(thread.getReplyCount() + 1);
@@ -177,6 +193,68 @@ public class BoardService {
     private BoardThread getGeneralThreadEntity(Long threadId) {
         return boardThreadRepository.findByIdAndBoardType(threadId, BOARD_TYPE_GENERAL)
                 .orElseThrow(() -> new IllegalArgumentException("Thread not found: " + threadId));
+    }
+
+    private void validateThreadRequest(BoardThreadRequest request, String authorKey) {
+        String normalizedBody = normalizeText(request.getContent());
+        String normalizedTitle = normalizeText(request.getTitle());
+        validateUrlCount(normalizedTitle + "\n" + normalizedBody);
+
+        Optional<BoardThread> latestThread = boardThreadRepository.findTopByAuthorKeyOrderByCreatedAtDescIdDesc(authorKey);
+        if (latestThread.isPresent()) {
+            BoardThread previous = latestThread.get();
+            if (minutesBetween(previous.getCreatedAt(), LocalDateTime.now()) < THREAD_INTERVAL_MINUTES) {
+                throw new IllegalArgumentException("スレ立ては5分に1回までです");
+            }
+            String previousNormalized = normalizeText(previous.getTitle()) + "\n" + normalizeText(previous.getContent());
+            if (previousNormalized.equals(normalizedTitle + "\n" + normalizedBody)) {
+                throw new IllegalArgumentException("同じ内容のスレッドは連続で投稿できません");
+            }
+        }
+    }
+
+    private void validatePostRequest(BoardPostRequest request, String authorKey) {
+        String normalizedBody = normalizeText(request.getContent());
+        if (normalizedBody.length() > 100) {
+            throw new IllegalArgumentException("返信は100文字以内で入力してください");
+        }
+        validateUrlCount(normalizedBody);
+
+        Optional<BoardPost> latestPost = boardPostRepository.findTopByAuthorKeyOrderByCreatedAtDescIdDesc(authorKey);
+        if (latestPost.isPresent()) {
+            BoardPost previous = latestPost.get();
+            if (secondsBetween(previous.getCreatedAt(), LocalDateTime.now()) < POST_INTERVAL_SECONDS) {
+                throw new IllegalArgumentException("返信は10秒に1回までです");
+            }
+            if (normalizeText(previous.getContent()).equals(normalizedBody)) {
+                throw new IllegalArgumentException("同じ内容の返信は連続で投稿できません");
+            }
+        }
+    }
+
+    private void validateUrlCount(String text) {
+        Matcher matcher = URL_PATTERN.matcher(text);
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+            if (count >= 2) {
+                throw new IllegalArgumentException("URLは2個以上投稿できません");
+            }
+        }
+    }
+
+    private String normalizeText(String raw) {
+        return raw == null ? "" : raw.trim().replaceAll("\\s+", " ");
+    }
+
+    private long minutesBetween(LocalDateTime from, LocalDateTime to) {
+        if (from == null) return Long.MAX_VALUE;
+        return ChronoUnit.MINUTES.between(from, to);
+    }
+
+    private long secondsBetween(LocalDateTime from, LocalDateTime to) {
+        if (from == null) return Long.MAX_VALUE;
+        return ChronoUnit.SECONDS.between(from, to);
     }
 
     private BoardThreadSummaryResponse toThreadSummary(BoardThread thread) {

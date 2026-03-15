@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS board_threads (
   title VARCHAR(200) NOT NULL,
   content TEXT NOT NULL,
   username VARCHAR(100) NOT NULL,
+  author_key VARCHAR(255) NOT NULL DEFAULT '',
   pinned BOOLEAN NOT NULL DEFAULT FALSE,
   locked BOOLEAN NOT NULL DEFAULT FALSE,
   reply_count INTEGER NOT NULL DEFAULT 0,
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS board_posts (
   thread_id BIGINT NOT NULL,
   content TEXT NOT NULL,
   username VARCHAR(100) NOT NULL,
+  author_key VARCHAR(255) NOT NULL DEFAULT '',
   created_at TIMESTAMP(6) WITHOUT TIME ZONE,
   updated_at TIMESTAMP(6) WITHOUT TIME ZONE,
   CONSTRAINT fk_board_posts_thread FOREIGN KEY (thread_id) REFERENCES board_threads(id) ON DELETE CASCADE

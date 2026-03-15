@@ -13,4 +13,5 @@ public interface BoardThreadRepository extends JpaRepository<BoardThread, Long> 
     List<BoardThread> findByBoardTypeOrderByPinnedDescLastPostedAtDescIdDesc(String boardType);
     Optional<BoardThread> findByIdAndGameId(Long id, Long gameId);
     Optional<BoardThread> findByIdAndBoardType(Long id, String boardType);
+    Optional<BoardThread> findTopByAuthorKeyOrderByCreatedAtDescIdDesc(String authorKey);
 }

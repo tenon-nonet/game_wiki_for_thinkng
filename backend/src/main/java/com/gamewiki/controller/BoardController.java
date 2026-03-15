@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -49,17 +50,19 @@ public class BoardController {
     public ResponseEntity<BoardThreadSummaryResponse> createThread(
             @PathVariable Long gameId,
             @Valid @RequestBody BoardThreadRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createThread(gameId, request, username));
+        return ResponseEntity.ok(boardService.createThread(gameId, request, username, resolveAuthorKey(httpServletRequest)));
     }
 
     @PostMapping("/general/threads")
     public ResponseEntity<BoardThreadSummaryResponse> createGeneralThread(
             @Valid @RequestBody BoardThreadRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createGeneralThread(request, username));
+        return ResponseEntity.ok(boardService.createGeneralThread(request, username, resolveAuthorKey(httpServletRequest)));
     }
 
     @PostMapping("/{gameId}/threads/{threadId}/posts")
@@ -67,17 +70,28 @@ public class BoardController {
             @PathVariable Long gameId,
             @PathVariable Long threadId,
             @Valid @RequestBody BoardPostRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createPost(gameId, threadId, request, username));
+        return ResponseEntity.ok(boardService.createPost(gameId, threadId, request, username, resolveAuthorKey(httpServletRequest)));
     }
 
     @PostMapping("/general/threads/{threadId}/posts")
     public ResponseEntity<BoardPostResponse> createGeneralPost(
             @PathVariable Long threadId,
             @Valid @RequestBody BoardPostRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest httpServletRequest) {
         String username = userDetails != null ? userDetails.getUsername() : "名もなき褪せ人";
-        return ResponseEntity.ok(boardService.createGeneralPost(threadId, request, username));
+        return ResponseEntity.ok(boardService.createGeneralPost(threadId, request, username, resolveAuthorKey(httpServletRequest)));
+    }
+
+    private String resolveAuthorKey(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        String remoteAddr = request.getRemoteAddr();
+        return remoteAddr != null && !remoteAddr.isBlank() ? remoteAddr : "unknown";
     }
 }
