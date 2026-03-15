@@ -13,7 +13,7 @@ export default function GameDetailPage() {
   const navigate = useNavigate()
   const [game, setGame] = useState<Game | null>(null)
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<GameFormData>({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '' })
+  const [form, setForm] = useState<GameFormData>({ name: '', description: '', platforms: '', releaseDates: '', awards: '', staff: '', visible: true })
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [news, setNews] = useState<NewsItem[]>([])
@@ -28,14 +28,15 @@ export default function GameDetailPage() {
   useEffect(() => {
     getGame(Number(id)).then((res) => {
       setGame(res.data)
-      setForm({
-        name: res.data.name,
-        description: res.data.description || '',
-        platforms: res.data.platforms || '',
-        releaseDates: res.data.releaseDates || '',
-        awards: res.data.awards || '',
-        staff: res.data.staff || '',
-      })
+        setForm({
+          name: res.data.name,
+          description: res.data.description || '',
+          platforms: res.data.platforms || '',
+          releaseDates: res.data.releaseDates || '',
+          awards: res.data.awards || '',
+          staff: res.data.staff || '',
+          visible: res.data.visible,
+        })
       setNewsLoading(true)
       getNews(res.data.name, 5).then((r) => {
         setNews(r.data)
@@ -142,6 +143,15 @@ export default function GameDetailPage() {
                   className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                 />
               </div>
+              <label className="flex items-center gap-2 text-sm text-gray-200">
+                <input
+                  type="checkbox"
+                  checked={form.visible ?? true}
+                  onChange={(e) => setForm({ ...form, visible: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-500 bg-zinc-700 text-red-800 focus:ring-red-800"
+                />
+                公開する
+              </label>
               <div>
                 <label className="block text-sm text-gray-300 mb-1">画像を変更</label>
                 {(preview || game.imagePath) && (
@@ -177,6 +187,11 @@ export default function GameDetailPage() {
                   </div>
                 )}
               </div>
+              {admin && !game.visible && (
+                <p className="mb-3 inline-flex rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-200">
+                  非公開
+                </p>
+              )}
               {game.description && <p className="text-gray-300 mb-4">{game.description}</p>}
               <dl className="text-sm space-y-3 mb-4">
                 {game.platforms && (

@@ -14,6 +14,7 @@ export interface Game {
   awards: string | null
   staff: string | null
   categories: string[] | null
+  visible: boolean
   createdAt: string
   updatedAt: string
 }

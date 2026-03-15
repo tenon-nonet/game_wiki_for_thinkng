@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,16 +24,21 @@ public class GameController {
     private final GameService gameService;
 
     @GetMapping
-    public ResponseEntity<List<GameResponse>> findAll(@RequestParam(required = false) String name) {
+    public ResponseEntity<List<GameResponse>> findAll(
+            @RequestParam(required = false) String name,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        boolean includeHidden = isAdmin(userDetails);
         if (name != null && !name.isBlank()) {
-            return ResponseEntity.ok(gameService.search(name));
+            return ResponseEntity.ok(gameService.search(name, includeHidden));
         }
-        return ResponseEntity.ok(gameService.findAll());
+        return ResponseEntity.ok(gameService.findAll(includeHidden));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GameResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(gameService.findById(id));
+    public ResponseEntity<GameResponse> findById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(gameService.findById(id, isAdmin(userDetails)));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -72,5 +79,10 @@ public class GameController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         gameService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails != null
+                && userDetails.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     }
 }

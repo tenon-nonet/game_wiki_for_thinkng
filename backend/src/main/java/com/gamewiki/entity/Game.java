@@ -44,6 +44,9 @@ public class Game {
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int sortOrder = 0;
 
+    @Column(name = "is_visible", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean visible = true;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

@@ -18,6 +18,7 @@ public class GameResponse {
     private String awards;
     private String staff;
     private List<String> categories;
+    private boolean visible;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

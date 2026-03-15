@@ -19,4 +19,5 @@ public class GameRequest {
     private String awards;
     private String staff;
     private java.util.List<String> categories;
+    private Boolean visible;
 }
