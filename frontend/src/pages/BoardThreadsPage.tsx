@@ -11,8 +11,16 @@ import {
   getGeneralBoardThreads,
 } from '../api'
 import { isAdmin } from '../auth'
+import MessageOverlay from '../components/MessageOverlay'
 import { excerpt, usePageMeta } from '../seo'
 import type { BoardThreadSummary, Game } from '../types'
+
+function sortThreadsWithPinnedFirst(items: BoardThreadSummary[]) {
+  return [...items].sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+    return new Date(b.lastPostedAt).getTime() - new Date(a.lastPostedAt).getTime()
+  })
+}
 
 export default function BoardThreadsPage() {
   const location = useLocation()
@@ -26,6 +34,7 @@ export default function BoardThreadsPage() {
   const [pinned, setPinned] = useState(false)
   const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showCreatedOverlay, setShowCreatedOverlay] = useState(false)
 
   usePageMeta({
     title: `${isGeneral ? '総合掲示板' : game?.name ?? '掲示板'} | FROMDEX.com`,
@@ -39,11 +48,11 @@ export default function BoardThreadsPage() {
   const load = () => {
     if (isGeneral) {
       setGame(null)
-      getGeneralBoardThreads().then((res) => setThreads(res.data))
+      getGeneralBoardThreads().then((res) => setThreads(sortThreadsWithPinnedFirst(res.data)))
       return
     }
     getGame(numericGameId).then((res) => setGame(res.data))
-    getBoardThreads(numericGameId).then((res) => setThreads(res.data))
+    getBoardThreads(numericGameId).then((res) => setThreads(sortThreadsWithPinnedFirst(res.data)))
   }
 
   useEffect(() => {
@@ -64,6 +73,7 @@ export default function BoardThreadsPage() {
       setPinned(false)
       setShowCreateForm(false)
       load()
+      setShowCreatedOverlay(true)
     } catch (err: any) {
       setError(err.response?.data?.error || 'スレッド作成に失敗しました')
     }
@@ -244,6 +254,13 @@ export default function BoardThreadsPage() {
           ))
         )}
       </div>
+
+      {showCreatedOverlay && (
+        <MessageOverlay
+          message="新しいスレッドを作成しました"
+          onClose={() => setShowCreatedOverlay(false)}
+        />
+      )}
     </div>
   )
 }

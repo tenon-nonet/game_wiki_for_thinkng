@@ -13,6 +13,7 @@ import {
   getGeneralBoardThread,
 } from '../api'
 import { getUsername, isAdmin, isLoggedIn } from '../auth'
+import MessageOverlay from '../components/MessageOverlay'
 import { useNavigate } from 'react-router-dom'
 import { excerpt, usePageMeta } from '../seo'
 import type { BoardThreadDetail } from '../types'
@@ -28,6 +29,7 @@ export default function BoardThreadDetailPage() {
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [lengthError, setLengthError] = useState('')
+  const [showPostedOverlay, setShowPostedOverlay] = useState(false)
 
   usePageMeta({
     title: `${detail?.thread.title ?? 'スレッド詳細'} | FROMDEX.com`,
@@ -58,6 +60,7 @@ export default function BoardThreadDetailPage() {
       setContent('')
       setLengthError('')
       load()
+      setShowPostedOverlay(true)
     } catch (err: any) {
       setError(err.response?.data?.error || '返信に失敗しました')
     }
@@ -244,6 +247,13 @@ export default function BoardThreadDetailPage() {
           </form>
         </div>
       </div>
+
+      {showPostedOverlay && (
+        <MessageOverlay
+          message="メッセージを投稿しました"
+          onClose={() => setShowPostedOverlay(false)}
+        />
+      )}
     </div>
   )
 }
