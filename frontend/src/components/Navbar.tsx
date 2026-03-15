@@ -47,6 +47,7 @@ export default function Navbar() {
               {isAdmin() && (
                 <>
                   <Link to="/edit-requests" className="hover:text-gray-300 text-base">編集承認</Link>
+                  <Link to="/reports" className="hover:text-gray-300 text-base">通報管理</Link>
                   <Link to="/tags" className="hover:text-gray-300 text-base">タグ管理</Link>
                 </>
               )}
@@ -99,6 +100,7 @@ export default function Navbar() {
               {isAdmin() && (
                 <>
                   <Link to="/edit-requests" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">編集承認</Link>
+                  <Link to="/reports" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">通報管理</Link>
                   <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">タグ管理</Link>
                 </>
               )}

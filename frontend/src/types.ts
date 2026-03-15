@@ -79,6 +79,28 @@ export interface EditRequest {
   createdAt: string
 }
 
+export interface Report {
+  id: number
+  targetType: 'BOARD_THREAD' | 'BOARD_POST'
+  targetId: number
+  reason: string
+  reportedBy: string
+  targetAuthor: string | null
+  targetSummary: string | null
+  status: 'NEW' | 'CHECKING' | 'RESOLVED' | 'DISMISSED'
+  reviewedBy: string | null
+  createdAt: string
+  reviewedAt: string | null
+}
+
+export interface Ban {
+  id: number
+  authorKey: string
+  reason: string
+  createdBy: string
+  createdAt: string
+}
+
 export interface BoardGameSummary {
   gameId: number
   gameName: string

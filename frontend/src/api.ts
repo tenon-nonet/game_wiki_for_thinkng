@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, Report, Ban, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -229,3 +229,25 @@ export const getGeneralBoardThread = (threadId: number) =>
 
 export const createGeneralBoardPost = (threadId: number, content: string) =>
   api.post<BoardPost>(`/boards/general/threads/${threadId}/posts`, { content })
+
+// Reports
+export const createBoardThreadReport = (threadId: number, reason: string) =>
+  api.post<Report>(`/reports/board-threads/${threadId}`, { reason })
+
+export const createBoardPostReport = (postId: number, reason: string) =>
+  api.post<Report>(`/reports/board-posts/${postId}`, { reason })
+
+export const getReports = () =>
+  api.get<Report[]>('/reports')
+
+export const updateReportStatus = (id: number, status: Report['status']) =>
+  api.put<Report>(`/reports/${id}/status`, { status })
+
+export const banReportedAuthor = (id: number) =>
+  api.post<Report>(`/reports/${id}/ban`)
+
+export const getBans = () =>
+  api.get<Ban[]>('/reports/bans')
+
+export const removeBan = (id: number) =>
+  api.delete(`/reports/bans/${id}`)

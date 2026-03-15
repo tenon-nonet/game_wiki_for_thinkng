@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS bans (
+  id BIGSERIAL PRIMARY KEY,
+  author_key VARCHAR(255) NOT NULL UNIQUE,
+  reason VARCHAR(255) NOT NULL,
+  created_by VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP(6) WITHOUT TIME ZONE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_bans_author_key
+  ON bans (author_key);

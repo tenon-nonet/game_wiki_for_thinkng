@@ -1,7 +1,13 @@
 package com.gamewiki.controller;
 
-import com.gamewiki.dto.*;
+import com.gamewiki.dto.BoardGameSummaryResponse;
+import com.gamewiki.dto.BoardPostRequest;
+import com.gamewiki.dto.BoardPostResponse;
+import com.gamewiki.dto.BoardThreadDetailResponse;
+import com.gamewiki.dto.BoardThreadRequest;
+import com.gamewiki.dto.BoardThreadSummaryResponse;
 import com.gamewiki.service.BoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController

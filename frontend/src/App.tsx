@@ -29,6 +29,7 @@ import MyPage from './pages/MyPage'
 import MyEditHistoriesPage from './pages/MyEditHistoriesPage'
 import MyCommentsPage from './pages/MyCommentsPage'
 import EditRequestsPage from './pages/EditRequestsPage'
+import ReportsPage from './pages/ReportsPage'
 
 export default function App() {
   const [authVersion, setAuthVersion] = useState(0)
@@ -78,6 +79,7 @@ export default function App() {
             <Route path="/mypage/edit-histories" element={<MyEditHistoriesPage />} />
             <Route path="/mypage/comments" element={<MyCommentsPage />} />
             <Route path="/edit-requests" element={<EditRequestsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/tags" element={<TagsAdminPage />} />
             <Route path="/news" element={<AllNewsListPage />} />
           </Routes>

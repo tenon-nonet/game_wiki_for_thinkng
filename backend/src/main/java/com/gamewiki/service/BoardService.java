@@ -1,6 +1,11 @@
 package com.gamewiki.service;
 
-import com.gamewiki.dto.*;
+import com.gamewiki.dto.BoardGameSummaryResponse;
+import com.gamewiki.dto.BoardPostRequest;
+import com.gamewiki.dto.BoardPostResponse;
+import com.gamewiki.dto.BoardThreadDetailResponse;
+import com.gamewiki.dto.BoardThreadRequest;
+import com.gamewiki.dto.BoardThreadSummaryResponse;
 import com.gamewiki.entity.BoardPost;
 import com.gamewiki.entity.BoardThread;
 import com.gamewiki.entity.Game;
@@ -33,6 +38,7 @@ public class BoardService {
     private final GameRepository gameRepository;
     private final BoardThreadRepository boardThreadRepository;
     private final BoardPostRepository boardPostRepository;
+    private final BanService banService;
 
     public List<BoardGameSummaryResponse> getBoardGames() {
         List<Game> games = gameRepository.findAllByVisibleTrueOrderBySortOrderAscIdAsc();
@@ -196,8 +202,12 @@ public class BoardService {
     }
 
     private void validateThreadRequest(BoardThreadRequest request, String authorKey) {
+        ensureNotBanned(authorKey);
         String normalizedBody = normalizeText(request.getContent());
         String normalizedTitle = normalizeText(request.getTitle());
+        if (normalizedBody.length() > 300) {
+            throw new IllegalArgumentException("スレッド本文は300文字以内で入力してください");
+        }
         validateUrlCount(normalizedTitle + "\n" + normalizedBody);
 
         Optional<BoardThread> latestThread = boardThreadRepository.findTopByAuthorKeyOrderByCreatedAtDescIdDesc(authorKey);
@@ -208,15 +218,16 @@ public class BoardService {
             }
             String previousNormalized = normalizeText(previous.getTitle()) + "\n" + normalizeText(previous.getContent());
             if (previousNormalized.equals(normalizedTitle + "\n" + normalizedBody)) {
-                throw new IllegalArgumentException("同じ内容のスレッドは連続で投稿できません");
+                throw new IllegalArgumentException("同じ内容のスレッドは連投できません");
             }
         }
     }
 
     private void validatePostRequest(BoardPostRequest request, String authorKey) {
+        ensureNotBanned(authorKey);
         String normalizedBody = normalizeText(request.getContent());
-        if (normalizedBody.length() > 100) {
-            throw new IllegalArgumentException("返信は100文字以内で入力してください");
+        if (normalizedBody.length() > 300) {
+            throw new IllegalArgumentException("返信は300文字以内で入力してください");
         }
         validateUrlCount(normalizedBody);
 
@@ -227,8 +238,14 @@ public class BoardService {
                 throw new IllegalArgumentException("返信は10秒に1回までです");
             }
             if (normalizeText(previous.getContent()).equals(normalizedBody)) {
-                throw new IllegalArgumentException("同じ内容の返信は連続で投稿できません");
+                throw new IllegalArgumentException("同じ内容の返信は連投できません");
             }
+        }
+    }
+
+    private void ensureNotBanned(String authorKey) {
+        if (banService.isBanned(authorKey)) {
+            throw new IllegalArgumentException("現在この環境からは投稿できません");
         }
     }
 
