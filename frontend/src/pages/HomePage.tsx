@@ -22,12 +22,12 @@ export default function HomePage() {
 
   const [games, setGames] = useState<Game[]>([])
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', description: '' })
+  const [form, setForm] = useState({ name: '', description: '', visible: true })
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editForm, setEditForm] = useState({ name: '', description: '' })
+  const [editForm, setEditForm] = useState({ name: '', description: '', visible: true })
   const [editImage, setEditImage] = useState<File | null>(null)
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const admin = isAdmin()
@@ -75,7 +75,7 @@ export default function HomePage() {
     setError('')
     try {
       await createGame(form, image)
-      setForm({ name: '', description: '' })
+      setForm({ name: '', description: '', visible: true })
       setImage(null)
       setPreview(null)
       setShowForm(false)
@@ -113,7 +113,7 @@ export default function HomePage() {
 
   const startEdit = (game: Game) => {
     setEditingId(game.id)
-    setEditForm({ name: game.name, description: game.description || '' })
+    setEditForm({ name: game.name, description: game.description || '', visible: game.visible })
     setEditImage(null)
     setEditPreview(null)
   }
@@ -294,6 +294,15 @@ export default function HomePage() {
               rows={2}
               className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
             />
+            <label className="flex items-center gap-2 text-sm text-gray-200">
+              <input
+                type="checkbox"
+                checked={form.visible}
+                onChange={(e) => setForm({ ...form, visible: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-500 bg-zinc-700 text-red-800 focus:ring-red-800"
+              />
+              公開する
+            </label>
             <div>
               <label className="block text-sm text-gray-300 mb-1">画像</label>
               {preview && <img src={preview} alt="preview" className="w-full h-32 object-contain bg-zinc-900 rounded mb-2 border border-gray-600" />}
@@ -335,6 +344,15 @@ export default function HomePage() {
                       rows={2}
                       className="w-full border border-gray-600 rounded px-3 py-2 bg-zinc-700 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-800"
                     />
+                    <label className="flex items-center gap-2 text-sm text-gray-200">
+                      <input
+                        type="checkbox"
+                        checked={editForm.visible}
+                        onChange={(e) => setEditForm({ ...editForm, visible: e.target.checked })}
+                        className="h-4 w-4 rounded border-gray-500 bg-zinc-700 text-red-800 focus:ring-red-800"
+                      />
+                      公開する
+                    </label>
                     <div>
                       <label className="block text-xs text-gray-300 mb-1">画像を変更</label>
                       {(editPreview || game.imagePath) && (
@@ -368,6 +386,11 @@ export default function HomePage() {
                           </div>
                         )}
                       </div>
+                      {admin && !game.visible && (
+                        <p className="inline-flex w-fit rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-200">
+                          非公開
+                        </p>
+                      )}
                       {game.description && <p className="min-h-[2.8rem] text-sm leading-6 text-gray-400 line-clamp-2">{game.description}</p>}
                       {!game.description && <div className="min-h-[2.8rem]" />}
                       <div className="mt-3 space-y-2">

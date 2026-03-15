@@ -19,12 +19,22 @@ public class GameService {
     private final GameRepository gameRepository;
     private final FileStorageService fileStorageService;
 
-    public List<GameResponse> findAll() {
-        return gameRepository.findAllByOrderBySortOrderAscIdAsc().stream().map(this::toResponse).toList();
+    public List<GameResponse> findAll(boolean includeHidden) {
+        return (includeHidden
+                ? gameRepository.findAllByOrderBySortOrderAscIdAsc()
+                : gameRepository.findAllByVisibleTrueOrderBySortOrderAscIdAsc())
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public List<GameResponse> search(String name) {
-        return gameRepository.findByNameContainingIgnoreCaseOrderBySortOrderAscIdAsc(name).stream().map(this::toResponse).toList();
+    public List<GameResponse> search(String name, boolean includeHidden) {
+        return (includeHidden
+                ? gameRepository.findByNameContainingIgnoreCaseOrderBySortOrderAscIdAsc(name)
+                : gameRepository.findByNameContainingIgnoreCaseAndVisibleTrueOrderBySortOrderAscIdAsc(name))
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional
@@ -36,8 +46,12 @@ public class GameService {
         }
     }
 
-    public GameResponse findById(Long id) {
-        return toResponse(getGame(id));
+    public GameResponse findById(Long id, boolean includeHidden) {
+        Game game = getGame(id);
+        if (!includeHidden && !game.isVisible()) {
+            throw new IllegalArgumentException("Game not found: " + id);
+        }
+        return toResponse(game);
     }
 
     public GameResponse create(GameRequest request, MultipartFile image) {
@@ -49,6 +63,7 @@ public class GameService {
         game.setAwards(request.getAwards());
         game.setStaff(request.getStaff());
         game.setCategories(categoriesToString(request.getCategories()));
+        game.setVisible(request.getVisible() == null || request.getVisible());
         if (image != null && !image.isEmpty()) {
             game.setImagePath(fileStorageService.store(image));
         }
@@ -64,6 +79,7 @@ public class GameService {
         game.setAwards(request.getAwards());
         game.setStaff(request.getStaff());
         game.setCategories(categoriesToString(request.getCategories()));
+        game.setVisible(request.getVisible() == null || request.getVisible());
         if (image != null && !image.isEmpty()) {
             fileStorageService.delete(game.getImagePath());
             game.setImagePath(fileStorageService.store(image));
@@ -99,6 +115,7 @@ public class GameService {
         r.setAwards(game.getAwards());
         r.setStaff(game.getStaff());
         r.setCategories(stringToCategories(game.getCategories()));
+        r.setVisible(game.isVisible());
         r.setCreatedAt(game.getCreatedAt());
         r.setUpdatedAt(game.getUpdatedAt());
         return r;

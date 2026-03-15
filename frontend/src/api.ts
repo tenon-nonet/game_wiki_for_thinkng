@@ -31,6 +31,7 @@ export interface GameFormData {
   awards?: string
   staff?: string
   categories?: string[]
+  visible?: boolean
 }
 
 export const createGame = (form: GameFormData, image?: File | null) => {
