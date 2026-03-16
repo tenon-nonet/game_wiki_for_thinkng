@@ -5,6 +5,7 @@ import { isAdmin } from '../auth'
 import { usePageMeta } from '../seo'
 import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
 import type { Game } from '../types'
+import TutorialModal from '../components/TutorialModal'
 
 const SITE_STARTED_AT = new Date('2026-03-12T00:00:00+09:00')
 
@@ -66,6 +67,7 @@ export default function HomePage() {
   const [editImage, setEditImage] = useState<File | null>(null)
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const admin = isAdmin()
+  const [showTutorial, setShowTutorial] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [news, setNews] = useState<{ title: string; url: string; publishedAt: string; source: string }[]>([])
@@ -215,6 +217,7 @@ export default function HomePage() {
 
   return (
     <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
+      <TutorialModal forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
       <section className="mb-8 w-full">
         <div className="overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
           <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
@@ -242,6 +245,12 @@ export default function HomePage() {
                 </span>
               </h1>
               <div className="flex flex-wrap gap-2 text-sm">
+                <button
+                  onClick={() => setShowTutorial(true)}
+                  className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition text-xs tracking-wide"
+                >
+                  ? 使い方ガイド
+                </button>
                 {admin && (
                   <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
                     収録ゲーム: <span className="text-zinc-100">{games.length}</span>

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, Report, Ban, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, Report, Ban, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost, RelationGraph } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -241,6 +241,19 @@ export const deleteBoardPost = (gameId: number, threadId: number, postId: number
 
 export const deleteGeneralBoardPost = (threadId: number, postId: number) =>
   api.delete(`/boards/general/threads/${threadId}/posts/${postId}`)
+
+// Relation Graphs
+export const getRelationGraph = (gameId: number) =>
+  api.get<RelationGraph>(`/relation-graphs/${gameId}`)
+
+export const saveRelationGraph = (gameId: number, graphData: string) =>
+  api.put<RelationGraph>(`/relation-graphs/${gameId}`, { graphData })
+
+export const getUserRelationGraph = (gameId: number) =>
+  api.get<RelationGraph>(`/relation-graphs/${gameId}/mine`)
+
+export const saveUserRelationGraph = (gameId: number, graphData: string) =>
+  api.put<RelationGraph>(`/relation-graphs/${gameId}/mine`, { graphData })
 
 // Reports
 export const createBoardThreadReport = (threadId: number, reason: string) =>

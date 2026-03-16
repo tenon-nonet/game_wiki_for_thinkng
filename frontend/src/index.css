@@ -18,3 +18,30 @@ body,
     font-size: 18px;
   }
 }
+
+/* React Flow Controls ボタンのスタイル上書き */
+.react-flow__controls .react-flow__controls-button {
+  background: #3f3f46 !important;
+  border-color: #52525b !important;
+  fill: #d4d4d8 !important;
+  color: #d4d4d8 !important;
+}
+.react-flow__controls .react-flow__controls-button:hover {
+  background: #52525b !important;
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+.react-flow__controls .react-flow__controls-button svg {
+  fill: #d4d4d8 !important;
+}
+.react-flow__controls .react-flow__controls-button:hover svg {
+  fill: #ffffff !important;
+}
+
+/* React Flow attribution link */
+.react-flow__attribution {
+  background: #ffffff !important;
+}
+.react-flow__attribution a {
+  color: #000000 !important;
+}
