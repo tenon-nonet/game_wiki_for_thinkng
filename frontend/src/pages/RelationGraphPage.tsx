@@ -5,6 +5,7 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
+  Panel,
   NodeResizer,
   addEdge,
   useNodesState,
@@ -392,27 +393,52 @@ function RelationGraphEditor() {
   const editingEdge = edges.find((e) => e.id === editingEdgeId)
 
   return (
-    <div className="flex" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col" style={{ height: 'min(750px, calc(100vh - 56px))' }}>
+
+      {/* ---- ヘッダーバー ---- */}
+      <div className="bg-zinc-900 border-b border-zinc-700 px-4 sm:px-6 py-2.5 flex items-center justify-between shrink-0">
+        <Link to={`/games/${gameId}`} className="text-gray-100 hover:underline text-sm">
+          ← {game?.name ?? 'ゲーム詳細'}
+        </Link>
+        <span className="text-sm font-semibold text-gray-300 hidden sm:block">相関図</span>
+        {admin ? (
+          <div className="flex items-center gap-3">
+            {saveMsg && (
+              <span className={`text-xs ${saveMsg.includes('失敗') ? 'text-red-400' : 'text-green-400'}`}>
+                {saveMsg}
+              </span>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-4 py-1.5 text-sm font-semibold tracking-[0.08em] text-amber-50 shadow-[0_0_22px_rgba(245,158,11,0.16)] transition hover:border-amber-300/90 hover:bg-amber-300/24 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {saving ? '保存中...' : '保存する'}
+            </button>
+          </div>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      {/* ---- コンテンツエリア ---- */}
+      <div className="flex flex-1 overflow-hidden">
 
       {/* ---- 左パネル ---- */}
       {admin && (
-        <div className="w-56 bg-zinc-900 border-r border-zinc-700 flex flex-col overflow-hidden shrink-0">
-          <div className="p-3 border-b border-zinc-700">
-            <Link to={`/games/${gameId}`} className="text-xs text-gray-400 hover:underline">
-              ← {game?.name ?? 'ゲーム詳細'}
-            </Link>
-            <h2 className="text-sm font-bold text-gray-100 mt-1">キャラクター</h2>
-            <p className="text-xs text-gray-500 mt-0.5">クリックまたはドラッグで追加</p>
-          </div>
-
+        <div className="w-52 bg-zinc-900 border-r border-zinc-700 flex flex-col overflow-hidden shrink-0">
           {/* 組織追加ボタン */}
-          <div className="px-2 pt-2 pb-1 border-b border-zinc-700">
+          <div className="px-2 pt-2 pb-1.5 border-b border-zinc-700">
             <button
               onClick={() => setShowAddOrg(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-xs text-gray-200 transition"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs text-gray-300 transition"
             >
-              <span className="text-base leading-none">＋</span> 組織を追加
+              <span className="text-sm leading-none">＋</span> 組織を追加
             </button>
+          </div>
+
+          <div className="px-2 pt-2 pb-0.5">
+            <p className="text-xs text-gray-500">クリックまたはドラッグで追加</p>
           </div>
 
           <div className="overflow-y-auto flex-1 p-2 space-y-0.5">
@@ -430,14 +456,14 @@ function RelationGraphEditor() {
                         e.dataTransfer.effectAllowed = 'move'
                       }}
                       onClick={() => !inCanvas && addCharNode('BOSS', b)}
-                      className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition ${inCanvas ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-zinc-700'}`}
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition ${inCanvas ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-zinc-800'}`}
                     >
                       {b.imagePath
                         ? <img src={`/uploads/${b.imagePath}`} alt={b.name} className="w-6 h-6 object-cover rounded shrink-0" />
-                        : <div className="w-6 h-6 bg-zinc-700 rounded flex items-center justify-center shrink-0">⚔️</div>
+                        : <div className="w-6 h-6 bg-zinc-700 rounded flex items-center justify-center shrink-0 text-xs">⚔</div>
                       }
                       <span className={`truncate ${inCanvas ? 'text-gray-500' : 'text-gray-200'}`}>{b.name}</span>
-                      {inCanvas && <span className="ml-auto text-gray-500">✓</span>}
+                      {inCanvas && <span className="ml-auto text-gray-600">✓</span>}
                     </div>
                   )
                 })}
@@ -457,14 +483,14 @@ function RelationGraphEditor() {
                         e.dataTransfer.effectAllowed = 'move'
                       }}
                       onClick={() => !inCanvas && addCharNode('NPC', n)}
-                      className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition ${inCanvas ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-zinc-700'}`}
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition ${inCanvas ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-zinc-800'}`}
                     >
                       {n.imagePath
                         ? <img src={`/uploads/${n.imagePath}`} alt={n.name} className="w-6 h-6 object-cover rounded shrink-0" />
-                        : <div className="w-6 h-6 bg-zinc-700 rounded flex items-center justify-center shrink-0">👤</div>
+                        : <div className="w-6 h-6 bg-zinc-700 rounded flex items-center justify-center shrink-0 text-xs">人</div>
                       }
                       <span className={`truncate ${inCanvas ? 'text-gray-500' : 'text-gray-200'}`}>{n.name}</span>
-                      {inCanvas && <span className="ml-auto text-gray-500">✓</span>}
+                      {inCanvas && <span className="ml-auto text-gray-600">✓</span>}
                     </div>
                   )
                 })}
@@ -474,37 +500,11 @@ function RelationGraphEditor() {
               <p className="text-xs text-gray-500 px-2 pt-2">キャラクターがいません</p>
             )}
           </div>
-
-          <div className="p-3 border-t border-zinc-700 space-y-2">
-            {saveMsg && (
-              <p className={`text-xs text-center ${saveMsg.includes('失敗') ? 'text-red-400' : 'text-green-400'}`}>
-                {saveMsg}
-              </p>
-            )}
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full bg-red-900 hover:bg-red-800 disabled:opacity-50 text-white text-sm py-2 rounded font-medium transition"
-            >
-              {saving ? '保存中...' : '保存する'}
-            </button>
-          </div>
         </div>
       )}
 
       {/* ---- キャンバス ---- */}
       <div className="flex-1 relative">
-        {!admin && (
-          <div className="absolute top-3 left-3 z-10">
-            <Link
-              to={`/games/${gameId}`}
-              className="text-xs text-gray-300 bg-zinc-900/80 border border-zinc-700 px-3 py-1.5 rounded hover:bg-zinc-800 transition"
-            >
-              ← {game?.name ?? 'ゲーム詳細'}
-            </Link>
-          </div>
-        )}
-
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -526,22 +526,25 @@ function RelationGraphEditor() {
         >
           <Background color="#3f3f46" gap={20} size={1} />
           <Controls style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6 }} />
+          {admin && (
+            <Panel position="bottom-right">
+              <div className="text-xs text-zinc-300 bg-zinc-700 border border-zinc-500 px-3 py-2 rounded space-y-0.5">
+                <p>ノードの端をドラッグ → 関係線を引く</p>
+                <p>エッジをクリック → ラベル変更 / 削除</p>
+                <p>右クリック → 削除</p>
+                <p>キャラを組織内にドラッグ → 所属</p>
+              </div>
+            </Panel>
+          )}
         </ReactFlow>
-
-        {admin && (
-          <div className="absolute bottom-4 right-4 z-10 text-xs text-gray-400 bg-zinc-900/90 border border-zinc-700 px-3 py-2 rounded space-y-0.5">
-            <p>ノードの端をドラッグ → 関係線を引く</p>
-            <p>エッジをクリック → ラベル変更 / 削除</p>
-            <p>右クリック → 削除</p>
-            <p>キャラを組織内にドラッグ → 所属</p>
-          </div>
-        )}
       </div>
+
+      </div>{/* コンテンツエリア end */}
 
       {/* ---- 組織追加ダイアログ ---- */}
       {showAddOrg && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowAddOrg(false)}>
-          <div className="bg-zinc-800 border border-zinc-600 rounded-xl p-6 w-80 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 w-80 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-gray-100 font-semibold mb-4">組織を追加</h3>
             <div className="space-y-4">
               <div>
@@ -552,7 +555,7 @@ function RelationGraphEditor() {
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="例: 円卓の騎士"
                   autoFocus
-                  className="w-full bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  className="w-full bg-zinc-700 border border-gray-600 rounded px-3 py-2 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                   onKeyDown={(e) => { if (e.key === 'Enter') addOrgNode() }}
                 />
               </div>
@@ -596,22 +599,22 @@ function RelationGraphEditor() {
       {/* ---- エッジ作成ダイアログ ---- */}
       {pendingConn && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setPendingConn(null)}>
-          <div className="bg-zinc-800 border border-zinc-600 rounded-xl p-6 w-80 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 w-80 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-gray-100 font-semibold mb-4">関係性を選択</h3>
             <div className="space-y-2">
               {PRESET_LABELS.map((opt) => (
                 <button key={opt.type} onClick={() => confirmEdge(opt.type, opt.label)}
-                  className={`w-full py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 ${opt.colorClass} font-semibold text-sm transition`}>
+                  className={`w-full py-2 px-4 rounded bg-zinc-700 hover:bg-gray-600 ${opt.colorClass} font-semibold text-sm transition`}>
                   {opt.label}
                 </button>
               ))}
               <div className="flex gap-2 pt-1">
                 <input type="text" value={customLabel} onChange={(e) => setCustomLabel(e.target.value)}
                   placeholder="その他（自由入力）" autoFocus
-                  className="flex-1 bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  className="flex-1 bg-zinc-700 border border-gray-600 rounded px-3 py-2 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                   onKeyDown={(e) => { if (e.key === 'Enter' && customLabel) confirmEdge('CUSTOM', customLabel) }} />
                 <button onClick={() => customLabel && confirmEdge('CUSTOM', customLabel)} disabled={!customLabel}
-                  className="bg-zinc-600 hover:bg-zinc-500 disabled:opacity-40 text-gray-100 px-3 rounded text-sm transition">
+                  className="bg-zinc-700 hover:bg-gray-600 disabled:opacity-40 text-gray-200 px-3 rounded text-sm transition">
                   追加
                 </button>
               </div>
@@ -626,28 +629,28 @@ function RelationGraphEditor() {
       {/* ---- エッジ編集ダイアログ ---- */}
       {editingEdgeId && editingEdge && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setEditingEdgeId(null)}>
-          <div className="bg-zinc-800 border border-zinc-600 rounded-xl p-6 w-80 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 w-80 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-gray-100 font-semibold mb-1">関係性を変更</h3>
             <p className="text-xs text-gray-400 mb-4">現在: <span className="text-gray-200">{editingEdge.label as string}</span></p>
             <div className="space-y-2">
               {PRESET_LABELS.map((opt) => (
                 <button key={opt.type} onClick={() => updateEdgeLabel(opt.type, opt.label)}
-                  className={`w-full py-2 px-4 rounded bg-zinc-700 hover:bg-zinc-600 ${opt.colorClass} font-semibold text-sm transition`}>
+                  className={`w-full py-2 px-4 rounded bg-zinc-700 hover:bg-gray-600 ${opt.colorClass} font-semibold text-sm transition`}>
                   {opt.label}
                 </button>
               ))}
               <div className="flex gap-2 pt-1">
                 <input type="text" value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
                   placeholder="その他（自由入力）"
-                  className="flex-1 bg-zinc-700 border border-zinc-600 rounded px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800"
+                  className="flex-1 bg-zinc-700 border border-gray-600 rounded px-3 py-2 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-800"
                   onKeyDown={(e) => { if (e.key === 'Enter' && editLabel) updateEdgeLabel('CUSTOM', editLabel) }} />
                 <button onClick={() => editLabel && updateEdgeLabel('CUSTOM', editLabel)} disabled={!editLabel}
-                  className="bg-zinc-600 hover:bg-zinc-500 disabled:opacity-40 text-gray-100 px-3 rounded text-sm transition">
+                  className="bg-zinc-700 hover:bg-gray-600 disabled:opacity-40 text-gray-200 px-3 rounded text-sm transition">
                   変更
                 </button>
               </div>
             </div>
-            <button onClick={deleteEdge} className="mt-3 w-full text-sm text-red-400 hover:text-red-300 py-2 border border-red-900/50 rounded transition">
+            <button onClick={deleteEdge} className="mt-3 w-full bg-zinc-800 hover:bg-red-900/40 text-red-400 hover:text-red-300 text-sm px-4 py-2 rounded border border-red-900/40 transition">
               この関係を削除
             </button>
             <button onClick={() => setEditingEdgeId(null)} className="mt-2 w-full text-sm text-gray-400 hover:text-gray-200 transition">

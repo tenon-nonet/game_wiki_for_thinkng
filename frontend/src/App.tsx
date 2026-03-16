@@ -33,25 +33,12 @@ import ReportsPage from './pages/ReportsPage'
 import RelationGraphPage from './pages/RelationGraphPage'
 import RelationGraphSelectPage from './pages/RelationGraphSelectPage'
 
-export default function App() {
-  const [authVersion, setAuthVersion] = useState(0)
-
-  useEffect(() => {
-    const unsubscribe = onAuthChanged(() => setAuthVersion((v) => v + 1))
-    const onStorage = () => setAuthVersion((v) => v + 1)
-    window.addEventListener('storage', onStorage)
-    return () => {
-      unsubscribe()
-      window.removeEventListener('storage', onStorage)
-    }
-  }, [])
-
+function AppLayout({ authVersion }: { authVersion: number }) {
   return (
-    <BrowserRouter>
-      <div key={authVersion} className="flex min-h-screen flex-col bg-black">
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
+    <div key={authVersion} className="flex min-h-screen flex-col bg-black">
+      <Navbar />
+      <main className="flex-1">
+        <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -90,6 +77,25 @@ export default function App() {
         </main>
         <Footer />
       </div>
+  )
+}
+
+export default function App() {
+  const [authVersion, setAuthVersion] = useState(0)
+
+  useEffect(() => {
+    const unsubscribe = onAuthChanged(() => setAuthVersion((v) => v + 1))
+    const onStorage = () => setAuthVersion((v) => v + 1)
+    window.addEventListener('storage', onStorage)
+    return () => {
+      unsubscribe()
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [])
+
+  return (
+    <BrowserRouter>
+      <AppLayout authVersion={authVersion} />
     </BrowserRouter>
   )
 }
