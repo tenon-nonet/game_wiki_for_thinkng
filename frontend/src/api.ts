@@ -249,6 +249,12 @@ export const getRelationGraph = (gameId: number) =>
 export const saveRelationGraph = (gameId: number, graphData: string) =>
   api.put<RelationGraph>(`/relation-graphs/${gameId}`, { graphData })
 
+export const getUserRelationGraph = (gameId: number) =>
+  api.get<RelationGraph>(`/relation-graphs/${gameId}/mine`)
+
+export const saveUserRelationGraph = (gameId: number, graphData: string) =>
+  api.put<RelationGraph>(`/relation-graphs/${gameId}/mine`, { graphData })
+
 // Reports
 export const createBoardThreadReport = (threadId: number, reason: string) =>
   api.post<Report>(`/reports/board-threads/${threadId}`, { reason })

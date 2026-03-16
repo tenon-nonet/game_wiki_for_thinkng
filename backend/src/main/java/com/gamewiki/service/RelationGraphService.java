@@ -18,19 +18,48 @@ public class RelationGraphService {
     private final RelationGraphRepository relationGraphRepository;
     private final GameRepository gameRepository;
 
-    public Optional<RelationGraphResponse> findByGameId(Long gameId) {
-        return relationGraphRepository.findByGameId(gameId).map(this::toResponse);
+    /** 公式グラフを取得（username = null） */
+    public Optional<RelationGraphResponse> findOfficial(Long gameId) {
+        return relationGraphRepository.findByGameIdAndUsernameIsNull(gameId)
+                .map(this::toResponse);
     }
 
+    /** ユーザー個人グラフを取得 */
+    public Optional<RelationGraphResponse> findByUser(Long gameId, String username) {
+        return relationGraphRepository.findByGameIdAndUsername(gameId, username)
+                .map(this::toResponse);
+    }
+
+    /** 公式グラフを保存（管理者のみ） */
     @Transactional
-    public RelationGraphResponse save(Long gameId, String graphData, String username) {
+    public RelationGraphResponse saveOfficial(Long gameId, String graphData, String updatedBy) {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found: " + gameId));
 
-        RelationGraph graph = relationGraphRepository.findByGameId(game.getId())
+        RelationGraph graph = relationGraphRepository.findByGameIdAndUsernameIsNull(game.getId())
                 .orElseGet(() -> {
                     RelationGraph g = new RelationGraph();
                     g.setGame(game);
+                    g.setUsername(null);
+                    return g;
+                });
+
+        graph.setGraphData(graphData);
+        graph.setUpdatedBy(updatedBy);
+        return toResponse(relationGraphRepository.save(graph));
+    }
+
+    /** ユーザー個人グラフを保存 */
+    @Transactional
+    public RelationGraphResponse saveUserGraph(Long gameId, String graphData, String username) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game not found: " + gameId));
+
+        RelationGraph graph = relationGraphRepository.findByGameIdAndUsername(game.getId(), username)
+                .orElseGet(() -> {
+                    RelationGraph g = new RelationGraph();
+                    g.setGame(game);
+                    g.setUsername(username);
                     return g;
                 });
 

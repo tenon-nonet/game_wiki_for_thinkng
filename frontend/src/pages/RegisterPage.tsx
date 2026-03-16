@@ -52,7 +52,7 @@ export default function RegisterPage() {
       <div className="bg-zinc-800 rounded-lg shadow p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-gray-100">新規登録</h1>
         {error && <p className="text-gray-100 text-sm mb-4">{error}</p>}
-        <p className="text-gray-100 text-sm mb-4">ログインするとマイページが追加され、自分の編集記録やメッセージ記録が確認できてうれしい。それだけです、、、よかったら登録してね</p>
+        <p className="text-gray-100 text-sm mb-4">ログインするとマイページが追加され、自分の編集記録などが確認できます。よかったら登録してね</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-200 mb-1">ユーザー名</label>

@@ -19,8 +19,12 @@ public class RelationGraph {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id", nullable = false, unique = true)
+    @JoinColumn(name = "game_id", nullable = false)
     private Game game;
+
+    /** null = 管理者公式グラフ、非null = ユーザー個人グラフ */
+    @Column(length = 100)
+    private String username;
 
     @Column(columnDefinition = "TEXT")
     private String graphData;

@@ -19,8 +19,8 @@ import {
   type NodeProps,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { getBosses, getNpcs, getGame, getRelationGraph, saveRelationGraph } from '../api'
-import { isAdmin } from '../auth'
+import { getBosses, getNpcs, getGame, getRelationGraph, saveRelationGraph, getUserRelationGraph, saveUserRelationGraph } from '../api'
+import { isAdmin, isLoggedIn } from '../auth'
 import type { Boss, Game, Npc } from '../types'
 
 // ---- ノード型定義 ----
@@ -65,8 +65,8 @@ function CharacterNode({ data }: NodeProps<CharacterNodeType>) {
       {data.imagePath ? (
         <img src={`/uploads/${data.imagePath}`} alt={data.name} className="w-full h-20 object-cover" />
       ) : (
-        <div className="w-full h-20 bg-zinc-700 flex items-center justify-center text-3xl">
-          {data.entityType === 'BOSS' ? '⚔️' : '👤'}
+        <div className="w-full h-20 bg-zinc-700 flex items-center justify-center">
+          <span className="text-xs text-zinc-500">画像なし</span>
         </div>
       )}
       <div className="p-1.5">
@@ -145,11 +145,32 @@ function makeEdgeStyle(labelType: LabelType) {
   }
 }
 
+type Tab = 'official' | 'personal'
+
+function parseGraphData(raw: string | null | undefined): { nodes: AppNode[]; edges: Edge[] } {
+  if (!raw) return { nodes: [], edges: [] }
+  try {
+    const parsed = JSON.parse(raw)
+    const nodes = (parsed.nodes ?? []).map((n: AppNode) => ({ ...n, extent: undefined }))
+    return { nodes, edges: parsed.edges ?? [] }
+  } catch (_) {
+    return { nodes: [], edges: [] }
+  }
+}
+
 // ---- エディタ本体 ----
 function RelationGraphEditor() {
   const { id: gameId } = useParams<{ id: string }>()
   const admin = isAdmin()
+  const loggedIn = isLoggedIn()
   const { screenToFlowPosition } = useReactFlow()
+
+  // タブ管理
+  const [activeTab, setActiveTab] = useState<Tab>('official')
+
+  // グラフデータ（タブ切り替え時にキャッシュとして使用）
+  const officialCache = useState<{ nodes: AppNode[]; edges: Edge[] }>({ nodes: [], edges: [] })
+  const personalCache = useState<{ nodes: AppNode[]; edges: Edge[] }>({ nodes: [], edges: [] })
 
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
@@ -174,26 +195,58 @@ function RelationGraphEditor() {
 
   useEffect(() => {
     const gid = Number(gameId)
-    Promise.all([
+    const requests: Promise<any>[] = [
       getGame(gid),
       getBosses(gid),
       getNpcs(gid),
       getRelationGraph(gid).catch(() => null),
-    ]).then(([gameRes, bossRes, npcRes, graphRes]) => {
+    ]
+    if (loggedIn) {
+      requests.push(getUserRelationGraph(gid).catch(() => null))
+    }
+
+    Promise.all(requests).then(([gameRes, bossRes, npcRes, officialRes, personalRes]) => {
       setGame(gameRes.data)
       setBosses(bossRes.data)
       setNpcs(npcRes.data)
-      if (graphRes?.data?.graphData) {
-        try {
-          const parsed = JSON.parse(graphRes.data.graphData)
-          // extent: 'parent' は追従バグの原因になるため除去
-          const sanitizedNodes = (parsed.nodes ?? []).map((n: AppNode) => ({ ...n, extent: undefined }))
-          setNodes(sanitizedNodes)
-          setEdges(parsed.edges ?? [])
-        } catch (_) { /* 壊れたデータは無視 */ }
+
+      const official = parseGraphData(officialRes?.data?.graphData)
+      const personal = loggedIn ? parseGraphData(personalRes?.data?.graphData) : { nodes: [], edges: [] }
+
+      officialCache[1](official)
+      personalCache[1](personal)
+
+      // 初期タブ：個人グラフがある場合はマイ相関図、なければ公式
+      if (loggedIn && personal.nodes.length > 0) {
+        setActiveTab('personal')
+        setNodes(personal.nodes)
+        setEdges(personal.edges)
+      } else {
+        setActiveTab('official')
+        setNodes(official.nodes)
+        setEdges(official.edges)
       }
     })
   }, [gameId])
+
+  // タブ切り替え
+  const switchTab = (tab: Tab) => {
+    if (tab === activeTab) return
+    // 現在のタブのデータをキャッシュに保存
+    if (activeTab === 'official') {
+      officialCache[1]({ nodes, edges })
+    } else {
+      personalCache[1]({ nodes, edges })
+    }
+    // 新しいタブのデータを読み込む
+    const cache = tab === 'official' ? officialCache[0] : personalCache[0]
+    setNodes(cache.nodes)
+    setEdges(cache.edges)
+    setActiveTab(tab)
+  }
+
+  // 現在のタブで編集可能か
+  const canEdit = (activeTab === 'official' && admin) || (activeTab === 'personal' && loggedIn)
 
   const nodeIdSet = new Set(nodes.map((n) => n.id))
 
@@ -379,7 +432,12 @@ function RelationGraphEditor() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await saveRelationGraph(Number(gameId), JSON.stringify({ nodes, edges }))
+      const graphData = JSON.stringify({ nodes, edges })
+      if (activeTab === 'official') {
+        await saveRelationGraph(Number(gameId), graphData)
+      } else {
+        await saveUserRelationGraph(Number(gameId), graphData)
+      }
       setSaveMsg('保存しました')
       setTimeout(() => setSaveMsg(null), 2500)
     } catch (_) {
@@ -396,13 +454,39 @@ function RelationGraphEditor() {
     <div className="flex flex-col" style={{ height: 'min(750px, calc(100vh - 56px))' }}>
 
       {/* ---- ヘッダーバー ---- */}
-      <div className="bg-zinc-900 border-b border-zinc-700 px-4 sm:px-6 py-2.5 flex items-center justify-between shrink-0">
-        <Link to={`/games/${gameId}`} className="text-gray-100 hover:underline text-sm">
+      <div className="bg-zinc-900 border-b border-zinc-700 px-4 sm:px-6 py-2 flex items-center justify-between shrink-0 gap-3">
+        <Link to={`/games/${gameId}`} className="text-gray-100 hover:underline text-sm shrink-0">
           ← {game?.name ?? 'ゲーム詳細'}
         </Link>
-        <span className="text-sm font-semibold text-gray-300 hidden sm:block">相関図</span>
-        {admin ? (
-          <div className="flex items-center gap-3">
+
+        {/* タブ */}
+        <div className="flex items-center gap-1 bg-zinc-800 rounded-md p-0.5 text-xs">
+          <button
+            onClick={() => switchTab('official')}
+            className={`px-3 py-1 rounded transition ${activeTab === 'official' ? 'bg-zinc-600 text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            公式相関図
+          </button>
+          {loggedIn ? (
+            <button
+              onClick={() => switchTab('personal')}
+              className={`px-3 py-1 rounded transition ${activeTab === 'personal' ? 'bg-zinc-600 text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              マイ相関図
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="px-3 py-1 rounded text-zinc-600 hover:text-zinc-400 transition"
+              title="ログインするとマイ相関図を作成できます"
+            >
+              マイ相関図
+            </Link>
+          )}
+        </div>
+
+        {canEdit ? (
+          <div className="flex items-center gap-3 shrink-0">
             {saveMsg && (
               <span className={`text-xs ${saveMsg.includes('失敗') ? 'text-red-400' : 'text-green-400'}`}>
                 {saveMsg}
@@ -417,7 +501,7 @@ function RelationGraphEditor() {
             </button>
           </div>
         ) : (
-          <div />
+          <div className="shrink-0" />
         )}
       </div>
 
@@ -425,7 +509,7 @@ function RelationGraphEditor() {
       <div className="flex flex-1 overflow-hidden">
 
       {/* ---- 左パネル ---- */}
-      {admin && (
+      {canEdit && (
         <div className="w-52 bg-zinc-900 border-r border-zinc-700 flex flex-col overflow-hidden shrink-0">
           {/* 組織追加ボタン */}
           <div className="px-2 pt-2 pb-1.5 border-b border-zinc-700">
@@ -460,7 +544,7 @@ function RelationGraphEditor() {
                     >
                       {b.imagePath
                         ? <img src={`/uploads/${b.imagePath}`} alt={b.name} className="w-6 h-6 object-cover rounded shrink-0" />
-                        : <div className="w-6 h-6 bg-zinc-700 rounded flex items-center justify-center shrink-0 text-xs">⚔</div>
+                        : <div className="w-6 h-6 bg-zinc-700 rounded shrink-0" />
                       }
                       <span className={`truncate ${inCanvas ? 'text-gray-500' : 'text-gray-200'}`}>{b.name}</span>
                       {inCanvas && <span className="ml-auto text-gray-600">✓</span>}
@@ -487,7 +571,7 @@ function RelationGraphEditor() {
                     >
                       {n.imagePath
                         ? <img src={`/uploads/${n.imagePath}`} alt={n.name} className="w-6 h-6 object-cover rounded shrink-0" />
-                        : <div className="w-6 h-6 bg-zinc-700 rounded flex items-center justify-center shrink-0 text-xs">人</div>
+                        : <div className="w-6 h-6 bg-zinc-700 rounded shrink-0" />
                       }
                       <span className={`truncate ${inCanvas ? 'text-gray-500' : 'text-gray-200'}`}>{n.name}</span>
                       {inCanvas && <span className="ml-auto text-gray-600">✓</span>}
@@ -508,25 +592,25 @@ function RelationGraphEditor() {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={admin ? onNodesChange : undefined}
-          onEdgesChange={admin ? onEdgesChange : undefined}
-          onConnect={admin ? onConnect : undefined}
-          onEdgeClick={admin ? onEdgeClick : undefined}
-          onDrop={admin ? onDrop : undefined}
-          onDragOver={admin ? onDragOver : undefined}
-          onNodeContextMenu={admin ? onNodeContextMenu : undefined}
-          onNodeDragStop={admin ? onNodeDragStop : undefined}
+          onNodesChange={canEdit ? onNodesChange : undefined}
+          onEdgesChange={canEdit ? onEdgesChange : undefined}
+          onConnect={canEdit ? onConnect : undefined}
+          onEdgeClick={canEdit ? onEdgeClick : undefined}
+          onDrop={canEdit ? onDrop : undefined}
+          onDragOver={canEdit ? onDragOver : undefined}
+          onNodeContextMenu={canEdit ? onNodeContextMenu : undefined}
+          onNodeDragStop={canEdit ? onNodeDragStop : undefined}
           nodeTypes={nodeTypes}
-          nodesDraggable={admin}
-          nodesConnectable={admin}
-          elementsSelectable={admin}
+          nodesDraggable={canEdit}
+          nodesConnectable={canEdit}
+          elementsSelectable={canEdit}
           fitView
           fitViewOptions={{ padding: 0.2 }}
           className="bg-zinc-950"
         >
           <Background color="#3f3f46" gap={20} size={1} />
           <Controls style={{ background: '#27272a', border: '1px solid #3f3f46', borderRadius: 6 }} />
-          {admin && (
+          {canEdit && (
             <Panel position="bottom-right">
               <div className="text-xs text-zinc-300 bg-zinc-700 border border-zinc-500 px-3 py-2 rounded space-y-0.5">
                 <p>ノードの端をドラッグ → 関係線を引く</p>
@@ -534,6 +618,16 @@ function RelationGraphEditor() {
                 <p>右クリック → 削除</p>
                 <p>キャラを組織内にドラッグ → 所属</p>
               </div>
+            </Panel>
+          )}
+          {!loggedIn && (
+            <Panel position="bottom-right">
+              <Link
+                to="/login"
+                className="block text-xs text-zinc-400 bg-zinc-900/90 border border-zinc-700 px-3 py-2 rounded hover:text-zinc-200 hover:border-zinc-500 transition"
+              >
+                ログインするとマイ相関図を作成できます →
+              </Link>
             </Panel>
           )}
         </ReactFlow>
