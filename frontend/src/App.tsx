@@ -30,6 +30,8 @@ import MyEditHistoriesPage from './pages/MyEditHistoriesPage'
 import MyCommentsPage from './pages/MyCommentsPage'
 import EditRequestsPage from './pages/EditRequestsPage'
 import ReportsPage from './pages/ReportsPage'
+import RelationGraphPage from './pages/RelationGraphPage'
+import RelationGraphSelectPage from './pages/RelationGraphSelectPage'
 
 export default function App() {
   const [authVersion, setAuthVersion] = useState(0)
@@ -55,6 +57,8 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/games" element={<GamesPage />} />
             <Route path="/games/:id" element={<GameDetailPage />} />
+            <Route path="/relation-graph" element={<RelationGraphSelectPage />} />
+            <Route path="/games/:id/relation-graph" element={<RelationGraphPage />} />
             <Route path="/games/:id/news" element={<NewsListPage />} />
             <Route path="/items" element={<ItemsPage />} />
             <Route path="/items/new" element={<ItemFormPage />} />

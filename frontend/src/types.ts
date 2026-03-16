@@ -175,6 +175,14 @@ export interface CatalogEntry {
   createdAt: string
 }
 
+export interface RelationGraph {
+  id: number
+  gameId: number
+  graphData: string | null
+  updatedBy: string | null
+  updatedAt: string | null
+}
+
 export interface Npc {
   id: number
   name: string
