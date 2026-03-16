@@ -42,25 +42,25 @@ type AppNode = CharacterNodeType | OrgNodeType
 
 // ---- 組織カラープリセット ----
 const ORG_COLORS = [
-  { label: '赤',  bg: 'rgba(153,27,27,0.25)',   border: '#b91c1c' },
-  { label: '青',  bg: 'rgba(29,78,216,0.25)',    border: '#2563eb' },
-  { label: '緑',  bg: 'rgba(21,128,61,0.25)',    border: '#16a34a' },
-  { label: '紫',  bg: 'rgba(126,34,206,0.25)',   border: '#7c3aed' },
-  { label: '金',  bg: 'rgba(161,98,7,0.25)',     border: '#b45309' },
+  { label: '赤',  bg: 'rgba(70,20,20,0.30)',   border: '#6b2a2a' },
+  { label: '青',  bg: 'rgba(20,38,70,0.30)',   border: '#2a4060' },
+  { label: '緑',  bg: 'rgba(20,48,32,0.30)',   border: '#2a5038' },
+  { label: '紫',  bg: 'rgba(48,22,65,0.30)',   border: '#472560' },
+  { label: '金',  bg: 'rgba(65,48,15,0.30)',   border: '#584020' },
 ]
 
 // ---- キャラクターノード ----
 function CharacterNode({ data }: NodeProps<CharacterNodeType>) {
   const navigate = useNavigate()
-  const borderColor = data.entityType === 'BOSS' ? 'border-red-700' : 'border-blue-600'
-  const tagBg = data.entityType === 'BOSS' ? 'bg-red-900/70 text-red-200' : 'bg-blue-900/70 text-blue-200'
+  const borderColor = data.entityType === 'BOSS' ? 'border-red-900' : 'border-slate-600'
+  const tagBg = data.entityType === 'BOSS' ? 'bg-red-950/80 text-red-400/80' : 'bg-slate-800 text-slate-400'
   const path = data.entityType === 'BOSS' ? 'bosses' : 'npcs'
 
   return (
     <div className={`bg-zinc-800 border-2 ${borderColor} rounded-lg w-28 overflow-hidden shadow-lg select-none`}>
-      <Handle id="top"     type="target" position={Position.Top}    className="!bg-zinc-400 !w-3 !h-3" />
-      <Handle id="left-t"  type="target" position={Position.Left}   className="!bg-zinc-400 !w-3 !h-3" />
-      <Handle id="right-t" type="target" position={Position.Right}  className="!bg-zinc-400 !w-3 !h-3" />
+      <Handle id="top"     type="target" position={Position.Top}    className="!bg-zinc-600 !w-2.5 !h-2.5" />
+      <Handle id="left-t"  type="target" position={Position.Left}   className="!bg-zinc-600 !w-2.5 !h-2.5" />
+      <Handle id="right-t" type="target" position={Position.Right}  className="!bg-zinc-600 !w-2.5 !h-2.5" />
       {data.imagePath ? (
         <img src={`/uploads/${data.imagePath}`} alt={data.name} className="w-full h-20 object-cover" />
       ) : (
@@ -80,9 +80,9 @@ function CharacterNode({ data }: NodeProps<CharacterNodeType>) {
           {data.entityType === 'BOSS' ? 'ボス' : 'NPC'}
         </span>
       </div>
-      <Handle id="bottom"  type="source" position={Position.Bottom} className="!bg-zinc-400 !w-3 !h-3" />
-      <Handle id="left-s"  type="source" position={Position.Left}   className="!bg-zinc-400 !w-3 !h-3" />
-      <Handle id="right-s" type="source" position={Position.Right}  className="!bg-zinc-400 !w-3 !h-3" />
+      <Handle id="bottom"  type="source" position={Position.Bottom} className="!bg-zinc-600 !w-2.5 !h-2.5" />
+      <Handle id="left-s"  type="source" position={Position.Left}   className="!bg-zinc-600 !w-2.5 !h-2.5" />
+      <Handle id="right-s" type="source" position={Position.Right}  className="!bg-zinc-600 !w-2.5 !h-2.5" />
     </div>
   )
 }
@@ -105,16 +105,16 @@ function OrganizationNode({ data, selected }: NodeProps<OrgNodeType>) {
         minHeight={80}
         isVisible={selected}
         lineStyle={{ stroke: data.borderColor, strokeWidth: 1 }}
-        handleStyle={{ fill: data.borderColor, stroke: data.borderColor, width: 8, height: 8 }}
+        handleStyle={{ fill: data.borderColor, stroke: data.borderColor, width: 6, height: 6, opacity: 0.7 }}
       />
-      <Handle id="org-top"    type="source" position={Position.Top}    className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-bottom" type="source" position={Position.Bottom} className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-left"   type="source" position={Position.Left}   className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-right"  type="source" position={Position.Right}  className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-top-t"    type="target" position={Position.Top}    className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-bottom-t" type="target" position={Position.Bottom} className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-left-t"   type="target" position={Position.Left}   className="!w-3 !h-3" style={{ background: data.borderColor }} />
-      <Handle id="org-right-t"  type="target" position={Position.Right}  className="!w-3 !h-3" style={{ background: data.borderColor }} />
+      <Handle id="org-top"    type="source" position={Position.Top}    className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-bottom" type="source" position={Position.Bottom} className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-left"   type="source" position={Position.Left}   className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-right"  type="source" position={Position.Right}  className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-top-t"    type="target" position={Position.Top}    className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-bottom-t" type="target" position={Position.Bottom} className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-left-t"   type="target" position={Position.Left}   className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
+      <Handle id="org-right-t"  type="target" position={Position.Right}  className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
       <div
         className="px-2.5 py-1.5 font-bold text-sm select-none"
         style={{ color: data.borderColor, borderBottom: `1px solid ${data.borderColor}40` }}
@@ -131,12 +131,12 @@ const nodeTypes = { character: CharacterNode, organization: OrganizationNode }
 type LabelType = 'ALLY' | 'ENEMY' | 'CUSTOM'
 
 const PRESET_LABELS: { type: LabelType; label: string; colorClass: string; stroke: string }[] = [
-  { type: 'ALLY',  label: '協力', colorClass: 'text-green-400', stroke: '#4ade80' },
-  { type: 'ENEMY', label: '敵対', colorClass: 'text-red-400',   stroke: '#f87171' },
+  { type: 'ALLY',  label: '協力', colorClass: 'text-emerald-600', stroke: '#4a7a5a' },
+  { type: 'ENEMY', label: '敵対', colorClass: 'text-red-700',     stroke: '#7a3a3a' },
 ]
 
 function makeEdgeStyle(labelType: LabelType) {
-  const color = labelType === 'ALLY' ? '#4ade80' : labelType === 'ENEMY' ? '#f87171' : '#9ca3af'
+  const color = labelType === 'ALLY' ? '#4a7a5a' : labelType === 'ENEMY' ? '#7a3a3a' : '#5a5a5a'
   return {
     style:        { stroke: color, strokeWidth: 2 },
     labelStyle:   { fill: color, fontWeight: 700, fontSize: 12 },
@@ -185,7 +185,9 @@ function RelationGraphEditor() {
       if (graphRes?.data?.graphData) {
         try {
           const parsed = JSON.parse(graphRes.data.graphData)
-          setNodes(parsed.nodes ?? [])
+          // extent: 'parent' は追従バグの原因になるため除去
+          const sanitizedNodes = (parsed.nodes ?? []).map((n: AppNode) => ({ ...n, extent: undefined }))
+          setNodes(sanitizedNodes)
           setEdges(parsed.edges ?? [])
         } catch (_) { /* 壊れたデータは無視 */ }
       }
@@ -234,38 +236,39 @@ function RelationGraphEditor() {
   const onNodeDragStop = useCallback((_: React.MouseEvent, draggedNode: Node) => {
     if (draggedNode.type !== 'character') return
 
-    // 絶対座標を計算
-    let absPos = draggedNode.position
-    if (draggedNode.parentId) {
-      const parent = nodes.find((n) => n.id === draggedNode.parentId)
-      if (parent) {
-        absPos = {
-          x: parent.position.x + draggedNode.position.x,
-          y: parent.position.y + draggedNode.position.y,
+    // setNodes の関数形式の中で最新の nds を使うことでステールクローズを回避
+    setNodes((nds) => {
+      // 最新の nds から親位置を取得して絶対座標を計算
+      let absPos = draggedNode.position
+      if (draggedNode.parentId) {
+        const parent = nds.find((n) => n.id === draggedNode.parentId)
+        if (parent) {
+          absPos = {
+            x: parent.position.x + draggedNode.position.x,
+            y: parent.position.y + draggedNode.position.y,
+          }
         }
       }
-    }
 
-    // 絶対座標が含まれる組織ノードを探す
-    const orgNode = nodes.find((n) => {
-      if (n.type !== 'organization') return false
-      const w = typeof n.style?.width === 'number' ? n.style.width : 280
-      const h = typeof n.style?.height === 'number' ? n.style.height : 200
-      return (
-        absPos.x >= n.position.x && absPos.x <= n.position.x + w &&
-        absPos.y >= n.position.y && absPos.y <= n.position.y + h
-      )
-    })
+      // 最新の nds から含まれる組織ノードを探す
+      const orgNode = nds.find((n) => {
+        if (n.type !== 'organization') return false
+        const w = typeof n.style?.width === 'number' ? n.style.width : 280
+        const h = typeof n.style?.height === 'number' ? n.style.height : 200
+        return (
+          absPos.x >= n.position.x && absPos.x <= n.position.x + w &&
+          absPos.y >= n.position.y && absPos.y <= n.position.y + h
+        )
+      })
 
-    if (orgNode && orgNode.id !== draggedNode.parentId) {
-      // 組織に入る（または別の組織に移動）
-      setNodes((nds) =>
-        nds.map((n) =>
+      if (orgNode && orgNode.id !== draggedNode.parentId) {
+        // 組織に入る（または別の組織に移動）
+        return nds.map((n) =>
           n.id === draggedNode.id
             ? {
                 ...n,
                 parentId: orgNode.id,
-                extent: 'parent' as const,
+                extent: undefined,
                 position: {
                   x: Math.max(0, absPos.x - orgNode.position.x),
                   y: Math.max(0, absPos.y - orgNode.position.y),
@@ -273,18 +276,18 @@ function RelationGraphEditor() {
               }
             : n
         )
-      )
-    } else if (!orgNode && draggedNode.parentId) {
-      // 組織の外に出た
-      setNodes((nds) =>
-        nds.map((n) =>
+      } else if (!orgNode && draggedNode.parentId) {
+        // 組織の外に出た
+        return nds.map((n) =>
           n.id === draggedNode.id
             ? { ...n, parentId: undefined, extent: undefined, position: absPos }
             : n
         )
-      )
-    }
-  }, [nodes, setNodes])
+      }
+
+      return nds
+    })
+  }, [setNodes])
 
   // ---- 右クリック削除 ----
   const onNodeContextMenu = useCallback((e: React.MouseEvent, node: Node) => {
