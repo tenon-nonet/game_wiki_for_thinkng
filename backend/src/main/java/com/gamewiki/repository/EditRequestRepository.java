@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface EditRequestRepository extends JpaRepository<EditRequest, Long> {
     List<EditRequest> findByStatusOrderByCreatedAtAsc(String status);
+    long countByStatus(String status);
 }

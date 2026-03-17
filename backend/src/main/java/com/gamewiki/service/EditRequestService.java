@@ -33,6 +33,11 @@ public class EditRequestService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public long countPending() {
+        return editRequestRepository.countByStatus("PENDING");
+    }
+
     @Transactional
     public void createItemRequest(String actionType, Long entityId, ItemRequest request, MultipartFile image, String requestedBy) {
         saveRequest("ITEM", actionType, entityId, request.getName(), request.getGameId(), image, request, requestedBy);

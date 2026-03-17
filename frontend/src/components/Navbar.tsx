@@ -1,13 +1,51 @@
-﻿import { useState } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearAuth, getUsername, isLoggedIn, isAdmin } from '../auth'
+import { getEditRequestCount, getNewUserCount, getReportCount } from '../api'
 import MessageOverlay from './MessageOverlay'
 
 export default function Navbar() {
   const navigate = useNavigate()
   const loggedIn = isLoggedIn()
+  const admin = isAdmin()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false)
+  const [adminMobileOpen, setAdminMobileOpen] = useState(false)
   const [showLogoutOverlay, setShowLogoutOverlay] = useState(false)
+  const [editRequestCount, setEditRequestCount] = useState(0)
+  const [reportCount, setReportCount] = useState(0)
+  const [newUserCount, setNewUserCount] = useState(0)
+  const adminMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
+        setAdminMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    if (!admin) return
+    const fetchCounts = () => {
+      getEditRequestCount().then((res) => setEditRequestCount(res.data.count)).catch(() => {})
+      getReportCount().then((res) => setReportCount(res.data.count)).catch(() => {})
+      const lastViewed = parseInt(localStorage.getItem('adminUsersLastViewed') || '0', 10)
+      getNewUserCount(lastViewed).then((res) => setNewUserCount(res.data.count)).catch(() => {})
+    }
+    fetchCounts()
+    const interval = setInterval(fetchCounts, 60000)
+    const onViewed = () => setNewUserCount(0)
+    window.addEventListener('adminUsersViewed', onViewed)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('adminUsersViewed', onViewed)
+    }
+  }, [admin])
+
+  const totalBadge = editRequestCount + reportCount + newUserCount
 
   const handleLogout = () => {
     setMenuOpen(false)
@@ -45,12 +83,40 @@ export default function Navbar() {
           {loggedIn ? (
             <>
               <Link to="/mypage" className="hover:text-gray-300 text-base">マイページ</Link>
-              {isAdmin() && (
-                <>
-                  <Link to="/edit-requests" className="hover:text-gray-300 text-base">編集承認</Link>
-                  <Link to="/reports" className="hover:text-gray-300 text-base">通報管理</Link>
-                  <Link to="/tags" className="hover:text-gray-300 text-base">タグ管理</Link>
-                </>
+              {admin && (
+                <div className="relative" ref={adminMenuRef}>
+                  <button
+                    onClick={() => setAdminMenuOpen((o) => !o)}
+                    className="hover:text-gray-300 text-base flex items-center gap-1"
+                  >
+                    管理者機能
+                    {totalBadge > 0 && (
+                      <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">
+                        {totalBadge > 99 ? '99+' : totalBadge}
+                      </span>
+                    )}
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {adminMenuOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-44 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-50 py-1">
+                      <Link to="/edit-requests" onClick={() => setAdminMenuOpen(false)} className="flex items-center justify-between px-4 py-2 text-sm hover:bg-zinc-700 hover:text-white">
+                        <span>編集承認</span>
+                        {editRequestCount > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">{editRequestCount}</span>}
+                      </Link>
+                      <Link to="/reports" onClick={() => setAdminMenuOpen(false)} className="flex items-center justify-between px-4 py-2 text-sm hover:bg-zinc-700 hover:text-white">
+                        <span>通報管理</span>
+                        {reportCount > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">{reportCount}</span>}
+                      </Link>
+                      <Link to="/tags" onClick={() => setAdminMenuOpen(false)} className="block px-4 py-2 text-sm hover:bg-zinc-700 hover:text-white">タグ管理</Link>
+                      <Link to="/admin/users" onClick={() => setAdminMenuOpen(false)} className="flex items-center justify-between px-4 py-2 text-sm hover:bg-zinc-700 hover:text-white">
+                        <span>ユーザー一覧</span>
+                        {newUserCount > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">{newUserCount}</span>}
+                      </Link>
+                    </div>
+                  )}
+                </div>
               )}
               <span className="text-gray-400 text-base">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
@@ -99,12 +165,40 @@ export default function Navbar() {
           {loggedIn ? (
             <>
               <Link to="/mypage" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">マイページ</Link>
-              {isAdmin() && (
-                <>
-                  <Link to="/edit-requests" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">編集承認</Link>
-                  <Link to="/reports" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">通報管理</Link>
-                  <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1">タグ管理</Link>
-                </>
+              {admin && (
+                <div>
+                  <button
+                    onClick={() => setAdminMobileOpen((o) => !o)}
+                    className="hover:text-gray-300 py-1 flex items-center gap-2 w-full text-left"
+                  >
+                    管理者機能
+                    {totalBadge > 0 && (
+                      <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">
+                        {totalBadge > 99 ? '99+' : totalBadge}
+                      </span>
+                    )}
+                    <svg className={`w-3 h-3 transition-transform ${adminMobileOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {adminMobileOpen && (
+                    <div className="pl-4 flex flex-col gap-2 mt-1">
+                      <Link to="/edit-requests" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 hover:text-gray-300 py-1 text-sm text-gray-300">
+                        編集承認
+                        {editRequestCount > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">{editRequestCount}</span>}
+                      </Link>
+                      <Link to="/reports" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 hover:text-gray-300 py-1 text-sm text-gray-300">
+                        通報管理
+                        {reportCount > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">{reportCount}</span>}
+                      </Link>
+                      <Link to="/tags" onClick={() => setMenuOpen(false)} className="hover:text-gray-300 py-1 text-sm text-gray-300">タグ管理</Link>
+                      <Link to="/admin/users" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 hover:text-gray-300 py-1 text-sm text-gray-300">
+                        ユーザー一覧
+                        {newUserCount > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs font-bold px-1">{newUserCount}</span>}
+                      </Link>
+                    </div>
+                  )}
+                </div>
               )}
               <span className="text-gray-400 py-1">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button

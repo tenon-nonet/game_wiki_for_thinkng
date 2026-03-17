@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findAllByOrderByCreatedAtDescIdDesc();
+    long countByStatus(String status);
     Optional<Report> findByTargetTypeAndTargetIdAndReporterKey(String targetType, Long targetId, String reporterKey);
 }

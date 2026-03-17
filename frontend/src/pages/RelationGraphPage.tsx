@@ -465,14 +465,14 @@ function RelationGraphEditor() {
             onClick={() => switchTab('official')}
             className={`px-3 py-1 rounded transition ${activeTab === 'official' ? 'bg-zinc-600 text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            公式相関図
+            管理人の相関図
           </button>
           {loggedIn ? (
             <button
               onClick={() => switchTab('personal')}
               className={`px-3 py-1 rounded transition ${activeTab === 'personal' ? 'bg-zinc-600 text-gray-100' : 'text-gray-500 hover:text-gray-300'}`}
             >
-              マイ相関図
+              ユーザーの相関図
             </button>
           ) : (
             <Link
@@ -480,7 +480,7 @@ function RelationGraphEditor() {
               className="px-3 py-1 rounded text-zinc-600 hover:text-zinc-400 transition"
               title="ログインするとマイ相関図を作成できます"
             >
-              マイ相関図
+              ユーザーの相関図
             </Link>
           )}
         </div>

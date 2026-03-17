@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/edit-requests")
@@ -23,6 +24,11 @@ public class EditRequestController {
     @GetMapping
     public ResponseEntity<List<EditRequestResponse>> findPending() {
         return ResponseEntity.ok(editRequestService.findPending());
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> countPending() {
+        return ResponseEntity.ok(Map.of("count", editRequestService.countPending()));
     }
 
     @PostMapping("/{id}/approve")

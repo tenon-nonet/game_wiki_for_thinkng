@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -55,6 +56,12 @@ public class ReportController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ReportResponse>> listReports() {
         return ResponseEntity.ok(reportService.findAll());
+    }
+
+    @GetMapping("/count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Long>> countNew() {
+        return ResponseEntity.ok(Map.of("count", reportService.countNew()));
     }
 
     @PutMapping("/{id}/status")
