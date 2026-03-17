@@ -196,6 +196,18 @@ export const getMyComments = () =>
 export const getEditRequests = () =>
   api.get<EditRequest[]>('/edit-requests')
 
+export const getEditRequestCount = () =>
+  api.get<{ count: number }>('/edit-requests/count')
+
+export const getReportCount = () =>
+  api.get<{ count: number }>('/reports/count')
+
+export const getAdminUsers = () =>
+  api.get<{ id: number; username: string; role: string; createdAt: string; editRequestCount: number; commentCount: number; boardPostCount: number }[]>('/admin/users')
+
+export const getNewUserCount = (since: number) =>
+  api.get<{ count: number }>(`/admin/users/count?since=${since}`)
+
 export const approveEditRequest = (id: number) =>
   api.post<EditRequest>(`/edit-requests/${id}/approve`)
 

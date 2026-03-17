@@ -30,6 +30,7 @@ import MyEditHistoriesPage from './pages/MyEditHistoriesPage'
 import MyCommentsPage from './pages/MyCommentsPage'
 import EditRequestsPage from './pages/EditRequestsPage'
 import ReportsPage from './pages/ReportsPage'
+import AdminUsersPage from './pages/AdminUsersPage'
 import RelationGraphPage from './pages/RelationGraphPage'
 import RelationGraphSelectPage from './pages/RelationGraphSelectPage'
 
@@ -72,6 +73,7 @@ function AppLayout({ authVersion }: { authVersion: number }) {
             <Route path="/edit-requests" element={<EditRequestsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/tags" element={<TagsAdminPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/news" element={<AllNewsListPage />} />
           </Routes>
         </main>

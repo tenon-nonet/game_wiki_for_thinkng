@@ -43,6 +43,10 @@ public class ReportService {
         return reportRepository.findAllByOrderByCreatedAtDescIdDesc().stream().map(this::toResponse).toList();
     }
 
+    public long countNew() {
+        return reportRepository.countByStatus("NEW");
+    }
+
     @Transactional
     public ReportResponse updateStatus(Long id, String status, String reviewedBy) {
         if (!ALLOWED_STATUSES.contains(status)) {
