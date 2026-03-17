@@ -1,5 +1,8 @@
 package com.gamewiki.controller;
 
+import com.gamewiki.repository.BoardPostRepository;
+import com.gamewiki.repository.CommentRepository;
+import com.gamewiki.repository.EditRequestRepository;
 import com.gamewiki.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +22,25 @@ import java.util.Map;
 public class AdminUserController {
 
     private final UserRepository userRepository;
+    private final EditRequestRepository editRequestRepository;
+    private final CommentRepository commentRepository;
+    private final BoardPostRepository boardPostRepository;
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listUsers() {
         List<Map<String, Object>> users = userRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(u -> Map.<String, Object>of(
-                        "id", u.getId(),
-                        "username", u.getUsername(),
-                        "role", u.getRole().name(),
-                        "createdAt", u.getCreatedAt() != null ? u.getCreatedAt().toString() : ""
-                ))
+                .map(u -> {
+                    String name = u.getUsername();
+                    Map<String, Object> row = new java.util.LinkedHashMap<>();
+                    row.put("id", u.getId());
+                    row.put("username", name);
+                    row.put("role", u.getRole().name());
+                    row.put("createdAt", u.getCreatedAt() != null ? u.getCreatedAt().toString() : "");
+                    row.put("editRequestCount", editRequestRepository.countByRequestedBy(name));
+                    row.put("commentCount", commentRepository.countByUsername(name));
+                    row.put("boardPostCount", boardPostRepository.countByUsername(name));
+                    return row;
+                })
                 .toList();
         return ResponseEntity.ok(users);
     }

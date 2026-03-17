@@ -11,5 +11,6 @@ public interface BoardPostRepository extends JpaRepository<BoardPost, Long> {
     Optional<BoardPost> findTopByAuthorKeyOrderByCreatedAtDescIdDesc(String authorKey);
     Optional<BoardPost> findTopByThreadIdOrderByCreatedAtDescIdDesc(Long threadId);
     long countByThreadId(Long threadId);
+    long countByUsername(String username);
     void deleteByThreadId(Long threadId);
 }

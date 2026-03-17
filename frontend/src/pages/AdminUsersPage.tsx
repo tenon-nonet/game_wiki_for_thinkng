@@ -5,7 +5,7 @@ import { isAdmin } from '../auth'
 
 const STORAGE_KEY = 'adminUsersLastViewed'
 
-type AdminUser = { id: number; username: string; role: string; createdAt: string }
+type AdminUser = { id: number; username: string; role: string; createdAt: string; editRequestCount: number; commentCount: number; boardPostCount: number }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -44,6 +44,9 @@ export default function AdminUsersPage() {
                 <th className="px-4 py-3">ユーザー名</th>
                 <th className="px-4 py-3">権限</th>
                 <th className="px-4 py-3">登録日時</th>
+                <th className="px-4 py-3 text-right">編集申請</th>
+                <th className="px-4 py-3 text-right">コメント</th>
+                <th className="px-4 py-3 text-right">掲示板投稿</th>
               </tr>
             </thead>
             <tbody>
@@ -58,6 +61,9 @@ export default function AdminUsersPage() {
                   <td className="px-4 py-3 text-gray-400">
                     {new Date(u.createdAt).toLocaleString('ja-JP')}
                   </td>
+                  <td className="px-4 py-3 text-right text-gray-300">{u.editRequestCount}</td>
+                  <td className="px-4 py-3 text-right text-gray-300">{u.commentCount}</td>
+                  <td className="px-4 py-3 text-right text-gray-300">{u.boardPostCount}</td>
                 </tr>
               ))}
             </tbody>
