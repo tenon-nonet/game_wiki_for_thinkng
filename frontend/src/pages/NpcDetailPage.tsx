@@ -4,7 +4,7 @@ import { getNpc, deleteNpc, getItems } from '../api'
 import { isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { parseDialogueLines } from '../dialogues'
-import { excerpt, usePageMeta } from '../seo'
+import { excerpt, usePageMeta, useCharacterStructuredData } from '../seo'
 import type { Npc, Item } from '../types'
 
 export default function NpcDetailPage() {
@@ -28,6 +28,15 @@ export default function NpcDetailPage() {
   usePageMeta({
     title: `${npc?.name ?? 'NPC詳細'} | FROMDEX.com`,
     description: excerpt(npc?.description, 120) || 'NPCの詳細、関連情報、セリフを掲載しています。',
+  })
+
+  useCharacterStructuredData({
+    type: 'npc',
+    id: npc?.id ?? 0,
+    name: npc?.name ?? '',
+    description: excerpt(npc?.description, 200) || undefined,
+    gameName: npc?.gameName,
+    gameId: npc?.gameId,
   })
 
   useEffect(() => {

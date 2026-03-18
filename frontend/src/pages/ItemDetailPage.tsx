@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'reac
 import { getItem, getItems, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
 import { getUsername, isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
-import { excerpt, usePageMeta } from '../seo'
+import { excerpt, usePageMeta, useItemStructuredData } from '../seo'
 import type { Item, Comment } from '../types'
 
 export default function ItemDetailPage() {
@@ -39,6 +39,14 @@ export default function ItemDetailPage() {
   usePageMeta({
     title: `${item?.name ?? 'アイテム詳細'} | FROMDEX.com`,
     description: excerpt(item?.description, 120) || 'アイテム詳細、関連情報、コメントを掲載しています。',
+  })
+
+  useItemStructuredData({
+    id: item?.id ?? 0,
+    name: item?.name ?? '',
+    description: excerpt(item?.description, 200) || undefined,
+    gameName: item?.gameName,
+    gameId: item?.gameId,
   })
 
   useEffect(() => {

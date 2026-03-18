@@ -4,7 +4,7 @@ import { getBoss, deleteBoss, getItems } from '../api'
 import { isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { parseDialogueLines } from '../dialogues'
-import { excerpt, usePageMeta } from '../seo'
+import { excerpt, usePageMeta, useCharacterStructuredData } from '../seo'
 import type { Boss, Item } from '../types'
 
 export default function BossDetailPage() {
@@ -28,6 +28,15 @@ export default function BossDetailPage() {
   usePageMeta({
     title: `${boss?.name ?? 'ボス詳細'} | FROMDEX.com`,
     description: excerpt(boss?.description, 120) || 'ボスの詳細、関連情報、セリフを掲載しています。',
+  })
+
+  useCharacterStructuredData({
+    type: 'boss',
+    id: boss?.id ?? 0,
+    name: boss?.name ?? '',
+    description: excerpt(boss?.description, 200) || undefined,
+    gameName: boss?.gameName,
+    gameId: boss?.gameId,
   })
 
   useEffect(() => {
