@@ -9,4 +9,6 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificationExecutor<Item> {
     List<Item> findAllByOrderBySortOrderAscIdAsc();
     List<Item> findByGameIdOrderBySortOrderAscIdAsc(Long gameId);
+    List<Item> findTop6ByOrderByUpdatedAtDesc();
+    long countByGameId(Long gameId);
 }

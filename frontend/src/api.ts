@@ -288,3 +288,13 @@ export const getBans = () =>
 
 export const removeBan = (id: number) =>
   api.delete(`/reports/bans/${id}`)
+
+export type HomeActivity = {
+  recentUpdates: { type: 'item' | 'boss' | 'npc'; id: number; name: string; gameName: string; updatedAt: string }[]
+  recentComments: { id: number; content: string; username: string; itemId: number; itemName: string; createdAt: string }[]
+  recentThreads: { id: number; title: string; username: string; boardType: string; gameId: number | null; gameName: string; replyCount: number; createdAt: string }[]
+  gameStats: { gameId: number; gameName: string; itemCount: number; bossCount: number; npcCount: number }[]
+}
+
+export const getHomeActivity = () =>
+  api.get<HomeActivity>('/home/activity')

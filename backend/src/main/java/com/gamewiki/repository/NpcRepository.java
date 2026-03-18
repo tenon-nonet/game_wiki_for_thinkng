@@ -8,4 +8,6 @@ import java.util.List;
 public interface NpcRepository extends JpaRepository<Npc, Long> {
     List<Npc> findAllByOrderBySortOrderAscIdAsc();
     List<Npc> findByGameIdOrderBySortOrderAscIdAsc(Long gameId);
+    List<Npc> findTop6ByOrderByUpdatedAtDesc();
+    long countByGameId(Long gameId);
 }

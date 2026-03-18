@@ -39,6 +39,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/sitemap.xml").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/home/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/reports/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/games/**").permitAll()
