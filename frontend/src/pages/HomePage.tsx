@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit, getItems, getBosses, getNpcs } from '../api'
+import { getGames, createGame, updateGame, deleteGame, updateGameOrder, getNews, trackHomeVisit, getItems, getBosses, getNpcs, getHomeActivity } from '../api'
+import type { HomeActivity } from '../api'
 import { isAdmin } from '../auth'
 import { usePageMeta } from '../seo'
 import { GAME_IMAGE_FILE_SIZE_ERROR, isGameImageFileSizeValid } from '../upload'
@@ -19,29 +20,11 @@ function getElapsedParts(now: Date) {
   let hours = now.getHours() - SITE_STARTED_AT.getHours()
   let minutes = now.getMinutes() - SITE_STARTED_AT.getMinutes()
   let seconds = now.getSeconds() - SITE_STARTED_AT.getSeconds()
-
-  if (seconds < 0) {
-    seconds += 60
-    minutes -= 1
-  }
-  if (minutes < 0) {
-    minutes += 60
-    hours -= 1
-  }
-  if (hours < 0) {
-    hours += 24
-    days -= 1
-  }
-  if (days < 0) {
-    const previousMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate()
-    days += previousMonthLastDay
-    months -= 1
-  }
-  if (months < 0) {
-    months += 12
-    years -= 1
-  }
-
+  if (seconds < 0) { seconds += 60; minutes -= 1 }
+  if (minutes < 0) { minutes += 60; hours -= 1 }
+  if (hours < 0) { hours += 24; days -= 1 }
+  if (days < 0) { days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); months -= 1 }
+  if (months < 0) { months += 12; years -= 1 }
   return { years, months, days, hours, minutes, seconds }
 }
 
@@ -75,6 +58,7 @@ export default function HomePage() {
   const [introDone, setIntroDone] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [activity, setActivity] = useState<HomeActivity | null>(null)
   const [news, setNews] = useState<{ title: string; url: string; publishedAt: string; source: string }[]>([])
   const [newsLoading, setNewsLoading] = useState(false)
   const [totalVisitors, setTotalVisitors] = useState<number | null>(null)
@@ -88,16 +72,12 @@ export default function HomePage() {
     setGames(res.data)
     if (!q) {
       Promise.all([getItems(), getBosses(), getNpcs()])
-        .then(([itemsRes, bossesRes, npcsRes]) => {
-          setTotalItems(itemsRes.data.length)
-          setTotalBosses(bossesRes.data.length)
-          setTotalNpcs(npcsRes.data.length)
+        .then(([ir, br, nr]) => {
+          setTotalItems(ir.data.length)
+          setTotalBosses(br.data.length)
+          setTotalNpcs(nr.data.length)
         })
-        .catch(() => {
-          setTotalItems(null)
-          setTotalBosses(null)
-          setTotalNpcs(null)
-        })
+        .catch(() => {})
       setNewsLoading(true)
       getNews(FROM_SOFTWARE_NEWS_QUERY, 5).then((r) => {
         setNews(r.data)
@@ -107,17 +87,13 @@ export default function HomePage() {
   }
 
   useEffect(() => { load() }, [])
+  useEffect(() => { getHomeActivity().then((r) => setActivity(r.data)).catch(() => {}) }, [])
   useEffect(() => {
-    trackHomeVisit()
-      .then((r) => setTotalVisitors(r.data.totalUniqueDailyVisitors))
-      .catch(() => setTotalVisitors(null))
+    trackHomeVisit().then((r) => setTotalVisitors(r.data.totalUniqueDailyVisitors)).catch(() => {})
   }, [])
-
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setElapsed(getElapsedParts(new Date()))
-    }, 1000)
-    return () => window.clearInterval(timer)
+    const t = window.setInterval(() => setElapsed(getElapsedParts(new Date())), 1000)
+    return () => window.clearInterval(t)
   }, [])
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -235,7 +211,7 @@ export default function HomePage() {
       />
       <section className="mb-8 w-full">
         <div className="overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
-          <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_18rem] lg:items-start">
+          <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[1fr_1fr_1fr_14rem] lg:items-start">
             <div className="space-y-3 pt-1">
               <h1 className="text-[0.82rem] font-semibold leading-snug text-zinc-100 sm:text-4xl lg:text-[1rem]">
                 <span className="sm:hidden">
@@ -244,7 +220,7 @@ export default function HomePage() {
                   <span className="block text-right">―上位者の叡智</span>
                 </span>
                 <span className="hidden sm:inline">
-                  <br/>知ることに終わりはなく、また完全もない。<br />
+                  知ることに終わりはなく、また完全もない。<br />
                   それ故に私は百智卿であり続ける。<br />
                   導きも、或いはそうなのかもしれぬ。<br />
                   その戦いが終わる時、我らは我らで在り続けるものか？
@@ -257,6 +233,7 @@ export default function HomePage() {
                   かつてビルゲンワースのウィレームは喝破した<br/>
                   「我々は、思考の次元が低すぎる。もっと瞳が必要なのだ」
                   <br />―上位者の叡智
+                  <br /><br />
                 </span>
               </h1>
               <div className="flex flex-wrap gap-2 text-sm">
@@ -275,32 +252,104 @@ export default function HomePage() {
             </div>
 
 
-            <div className="hidden lg:grid lg:grid-cols-1 lg:gap-3">
+            {/* 中央カラム：アクティビティ */}
+            <div className="hidden lg:flex lg:flex-col lg:gap-3">
               <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL ITEMS DATA</p>
-                <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalItems ?? '-'}</p>
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 mb-2.5">RECENT UPDATES</p>
+                <ul className="space-y-2">
+                  {(activity?.recentUpdates ?? []).slice(0, 3).map((u, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <span className={`shrink-0 rounded text-[9px] px-1 py-0.5 font-medium ${u.type === 'boss' ? 'bg-red-900/60 text-red-300' : u.type === 'npc' ? 'bg-blue-900/60 text-blue-300' : 'bg-zinc-700 text-zinc-400'}`}>
+                        {u.type === 'item' ? 'ITEM' : u.type === 'boss' ? 'BOSS' : 'NPC'}
+                      </span>
+                      <div className="min-w-0">
+                        <Link to={`/${u.type === 'item' ? 'items' : u.type === 'boss' ? 'bosses' : 'npcs'}/${u.id}`}
+                          className="block text-xs text-zinc-200 hover:text-amber-300 transition truncate">
+                          {u.name}
+                        </Link>
+                        <p className="text-[10px] text-zinc-600 truncate">{u.gameName}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL BOSSES DATA</p>
-                <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalBosses ?? '-'}</p>
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 mb-2.5">RECENT THREADS</p>
+                <ul className="space-y-2">
+                  {(activity?.recentThreads ?? []).slice(0, 3).map((t) => (
+                    <li key={t.id}>
+                      <Link to={t.boardType === 'GENERAL' ? `/boards/general/${t.id}` : `/boards/game/${t.gameId}/${t.id}`}
+                        className="block text-xs text-zinc-200 hover:text-amber-300 transition truncate">
+                        {t.title}
+                      </Link>
+                      <p className="text-[10px] text-zinc-600 truncate">
+                        {t.boardType === 'GENERAL' ? '総合' : t.gameName} · {t.replyCount}件
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* 3カラム：コメント・ゲーム統計 */}
+            <div className="hidden lg:flex lg:flex-col lg:gap-3">
+              <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 mb-2.5">RECENT COMMENTS</p>
+                <ul className="space-y-2">
+                  {(activity?.recentComments ?? []).slice(0, 3).map((c) => (
+                    <li key={c.id}>
+                      <Link to={`/items/${c.itemId}`}
+                        className="block text-xs text-zinc-200 hover:text-amber-300 transition truncate">
+                        {c.content}
+                      </Link>
+                      <p className="text-[10px] text-zinc-600 truncate">{c.itemName}</p>
+                    </li>
+                  ))}
+                </ul>
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL NPCS DATA</p>
-                <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalNpcs ?? '-'}</p>
+                <p className="text-[9px] tracking-[0.14em] text-zinc-500 mb-2.5">GAME STATS</p>
+                <ul className="space-y-2">
+                  {(activity?.gameStats ?? []).map((g) => (
+                    <li key={g.gameId}>
+                      <Link to={`/games/${g.gameId}`} className="block text-xs text-zinc-200 hover:text-amber-300 transition truncate font-medium">
+                        {g.gameName}
+                      </Link>
+                      <p className="text-[10px] text-zinc-600">
+                        {g.itemCount} items · {g.bossCount} bosses · {g.npcCount} npcs
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* 右カラム：統計 */}
+            <div className="hidden lg:flex lg:flex-col lg:gap-3">
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { label: 'TOTAL ITEMS', value: totalItems },
+                  { label: 'TOTAL BOSSES', value: totalBosses },
+                  { label: 'TOTAL NPCS', value: totalNpcs },
+                ].map(({ label, value }) => (
+                  <div key={label} className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
+                    <p className="text-[9px] tracking-[0.14em] text-zinc-500">{label}</p>
+                    <p className="mt-1 text-2xl font-semibold text-zinc-100">{value ?? '-'}</p>
+                  </div>
+                ))}
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
-                <div className="grid grid-cols-2 items-start gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">SINCE SITE OPEN</p>
-                    <p className="mt-1 text-[11px] leading-5 text-zinc-300 sm:text-xs sm:leading-6">
-                      {elapsed.years}y {elapsed.months}m {elapsed.days}d
-                      <br />
-                      {elapsed.hours}:{elapsed.minutes}:{elapsed.seconds}
+                    <p className="text-[9px] tracking-[0.14em] text-zinc-500">SINCE OPEN</p>
+                    <p className="mt-1 text-[11px] leading-5 text-zinc-300">
+                      {elapsed.years}y {elapsed.months}m {elapsed.days}d<br />
+                      {String(elapsed.hours).padStart(2,'0')}:{String(elapsed.minutes).padStart(2,'0')}:{String(elapsed.seconds).padStart(2,'0')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[9px] tracking-[0.14em] text-zinc-500 sm:text-[11px] sm:tracking-[0.18em]">TOTAL VISITORS</p>
-                    <p className="mt-1 text-lg font-semibold text-zinc-100 sm:text-2xl">{totalVisitors ?? '-'}</p>
+                    <p className="text-[9px] tracking-[0.14em] text-zinc-500">VISITORS</p>
+                    <p className="mt-1 text-2xl font-semibold text-zinc-100">{totalVisitors ?? '-'}</p>
                   </div>
                 </div>
               </div>
@@ -514,6 +563,7 @@ export default function HomePage() {
           )}
         </section>
       )}
+
     </div>
   )
 }

@@ -8,4 +8,6 @@ import java.util.List;
 public interface BossRepository extends JpaRepository<Boss, Long> {
     List<Boss> findAllByOrderBySortOrderAscIdAsc();
     List<Boss> findByGameIdOrderBySortOrderAscIdAsc(Long gameId);
+    List<Boss> findTop6ByOrderByUpdatedAtDesc();
+    long countByGameId(Long gameId);
 }
