@@ -8,7 +8,7 @@ import type { Game } from '../types'
 import TutorialModal from '../components/TutorialModal'
 import IntroAnimation from '../components/IntroAnimation'
 
-const TUTORIAL_STORAGE_KEY = 'fromdex_tutorial_seen'
+const INTRO_SESSION_KEY = 'fromdex_intro_shown'
 
 const SITE_STARTED_AT = new Date('2026-03-12T00:00:00+09:00')
 
@@ -71,7 +71,7 @@ export default function HomePage() {
   const [editPreview, setEditPreview] = useState<string | null>(null)
   const admin = isAdmin()
   const [showTutorial, setShowTutorial] = useState(false)
-  const [showIntro, setShowIntro] = useState(() => !localStorage.getItem(TUTORIAL_STORAGE_KEY))
+  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem(INTRO_SESSION_KEY))
   const [introDone, setIntroDone] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
@@ -223,7 +223,11 @@ export default function HomePage() {
   return (
     <div className="w-full px-4 py-4 sm:px-6 sm:py-6">
       {showIntro && (
-        <IntroAnimation onComplete={() => { setShowIntro(false); setIntroDone(true) }} />
+        <IntroAnimation onComplete={() => {
+          sessionStorage.setItem(INTRO_SESSION_KEY, '1')
+          setShowIntro(false)
+          setIntroDone(true)
+        }} />
       )}
       <TutorialModal
         forceOpen={showTutorial || introDone}
@@ -258,9 +262,9 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-2 text-sm">
                 <button
                   onClick={() => setShowTutorial(true)}
-                  className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition text-xs tracking-wide"
+                  className="rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-4 py-2 text-center text-xs font-semibold tracking-[0.08em] text-amber-50 shadow-[0_0_28px_rgba(245,158,11,0.18)] transition hover:border-amber-300/90 hover:text-white"
                 >
-                  ? 使い方ガイド
+                  使い方ガイド
                 </button>
                 {admin && (
                   <div className="rounded-full border border-zinc-700 bg-black/30 px-4 py-2 text-zinc-300">
@@ -270,39 +274,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="space-y-3 pt-1 lg:-ml-60 lg:space-y-4">
-              <div className="-mx-1 w-auto rounded-xl border border-zinc-800/80 bg-black/30 p-3 backdrop-blur-sm sm:mx-0 sm:w-full">
-                <p className="text-sm font-semibold tracking-[0.28em] text-amber-200 sm:text-base">SITE GUIDE</p>
-                <div className="mt-2 space-y-3">
-                  <div>
-                    <p className="text-[0.75rem] leading-6 text-zinc-400 sm:text-base sm:leading-7">
-                      FROMDEXは、誰でも編集可能なゲームwiki
-                      <br />断片的に記されたゲーム内テキスト情報を収集、編纂する
-                      <br />難解かつ緻密、或いは理解不能な世界感を考察、啓蒙を高める
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-zinc-100">目録</p>
-                    <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      全体を俯瞰し、全情報を確認。未登録情報に情報を追加できる
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-zinc-100">図録</p>
-                    <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      集約された画像と情報を眺める。情報追加やコメントもできる
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-zinc-100">情報の追加方法</p>
-                    <p className="mt-1 text-[0.75rem] leading-5 text-zinc-400 sm:text-sm sm:leading-6">
-                      目録から情報を選択、編集画面で画像、テキストを入力する。
-                      既存の情報も変更できるので、より良い画像に差し替えたり校閲する
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div className="hidden lg:grid lg:grid-cols-1 lg:gap-3">
               <div className="rounded-xl border border-zinc-800/80 bg-black/25 px-4 py-3">
