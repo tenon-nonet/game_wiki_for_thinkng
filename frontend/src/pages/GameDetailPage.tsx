@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getGame, updateGame, deleteGame, getNews } from '../api'
 import type { GameFormData } from '../api'
 import { isAdmin } from '../auth'
-import { excerpt, usePageMeta } from '../seo'
+import { excerpt, usePageMeta, useGameStructuredData } from '../seo'
 import type { Game } from '../types'
 
 type NewsItem = { title: string; url: string; publishedAt: string; source: string }
@@ -23,6 +23,13 @@ export default function GameDetailPage() {
   usePageMeta({
     title: `${game?.name ?? 'ゲーム詳細'} | FROMDEX.com`,
     description: excerpt(game?.description, 120) || 'ゲーム作品の詳細情報、図録導線、関連ニュースを掲載しています。',
+  })
+
+  useGameStructuredData({
+    id: game?.id ?? 0,
+    name: game?.name ?? '',
+    description: excerpt(game?.description, 200) || undefined,
+    image: game?.imagePath ? `/uploads/${game.imagePath}` : undefined,
   })
 
   useEffect(() => {

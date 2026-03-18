@@ -37,6 +37,88 @@ export function excerpt(text?: string | null, maxLength = 120) {
   return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}…` : normalized
 }
 
+const BASE_URL = 'https://fromdex.com'
+
+// Schema.org JSON-LD structured data
+export function useStructuredData(data: Record<string, unknown>) {
+  useEffect(() => {
+    const id = 'structured-data-jsonld'
+    let script = document.head.querySelector<HTMLScriptElement>(`#${id}`)
+    if (!script) {
+      script = document.createElement('script')
+      script.id = id
+      script.type = 'application/ld+json'
+      document.head.appendChild(script)
+    }
+    script.textContent = JSON.stringify({ '@context': 'https://schema.org', ...data })
+    return () => {
+      document.head.querySelector(`#${id}`)?.remove()
+    }
+  }, [data])
+}
+
+export function useGameStructuredData(opts: { id: number; name: string; description?: string; image?: string }) {
+  useStructuredData({
+    '@type': 'VideoGame',
+    name: opts.name,
+    description: opts.description ?? '',
+    url: `${BASE_URL}/games/${opts.id}`,
+    image: opts.image ? `${BASE_URL}${opts.image}` : undefined,
+    publisher: { '@type': 'Organization', name: 'FromSoftware' },
+  })
+}
+
+export function useCharacterStructuredData(opts: {
+  type: 'boss' | 'npc'
+  id: number
+  name: string
+  description?: string
+  gameName?: string
+  gameId?: number
+}) {
+  useStructuredData({
+    '@type': 'WebPage',
+    name: `${opts.name} | FROMDEX.com`,
+    description: opts.description ?? '',
+    url: `${BASE_URL}/${opts.type === 'boss' ? 'bosses' : 'npcs'}/${opts.id}`,
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'FROMDEX', item: BASE_URL },
+        ...(opts.gameName && opts.gameId
+          ? [{ '@type': 'ListItem', position: 2, name: opts.gameName, item: `${BASE_URL}/games/${opts.gameId}` }]
+          : []),
+        { '@type': 'ListItem', position: opts.gameId ? 3 : 2, name: opts.name },
+      ],
+    },
+  })
+}
+
+export function useItemStructuredData(opts: {
+  id: number
+  name: string
+  description?: string
+  gameName?: string
+  gameId?: number
+}) {
+  useStructuredData({
+    '@type': 'WebPage',
+    name: `${opts.name} | FROMDEX.com`,
+    description: opts.description ?? '',
+    url: `${BASE_URL}/items/${opts.id}`,
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'FROMDEX', item: BASE_URL },
+        ...(opts.gameName && opts.gameId
+          ? [{ '@type': 'ListItem', position: 2, name: opts.gameName, item: `${BASE_URL}/games/${opts.gameId}` }]
+          : []),
+        { '@type': 'ListItem', position: opts.gameId ? 3 : 2, name: opts.name },
+      ],
+    },
+  })
+}
+
 export function usePageMeta({ title, description }: MetaOptions) {
   useEffect(() => {
     document.title = title
