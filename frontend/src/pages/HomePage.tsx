@@ -210,7 +210,7 @@ export default function HomePage() {
         onClose={() => { setShowTutorial(false); setIntroDone(false) }}
       />
       <section className="mb-8 w-full">
-        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
+        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_top_left,rgba(120,8,8,0.18),transparent_40%),linear-gradient(180deg,rgba(24,24,27,0.96),rgba(9,9,11,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
           <div className="grid gap-3 px-3 py-4 sm:gap-4 sm:px-6 sm:py-6 lg:grid-cols-[1fr_1fr_1fr_14rem] lg:items-start">
             <div className="space-y-3 pt-1">
               <h1 className="text-[0.82rem] leading-snug text-zinc-300 sm:text-4xl lg:text-[1rem]" style={{ fontFamily: "'Yuji Syuku', serif" }}>
