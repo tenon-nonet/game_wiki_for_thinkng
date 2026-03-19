@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
+import BgmPlayer from './components/BgmPlayer'
 import { useEffect, useState } from 'react'
 import { onAuthChanged, isLoggedIn } from './auth'
 import { getMe } from './api'
@@ -100,6 +101,7 @@ function AppLayout({ authVersion, enlightenment }: { authVersion: number; enligh
         </main>
         <Footer />
       </div>
+      <BgmPlayer />
     </div>
   )
 }

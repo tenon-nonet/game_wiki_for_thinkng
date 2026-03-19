@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 const STEPS = [
@@ -50,17 +50,46 @@ type Props = {
 export default function TutorialModal({ forceOpen, onClose }: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
+  const openSfxFired = useRef(false)
 
   useEffect(() => {
     if (forceOpen) {
+      openSfxFired.current = true
       setOpen(true)
       setStep(0)
       return
     }
     if (!localStorage.getItem(STORAGE_KEY)) {
+      openSfxFired.current = false
       setOpen(true)
     }
   }, [forceOpen])
+
+  useEffect(() => {
+    if (!open || openSfxFired.current) return
+    const handleFirst = () => {
+      if (!openSfxFired.current) {
+        openSfxFired.current = true
+        playSfx('/sfx-tutorial.mp3')
+      }
+      document.removeEventListener('click', handleFirst, true)
+    }
+    document.addEventListener('click', handleFirst, true)
+    return () => document.removeEventListener('click', handleFirst, true)
+  }, [open])
+
+  useEffect(() => {
+    if (!forceOpen) return
+    const sfx = new Audio('/sfx-tutorial.mp3')
+    sfx.volume = 0.6
+    sfx.play().catch(() => {})
+  }, [forceOpen])
+
+  const playSfx = (src: string) => {
+    const sfx = new Audio(src)
+    sfx.volume = 0.6
+    sfx.play().catch(() => {})
+  }
 
   const close = () => {
     localStorage.setItem(STORAGE_KEY, '1')
@@ -141,7 +170,7 @@ export default function TutorialModal({ forceOpen, onClose }: Props) {
             {STEPS.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setStep(i)}
+                onClick={() => { openSfxFired.current = true; setStep(i); playSfx('/sfx-tutorial.mp3') }}
                 className={`w-2 h-2 rounded-full transition ${i === step ? 'bg-amber-400' : 'bg-zinc-700 hover:bg-zinc-500'}`}
               />
             ))}
@@ -150,7 +179,7 @@ export default function TutorialModal({ forceOpen, onClose }: Props) {
           <div className="flex gap-2">
             {step > 0 && (
               <button
-                onClick={() => setStep(step - 1)}
+                onClick={() => { openSfxFired.current = true; setStep(step - 1); playSfx('/sfx-tutorial.mp3') }}
                 className="px-4 py-1.5 text-sm rounded border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 transition"
               >
                 前へ
@@ -158,14 +187,14 @@ export default function TutorialModal({ forceOpen, onClose }: Props) {
             )}
             {isLast ? (
               <button
-                onClick={close}
+                onClick={() => { playSfx('/sfx-start.mp3'); close() }}
                 className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-1.5 text-sm font-semibold tracking-[0.06em] text-amber-50 shadow-[0_0_18px_rgba(245,158,11,0.14)] transition hover:border-amber-300/90 hover:text-white"
               >
                 はじめる
               </button>
             ) : (
               <button
-                onClick={() => setStep(step + 1)}
+                onClick={() => { openSfxFired.current = true; setStep(step + 1); playSfx('/sfx-tutorial.mp3') }}
                 className="inline-flex items-center justify-center rounded-md border border-amber-400/70 bg-gradient-to-b from-amber-300/30 via-amber-500/20 to-transparent px-5 py-1.5 text-sm font-semibold tracking-[0.06em] text-amber-50 shadow-[0_0_18px_rgba(245,158,11,0.14)] transition hover:border-amber-300/90 hover:text-white"
               >
                 次へ
