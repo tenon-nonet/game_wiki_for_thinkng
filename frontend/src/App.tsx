@@ -1,8 +1,9 @@
-﻿import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import { useEffect, useState } from 'react'
-import { onAuthChanged } from './auth'
+import { onAuthChanged, isLoggedIn } from './auth'
+import { getMe } from './api'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -34,12 +35,32 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import RelationGraphPage from './pages/RelationGraphPage'
 import RelationGraphSelectPage from './pages/RelationGraphSelectPage'
 
-function AppLayout({ authVersion }: { authVersion: number }) {
+function bgOpacity(enlightenment: number): number {
+  if (enlightenment >= 20) return 0.85
+  if (enlightenment >= 10) return 0.45
+  if (enlightenment >= 1) return 0.18
+  return 0
+}
+
+function AppLayout({ authVersion, enlightenment }: { authVersion: number; enlightenment: number }) {
+  const opacity = bgOpacity(enlightenment)
   return (
-    <div key={authVersion} className="flex min-h-screen flex-col bg-black">
-      <Navbar />
-      <main className="flex-1">
-        <Routes>
+    <div key={authVersion} className="relative flex min-h-screen flex-col bg-black">
+      {opacity > 0 && (
+        <div
+          className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-1000"
+          style={{
+            backgroundImage: 'url(/hero-enlightened.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity,
+          }}
+        />
+      )}
+      <div className="relative z-10 flex flex-1 flex-col">
+        <Navbar />
+        <main className="flex-1">
+          <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -79,25 +100,39 @@ function AppLayout({ authVersion }: { authVersion: number }) {
         </main>
         <Footer />
       </div>
+    </div>
   )
 }
 
 export default function App() {
   const [authVersion, setAuthVersion] = useState(0)
+  const [enlightenment, setEnlightenment] = useState(0)
 
   useEffect(() => {
-    const unsubscribe = onAuthChanged(() => setAuthVersion((v) => v + 1))
+    const fetchEnlightenment = () => {
+      if (isLoggedIn()) getMe().then((r) => setEnlightenment(r.data.enlightenment)).catch(() => {})
+      else setEnlightenment(0)
+    }
+
+    fetchEnlightenment()
+    const unsubscribe = onAuthChanged(() => {
+      setAuthVersion((v) => v + 1)
+      fetchEnlightenment()
+    })
     const onStorage = () => setAuthVersion((v) => v + 1)
+    const onEnlightenment = () => fetchEnlightenment()
     window.addEventListener('storage', onStorage)
+    window.addEventListener('enlightenmentUpdate', onEnlightenment)
     return () => {
       unsubscribe()
       window.removeEventListener('storage', onStorage)
+      window.removeEventListener('enlightenmentUpdate', onEnlightenment)
     }
   }, [])
 
   return (
     <BrowserRouter>
-      <AppLayout authVersion={authVersion} />
+      <AppLayout authVersion={authVersion} enlightenment={enlightenment} />
     </BrowserRouter>
   )
 }
