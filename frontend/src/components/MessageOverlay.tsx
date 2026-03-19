@@ -1,4 +1,6 @@
-﻿type MessageOverlayProps = {
+﻿import { useEffect } from 'react'
+
+type MessageOverlayProps = {
   message: string
   onClose: () => void
   closeLabel?: string
@@ -9,6 +11,12 @@ export default function MessageOverlay({
   onClose,
   closeLabel = '閉じる',
 }: MessageOverlayProps) {
+  useEffect(() => {
+    const sfx = new Audio('/sfx-notify.mp3')
+    sfx.volume = 1
+    sfx.play().catch(() => {})
+  }, [])
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/68 px-4 backdrop-blur-md">
       <div className="w-full max-w-3xl">

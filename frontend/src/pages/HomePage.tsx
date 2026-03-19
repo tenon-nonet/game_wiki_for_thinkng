@@ -66,7 +66,6 @@ export default function HomePage() {
   const [totalBosses, setTotalBosses] = useState<number | null>(null)
   const [totalNpcs, setTotalNpcs] = useState<number | null>(null)
   const [elapsed, setElapsed] = useState(() => getElapsedParts(new Date()))
-
   const load = async (q?: string) => {
     const res = await getGames(q)
     setGames(res.data)

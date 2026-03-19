@@ -16,6 +16,9 @@ export const register = (username: string, password: string) =>
 export const login = (username: string, password: string) =>
   api.post<AuthResponse>('/auth/login', { username, password })
 
+export const getMe = () =>
+  api.get<{ username: string; role: string; enlightenment: number }>('/users/me')
+
 // Games
 export const getGames = (name?: string) =>
   api.get<Game[]>('/games', { params: name ? { name } : {} })

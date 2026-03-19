@@ -27,6 +27,9 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    @Column(nullable = false)
+    private int enlightenment = 0;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

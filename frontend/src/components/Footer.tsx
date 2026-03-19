@@ -17,6 +17,7 @@ export default function Footer() {
           {rightsLines.map((line) => (
             <p key={line}>{line}</p>
           ))}
+          <p>BGM: "Night Music" by Kevin MacLeod — Licensed under Creative Commons: By Attribution 4.0</p>
         </div>
       </div>
     </footer>
