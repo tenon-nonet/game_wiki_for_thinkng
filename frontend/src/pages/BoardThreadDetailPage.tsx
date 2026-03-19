@@ -12,7 +12,7 @@ import {
   getBoardThread,
   getGeneralBoardThread,
 } from '../api'
-import { getUsername, isAdmin, isLoggedIn } from '../auth'
+import { getUsername, isAdmin, isLoggedIn, notifyEnlightenment } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { useNavigate } from 'react-router-dom'
 import { excerpt, usePageMeta } from '../seo'
@@ -60,6 +60,7 @@ export default function BoardThreadDetailPage() {
       setContent('')
       setLengthError('')
       load()
+      notifyEnlightenment(1)
       setShowPostedOverlay(true)
     } catch (err: any) {
       setError(err.response?.data?.error || '返信に失敗しました')

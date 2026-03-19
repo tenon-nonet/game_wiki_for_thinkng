@@ -10,7 +10,7 @@ import {
   getGame,
   getGeneralBoardThreads,
 } from '../api'
-import { isAdmin } from '../auth'
+import { isAdmin, notifyEnlightenment } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { excerpt, usePageMeta } from '../seo'
 import type { BoardThreadSummary, Game } from '../types'
@@ -73,6 +73,7 @@ export default function BoardThreadsPage() {
       setPinned(false)
       setShowCreateForm(false)
       load()
+      notifyEnlightenment(1)
       setShowCreatedOverlay(true)
     } catch (err: any) {
       setError(err.response?.data?.error || 'スレッド作成に失敗しました')

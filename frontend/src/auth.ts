@@ -28,3 +28,7 @@ export const clearAuth = () => {
   localStorage.removeItem('role')
   notifyAuthChanged()
 }
+
+export const notifyEnlightenment = (amount: number) => {
+  window.dispatchEvent(new CustomEvent('enlightenmentUpdate', { detail: { amount } }))
+}

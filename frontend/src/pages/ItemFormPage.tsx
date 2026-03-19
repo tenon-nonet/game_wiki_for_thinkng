@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { getItem, getGames, getTags, getTagAttributes, createItem, updateItem, analyzeImageText } from '../api'
-import { isAdmin } from '../auth'
+import { isAdmin, notifyEnlightenment } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { IMAGE_FILE_SIZE_ERROR, isImageFileSizeValid } from '../upload'
 import type { Game, Tag, TagAttribute } from '../types'
@@ -190,6 +190,7 @@ export default function ItemFormPage() {
           setOverlayMessage(res.data.message || '編集申請を送信しました')
           setOverlayRedirect(`/items/${id}${detailReturnQuery}`)
         } else {
+          notifyEnlightenment(3)
           navigate(`/items/${id}${detailReturnQuery}`, { state: { flashMessage: '編集が完了しました' } })
         }
       } else {
@@ -199,6 +200,7 @@ export default function ItemFormPage() {
           setOverlayMessage(created.message || '編集申請を送信しました')
           setOverlayRedirect(fromCatalog ? `/catalog${catalogGameId ? `?gameId=${catalogGameId}&tab=ITEM` : '?tab=ITEM'}` : '/items')
         } else if ('id' in created) {
+          notifyEnlightenment(3)
           navigate(`/items/${created.id}`)
         }
       }

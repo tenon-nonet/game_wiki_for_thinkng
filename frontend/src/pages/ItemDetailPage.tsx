@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getItem, getItems, deleteItem, getComments, createComment, updateComment, deleteComment, toggleCommentLike } from '../api'
-import { getUsername, isAdmin } from '../auth'
+import { getUsername, isAdmin, notifyEnlightenment } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { excerpt, usePageMeta, useItemStructuredData } from '../seo'
 import type { Item, Comment } from '../types'
@@ -94,6 +94,7 @@ export default function ItemDetailPage() {
       const res = await createComment(Number(id), commentText.trim())
       setComments((prev) => [res.data, ...prev])
       setCommentText('')
+      notifyEnlightenment(1)
     } catch {
       setCommentError('コメントの投稿に失敗しました')
     }
@@ -141,6 +142,7 @@ export default function ItemDetailPage() {
       ))
       setReplyText('')
       setReplyToId(null)
+      notifyEnlightenment(1)
     } catch {
       setCommentError('返信の投稿に失敗しました')
     }

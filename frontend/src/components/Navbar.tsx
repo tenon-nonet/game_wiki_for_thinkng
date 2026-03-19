@@ -1,7 +1,7 @@
 ﻿import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearAuth, getUsername, isLoggedIn, isAdmin } from '../auth'
-import { getEditRequestCount, getNewUserCount, getReportCount } from '../api'
+import { getEditRequestCount, getMe, getNewUserCount, getReportCount } from '../api'
 import MessageOverlay from './MessageOverlay'
 
 export default function Navbar() {
@@ -15,6 +15,8 @@ export default function Navbar() {
   const [editRequestCount, setEditRequestCount] = useState(0)
   const [reportCount, setReportCount] = useState(0)
   const [newUserCount, setNewUserCount] = useState(0)
+  const [enlightenment, setEnlightenment] = useState<number | null>(null)
+  const [floatingPoints, setFloatingPoints] = useState<{ amount: number; key: number } | null>(null)
   const adminMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -26,6 +28,18 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (!loggedIn) return
+    getMe().then((res) => setEnlightenment(res.data.enlightenment)).catch(() => {})
+    const onUpdate = (e: Event) => {
+      const amount = (e as CustomEvent<{ amount: number }>).detail?.amount
+      if (amount) setFloatingPoints({ amount, key: Date.now() })
+      getMe().then((res) => setEnlightenment(res.data.enlightenment)).catch(() => {})
+    }
+    window.addEventListener('enlightenmentUpdate', onUpdate)
+    return () => window.removeEventListener('enlightenmentUpdate', onUpdate)
+  }, [loggedIn])
 
   useEffect(() => {
     if (!admin) return
@@ -118,6 +132,23 @@ export default function Navbar() {
                   )}
                 </div>
               )}
+              {enlightenment !== null && (
+                <span className="relative flex items-center gap-1 text-amber-400 text-sm font-medium">
+                  {floatingPoints && (
+                    <span
+                      key={floatingPoints.key}
+                      className="enlightenment-float absolute -top-1 left-1/2 -translate-x-1/2 text-amber-300 text-xs font-bold pointer-events-none whitespace-nowrap"
+                      onAnimationEnd={() => setFloatingPoints(null)}
+                    >
+                      +{floatingPoints.amount}
+                    </span>
+                  )}
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                  {enlightenment}
+                </span>
+              )}
               <span className="text-gray-400 text-base">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button
                 onClick={handleLogout}
@@ -199,6 +230,14 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
+              )}
+              {enlightenment !== null && (
+                <span className="flex items-center gap-1 text-amber-400 text-sm font-medium py-1">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                  啓蒙 {enlightenment}
+                </span>
               )}
               <span className="text-gray-400 py-1">{getUsername()}{isAdmin() && ' (Admin)'}</span>
               <button

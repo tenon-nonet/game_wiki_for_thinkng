@@ -26,6 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ItemRepository itemRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final EnlightenmentService enlightenmentService;
 
     public List<CommentResponse> findByItemId(Long itemId, String currentUsername) {
         List<Comment> topLevel = commentRepository.findByItemIdAndParentIdIsNullOrderByCreatedAtDesc(itemId);
@@ -70,6 +71,7 @@ public class CommentService {
         comment.setItem(item);
         comment.setParentId(parentId);
         Comment saved = commentRepository.save(comment);
+        enlightenmentService.add(username, 1);
         CommentResponse r = toResponse(saved, 0L, false);
         r.setReplies(new ArrayList<>());
         return r;

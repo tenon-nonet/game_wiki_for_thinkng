@@ -39,6 +39,7 @@ public class BoardService {
     private final BoardThreadRepository boardThreadRepository;
     private final BoardPostRepository boardPostRepository;
     private final BanService banService;
+    private final EnlightenmentService enlightenmentService;
 
     public List<BoardGameSummaryResponse> getBoardGames() {
         List<Game> games = gameRepository.findAllByVisibleTrueOrderBySortOrderAscIdAsc();
@@ -119,6 +120,7 @@ public class BoardService {
         thread.setPinned(canModerate && request.isPinned());
         thread.setLastPostedAt(LocalDateTime.now());
 
+        enlightenmentService.add(username, 1);
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
@@ -136,6 +138,7 @@ public class BoardService {
         thread.setPinned(canModerate && request.isPinned());
         thread.setLastPostedAt(LocalDateTime.now());
 
+        enlightenmentService.add(username, 1);
         return toThreadSummary(boardThreadRepository.save(thread));
     }
 
@@ -158,6 +161,7 @@ public class BoardService {
         thread.setLastPostedAt(LocalDateTime.now());
         boardThreadRepository.save(thread);
 
+        enlightenmentService.add(username, 1);
         return toPostResponse(saved);
     }
 
@@ -180,6 +184,7 @@ public class BoardService {
         thread.setLastPostedAt(LocalDateTime.now());
         boardThreadRepository.save(thread);
 
+        enlightenmentService.add(username, 1);
         return toPostResponse(saved);
     }
 

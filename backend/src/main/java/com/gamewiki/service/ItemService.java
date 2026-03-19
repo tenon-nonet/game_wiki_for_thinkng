@@ -31,6 +31,7 @@ public class ItemService {
     private final FileStorageService fileStorageService;
     private final TagService tagService;
     private final EditHistoryService editHistoryService;
+    private final EnlightenmentService enlightenmentService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -81,6 +82,7 @@ public class ItemService {
 
         Item saved = itemRepository.save(item);
         editHistoryService.record(editorUsername, "ITEM", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        enlightenmentService.add(editorUsername, 3);
         return toResponse(saved);
     }
 
@@ -116,6 +118,7 @@ public class ItemService {
 
         Item saved = itemRepository.save(item);
         editHistoryService.record(editorUsername, "ITEM", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        enlightenmentService.add(editorUsername, 3);
         return toResponse(saved);
     }
 
