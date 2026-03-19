@@ -140,11 +140,6 @@ export default function TutorialModal({ forceOpen, onClose }: Props) {
             onTimeUpdate={(e) => { if (e.currentTarget.currentTime >= 10) e.currentTarget.currentTime = 0 }}
             onError={(e) => { (e.currentTarget as HTMLVideoElement).style.display = 'none' }}
           />
-          {/* 動画がない場合のフォールバック */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 pointer-events-none select-none">
-            <p className="text-4xl mb-2 opacity-30">▶</p>
-            <p className="text-xs tracking-widest opacity-30">VIDEO</p>
-          </div>
         </div>
 
         {/* コンテンツ */}
