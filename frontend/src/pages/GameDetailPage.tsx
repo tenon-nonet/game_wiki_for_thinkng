@@ -21,8 +21,8 @@ export default function GameDetailPage() {
   const admin = isAdmin()
 
   usePageMeta({
-    title: `${game?.name ?? 'ゲーム詳細'} | FROMDEX.com`,
-    description: excerpt(game?.description, 120) || 'ゲーム作品の詳細情報、図録導線、関連ニュースを掲載しています。',
+    title: `${game?.name ?? 'ゲーム詳細'} 考察Wiki | FROMDEX`,
+    description: `${game?.name ?? 'ゲーム'}の考察・ロア情報Wiki。アイテム、ボス、NPCのテキスト情報・背景設定を収集・整理しています。`,
   })
 
   useGameStructuredData({

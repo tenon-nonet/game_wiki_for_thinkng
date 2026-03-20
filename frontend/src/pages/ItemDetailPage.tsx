@@ -37,8 +37,8 @@ export default function ItemDetailPage() {
   const admin = isAdmin()
 
   usePageMeta({
-    title: `${item?.name ?? 'アイテム詳細'} | FROMDEX.com`,
-    description: excerpt(item?.description, 120) || 'アイテム詳細、関連情報、コメントを掲載しています。',
+    title: `${item?.name ?? 'アイテム詳細'}${item?.gameName ? `（${item.gameName}）` : ''} 考察 | FROMDEX`,
+    description: excerpt(item?.description, 120) || `${item?.gameName ?? 'ゲーム'}のアイテム考察・テキスト情報を掲載しています。`,
   })
 
   useItemStructuredData({

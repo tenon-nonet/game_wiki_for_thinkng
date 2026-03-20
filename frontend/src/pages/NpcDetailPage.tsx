@@ -26,8 +26,8 @@ export default function NpcDetailPage() {
   const dialogues = parseDialogueLines(npc?.dialogues)
 
   usePageMeta({
-    title: `${npc?.name ?? 'NPC詳細'} | FROMDEX.com`,
-    description: excerpt(npc?.description, 120) || 'NPCの詳細、関連情報、セリフを掲載しています。',
+    title: `${npc?.name ?? 'NPC詳細'}${npc?.gameName ? `（${npc.gameName}）` : ''} 考察 | FROMDEX`,
+    description: excerpt(npc?.description, 120) || `${npc?.gameName ?? 'ゲーム'}のNPC考察・セリフ・ロア情報を掲載しています。`,
   })
 
   useCharacterStructuredData({

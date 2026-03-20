@@ -30,8 +30,8 @@ function getElapsedParts(now: Date) {
 
 export default function HomePage() {
   usePageMeta({
-    title: 'FROMDEX.com | FromSoftwareゲームWiki',
-    description: 'FROMDEXは、誰でも編集可能なFromSoftware作品向けゲームwiki。ゲーム内テキスト情報を収集・整理し、図録と目録で閲覧できます。',
+    title: 'FROMDEX | エルデンリング・ダークソウル・ブラッドボーン 考察Wiki',
+    description: 'FROMDEXは、エルデンリング・ダークソウル・ブラッドボーン等のFromSoftware作品の考察Wiki。アイテム・ボス・NPCのテキスト情報・収集・整理しています。',
   })
 
   const FROM_SOFTWARE_NEWS_QUERY = [
