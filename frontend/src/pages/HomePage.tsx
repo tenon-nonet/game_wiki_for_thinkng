@@ -277,7 +277,7 @@ export default function HomePage() {
                 <ul className="space-y-2">
                   {(activity?.recentThreads ?? []).slice(0, 3).map((t) => (
                     <li key={t.id}>
-                      <Link to={t.boardType === 'GENERAL' ? `/boards/general/${t.id}` : `/boards/game/${t.gameId}/${t.id}`}
+                      <Link to={t.boardType === 'GENERAL' ? `/boards/general/${t.id}` : `/boards/${t.gameId}/${t.id}`}
                         className="block text-xs text-zinc-200 hover:text-amber-300 transition truncate">
                         {t.title}
                       </Link>
