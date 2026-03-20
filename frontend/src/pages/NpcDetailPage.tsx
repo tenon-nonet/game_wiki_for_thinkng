@@ -170,6 +170,37 @@ export default function NpcDetailPage() {
         </div>
       </div>
 
+      {/* 入手アイテム */}
+      {npc.dropItems?.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-bold text-gray-100 mb-4">入手アイテム</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {npc.dropItems.map((item) => (
+              <Link
+                key={item.id}
+                to={`/items/${item.id}`}
+                className="group bg-zinc-800 rounded-lg overflow-hidden hover:ring-1 hover:ring-red-700 transition"
+              >
+                {item.imagePath ? (
+                  <img
+                    src={`/uploads/${item.imagePath}`}
+                    alt={item.name}
+                    className="w-full h-32 object-contain bg-zinc-900"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-zinc-700 flex items-center justify-center text-gray-500 text-xs">
+                    画像なし
+                  </div>
+                )}
+                <div className="p-2">
+                  <p className="text-gray-100 text-sm font-medium line-clamp-1">{item.name}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 関連アイテム */}
       {relatedItems.length > 0 && (
         <div className="mt-8">

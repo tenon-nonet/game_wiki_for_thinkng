@@ -1,11 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { getBoss, getGames, getTags, createTag, createBoss, updateBoss } from '../api'
+import { getBoss, getGames, getTags, getItems, createTag, createBoss, updateBoss } from '../api'
 import { isAdmin } from '../auth'
 import MessageOverlay from '../components/MessageOverlay'
 import { defaultDialogueLabel, parseDialogueLines, serializeDialogueEntries, type DialogueEntry } from '../dialogues'
 import { IMAGE_FILE_SIZE_ERROR, isImageFileSizeValid } from '../upload'
-import type { Game, Tag } from '../types'
+import type { Game, Tag, Item } from '../types'
 
 export default function BossFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -43,6 +43,10 @@ export default function BossFormPage() {
   const [initialDialogues, setInitialDialogues] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<Set<number>>(new Set())
   const [initialSelectedTags, setInitialSelectedTags] = useState<number[]>([])
+  const [allItems, setAllItems] = useState<Item[]>([])
+  const [selectedDropItems, setSelectedDropItems] = useState<Set<number>>(new Set())
+  const [initialSelectedDropItems, setInitialSelectedDropItems] = useState<number[]>([])
+  const [dropItemSearch, setDropItemSearch] = useState('')
   const [newTag, setNewTag] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -74,6 +78,10 @@ export default function BossFormPage() {
         setDialogues(parsedDialogues)
         setInitialDialogues(serializeDialogueEntries(parsedDialogues))
         setExistingImage(boss.imagePath)
+        const dropIds = (boss.dropItems ?? []).map((i) => i.id).sort((a, b) => a - b)
+        setSelectedDropItems(new Set(dropIds))
+        setInitialSelectedDropItems(dropIds)
+        getItems(boss.gameId).then((r2) => setAllItems(r2.data))
         getTags(boss.gameId, 'BOSS').then((r2) => {
           setAllTags(r2.data)
           const selectedTagIds = boss.tags.map((t) => t.id).sort((a, b) => a - b)
@@ -92,7 +100,10 @@ export default function BossFormPage() {
     }
     setAllTags([])
     setSelectedTags(new Set())
+    setAllItems([])
+    setSelectedDropItems(new Set())
     getTags(Number(form.gameId), 'BOSS').then((r) => setAllTags(r.data))
+    getItems(Number(form.gameId)).then((r) => setAllItems(r.data))
   }, [form.gameId])
 
   const toggleTag = (id: number) => {
@@ -143,6 +154,7 @@ export default function BossFormPage() {
       gameId: Number(form.gameId),
       tags: Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean),
       dialogues: dialogueValues,
+      dropItemIds: Array.from(selectedDropItems),
     })
     data.append('data', new Blob([json], { type: 'application/json' }))
     if (image) data.append('image', image)
@@ -172,6 +184,7 @@ export default function BossFormPage() {
   }
   const serializedDialogues = serializeDialogueEntries(dialogues)
   const selectedTagIds = Array.from(selectedTags).sort((a, b) => a - b)
+  const selectedDropIds = Array.from(selectedDropItems).sort((a, b) => a - b)
   const hasBossChanges = !isEdit || !initialForm
     ? true
     : image !== null
@@ -180,6 +193,7 @@ export default function BossFormPage() {
       || form.gameId !== initialForm.gameId
       || JSON.stringify(serializedDialogues) !== JSON.stringify(initialDialogues)
       || JSON.stringify(selectedTagIds) !== JSON.stringify(initialSelectedTags)
+      || JSON.stringify(selectedDropIds) !== JSON.stringify(initialSelectedDropItems)
 
   if (!isEdit && (!form.name || !form.gameId)) {
     return (
@@ -386,6 +400,52 @@ export default function BossFormPage() {
               <p className="text-xs text-gray-400 mt-2">
                 選択中: {Array.from(selectedTags).map((id) => allTags.find((t) => t.id === id)?.name).filter(Boolean).join(', ')}
               </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-2">入手アイテム</label>
+            {!form.gameId ? (
+              <p className="text-gray-500 text-xs">ゲームを選択するとアイテムが表示されます</p>
+            ) : allItems.length === 0 ? (
+              <p className="text-gray-500 text-xs">このゲームにアイテムはありません</p>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  value={dropItemSearch}
+                  onChange={(e) => setDropItemSearch(e.target.value)}
+                  placeholder="アイテム名で絞り込み"
+                  className="w-full border border-gray-600 rounded px-3 py-1.5 text-sm bg-zinc-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-800 mb-2"
+                />
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                  {allItems
+                    .filter((item) => item.name.toLowerCase().includes(dropItemSearch.toLowerCase()))
+                    .map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedDropItems((prev) => {
+                          const next = new Set(prev)
+                          next.has(item.id) ? next.delete(item.id) : next.add(item.id)
+                          return next
+                        })}
+                        className={`px-3 py-1 rounded-full text-sm border transition ${
+                          selectedDropItems.has(item.id)
+                            ? 'bg-red-900 border-red-800 text-white'
+                            : 'bg-zinc-700 border-gray-600 text-gray-300 hover:border-red-800'
+                        }`}
+                      >
+                        {item.name}
+                      </button>
+                    ))}
+                </div>
+                {selectedDropItems.size > 0 && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    選択中: {Array.from(selectedDropItems).map((id) => allItems.find((i) => i.id === id)?.name).filter(Boolean).join(', ')}
+                  </p>
+                )}
+              </>
             )}
           </div>
 

@@ -2,12 +2,15 @@ package com.gamewiki.service;
 
 import com.gamewiki.dto.BossRequest;
 import com.gamewiki.dto.BossResponse;
+import com.gamewiki.dto.DropItemInfo;
 import com.gamewiki.entity.Boss;
 import com.gamewiki.entity.BossDialogue;
 import com.gamewiki.entity.Game;
+import com.gamewiki.entity.Item;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.BossRepository;
 import com.gamewiki.repository.GameRepository;
+import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.TagRepository;
 import com.gamewiki.util.EntityNameConflictChecker;
 import com.gamewiki.util.EntitySearchFilter;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,9 +33,11 @@ public class BossService {
     private final BossRepository bossRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
+    private final ItemRepository itemRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
     private final EditHistoryService editHistoryService;
+    private final EnlightenmentService enlightenmentService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -73,6 +79,7 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.setDropItems(resolveDropItems(request.getDropItemIds()));
         boss.setUpdatedBy(editorUsername);
         setDialogues(boss, request.getDialogues());
 
@@ -82,6 +89,7 @@ public class BossService {
 
         Boss saved = bossRepository.save(boss);
         editHistoryService.record(editorUsername, "BOSS", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        enlightenmentService.add(editorUsername, 3);
         return toResponse(saved);
     }
 
@@ -107,6 +115,7 @@ public class BossService {
         boss.setDescription(request.getDescription());
         boss.setGame(game);
         boss.setTags(resolveTags(request.getTags(), request.getGameId()));
+        boss.setDropItems(resolveDropItems(request.getDropItemIds()));
         boss.setUpdatedBy(editorUsername);
         boss.getDialogues().clear();
         setDialogues(boss, request.getDialogues());
@@ -118,6 +127,7 @@ public class BossService {
 
         Boss saved = bossRepository.save(boss);
         editHistoryService.record(editorUsername, "BOSS", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        enlightenmentService.add(editorUsername, 3);
         return toResponse(saved);
     }
 
@@ -130,6 +140,11 @@ public class BossService {
     private Boss getBoss(Long id) {
         return bossRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Boss not found: " + id));
+    }
+
+    private Set<Item> resolveDropItems(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) return new HashSet<>();
+        return new HashSet<>(itemRepository.findAllById(ids));
     }
 
     private Set<Tag> resolveTags(Set<String> tagNames, Long gameId) {
@@ -163,6 +178,10 @@ public class BossService {
         r.setGameName(boss.getGame().getName());
         r.setTags(boss.getTags().stream().map(tagService::toResponse).collect(Collectors.toSet()));
         r.setDialogues(boss.getDialogues().stream().map(BossDialogue::getText).toList());
+        r.setDropItems(boss.getDropItems().stream()
+                .sorted(Comparator.comparing(Item::getName))
+                .map(item -> new DropItemInfo(item.getId(), item.getName(), item.getImagePath()))
+                .toList());
         r.setCreatedAt(boss.getCreatedAt());
         r.setUpdatedAt(boss.getUpdatedAt());
         r.setUpdatedBy(boss.getUpdatedBy());

@@ -25,4 +25,6 @@ public class BossRequest {
     private Set<String> tags;
 
     private List<String> dialogues;
+
+    private Set<Long> dropItemIds;
 }
