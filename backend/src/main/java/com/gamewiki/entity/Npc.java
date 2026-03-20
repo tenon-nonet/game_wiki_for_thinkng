@@ -42,6 +42,14 @@ public class Npc {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "npc_drop_items",
+        joinColumns = @JoinColumn(name = "npc_id"),
+        inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
+    private Set<Item> dropItems = new HashSet<>();
+
     @OneToMany(mappedBy = "npc", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("orderIndex ASC")
     private List<NpcDialogue> dialogues = new ArrayList<>();

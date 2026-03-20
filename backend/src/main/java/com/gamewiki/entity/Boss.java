@@ -42,6 +42,14 @@ public class Boss {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "boss_drop_items",
+        joinColumns = @JoinColumn(name = "boss_id"),
+        inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
+    private Set<Item> dropItems = new HashSet<>();
+
     @OneToMany(mappedBy = "boss", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("orderIndex ASC")
     private List<BossDialogue> dialogues = new ArrayList<>();

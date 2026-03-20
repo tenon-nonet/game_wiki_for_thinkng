@@ -18,6 +18,7 @@ public class NpcResponse {
     private String gameName;
     private Set<TagResponse> tags;
     private List<String> dialogues;
+    private List<DropItemInfo> dropItems;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String updatedBy;

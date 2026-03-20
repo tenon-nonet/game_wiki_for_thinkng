@@ -25,4 +25,6 @@ public class NpcRequest {
     private Set<String> tags;
 
     private List<String> dialogues;
+
+    private Set<Long> dropItemIds;
 }

@@ -152,6 +152,12 @@ export interface Item {
   updatedBy: string | null
 }
 
+export interface DropItem {
+  id: number
+  name: string
+  imagePath: string | null
+}
+
 export interface Boss {
   id: number
   name: string
@@ -161,6 +167,7 @@ export interface Boss {
   gameName: string
   tags: Tag[]
   dialogues: string[]
+  dropItems: DropItem[]
   createdAt: string
   updatedAt: string
   updatedBy: string | null
@@ -193,6 +200,7 @@ export interface Npc {
   gameName: string
   tags: Tag[]
   dialogues: string[]
+  dropItems: DropItem[]
   createdAt: string
   updatedAt: string
   updatedBy: string | null

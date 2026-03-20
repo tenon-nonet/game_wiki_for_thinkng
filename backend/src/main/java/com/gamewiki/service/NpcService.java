@@ -1,12 +1,15 @@
 package com.gamewiki.service;
 
+import com.gamewiki.dto.DropItemInfo;
 import com.gamewiki.dto.NpcRequest;
 import com.gamewiki.dto.NpcResponse;
 import com.gamewiki.entity.Game;
+import com.gamewiki.entity.Item;
 import com.gamewiki.entity.Npc;
 import com.gamewiki.entity.NpcDialogue;
 import com.gamewiki.entity.Tag;
 import com.gamewiki.repository.GameRepository;
+import com.gamewiki.repository.ItemRepository;
 import com.gamewiki.repository.NpcRepository;
 import com.gamewiki.repository.TagRepository;
 import com.gamewiki.util.EntityNameConflictChecker;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,9 +33,11 @@ public class NpcService {
     private final NpcRepository npcRepository;
     private final GameRepository gameRepository;
     private final TagRepository tagRepository;
+    private final ItemRepository itemRepository;
     private final FileStorageService fileStorageService;
     private final TagService tagService;
     private final EditHistoryService editHistoryService;
+    private final EnlightenmentService enlightenmentService;
 
     @Transactional
     public void updateOrder(List<Long> ids) {
@@ -73,6 +79,7 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.setDropItems(resolveDropItems(request.getDropItemIds()));
         npc.setUpdatedBy(editorUsername);
         setDialogues(npc, request.getDialogues());
 
@@ -82,6 +89,7 @@ public class NpcService {
 
         Npc saved = npcRepository.save(npc);
         editHistoryService.record(editorUsername, "NPC", saved.getId(), saved.getName(), "CREATE", saved.getGame().getName());
+        enlightenmentService.add(editorUsername, 3);
         return toResponse(saved);
     }
 
@@ -107,6 +115,7 @@ public class NpcService {
         npc.setDescription(request.getDescription());
         npc.setGame(game);
         npc.setTags(resolveTags(request.getTags(), request.getGameId()));
+        npc.setDropItems(resolveDropItems(request.getDropItemIds()));
         npc.setUpdatedBy(editorUsername);
         npc.getDialogues().clear();
         setDialogues(npc, request.getDialogues());
@@ -118,6 +127,7 @@ public class NpcService {
 
         Npc saved = npcRepository.save(npc);
         editHistoryService.record(editorUsername, "NPC", saved.getId(), saved.getName(), "UPDATE", saved.getGame().getName());
+        enlightenmentService.add(editorUsername, 3);
         return toResponse(saved);
     }
 
@@ -145,6 +155,11 @@ public class NpcService {
         }
     }
 
+    private Set<Item> resolveDropItems(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) return new HashSet<>();
+        return new HashSet<>(itemRepository.findAllById(ids));
+    }
+
     private Set<Tag> resolveTags(Set<String> tagNames, Long gameId) {
         if (tagNames == null || tagNames.isEmpty()) return new HashSet<>();
         return tagNames.stream().map(name ->
@@ -163,6 +178,10 @@ public class NpcService {
         r.setGameName(npc.getGame().getName());
         r.setTags(npc.getTags().stream().map(tagService::toResponse).collect(Collectors.toSet()));
         r.setDialogues(npc.getDialogues().stream().map(NpcDialogue::getText).toList());
+        r.setDropItems(npc.getDropItems().stream()
+                .sorted(Comparator.comparing(Item::getName))
+                .map(item -> new DropItemInfo(item.getId(), item.getName(), item.getImagePath()))
+                .toList());
         r.setCreatedAt(npc.getCreatedAt());
         r.setUpdatedAt(npc.getUpdatedAt());
         r.setUpdatedBy(npc.getUpdatedBy());
