@@ -80,9 +80,9 @@ export default function Navbar() {
       )}
       <nav className="bg-zinc-900 text-white shadow">
       <div className="px-4 sm:px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="text-lg sm:text-2xl font-bold text-gray-100 hover:text-gray-300 leading-tight">
-          <span className="hidden sm:inline">FROMDEX</span>
-          <span className="sm:hidden">FROMDEX</span>
+        <Link to="/" className="flex items-baseline gap-3 hover:opacity-80 transition leading-tight">
+          <span className="text-lg sm:text-2xl font-bold text-gray-100">FROMDEX</span>
+          <span className="hidden sm:inline text-lg text-gray-500 italic tracking-wide">--All begins, From Dex.</span>
         </Link>
 
         {/* Desktop nav */}

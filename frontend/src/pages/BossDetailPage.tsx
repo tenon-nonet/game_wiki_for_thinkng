@@ -26,8 +26,8 @@ export default function BossDetailPage() {
   const dialogues = parseDialogueLines(boss?.dialogues)
 
   usePageMeta({
-    title: `${boss?.name ?? 'ボス詳細'} | FROMDEX.com`,
-    description: excerpt(boss?.description, 120) || 'ボスの詳細、関連情報、セリフを掲載しています。',
+    title: `${boss?.name ?? 'ボス詳細'}${boss?.gameName ? `（${boss.gameName}）` : ''} 考察 | FROMDEX`,
+    description: excerpt(boss?.description, 120) || `${boss?.gameName ?? 'ゲーム'}のボス考察・セリフ・ロア情報を掲載しています。`,
   })
 
   useCharacterStructuredData({

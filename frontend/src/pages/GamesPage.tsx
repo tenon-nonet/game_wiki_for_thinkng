@@ -9,8 +9,8 @@ import type { Game } from '../types'
 
 export default function GamesPage() {
   usePageMeta({
-    title: 'ゲーム一覧 | FROMDEX.com',
-    description: 'FromSoftware作品のゲーム一覧ページ。各作品の詳細、図録、関連情報へ移動できます。',
+    title: 'ゲーム考察Wiki一覧 | FROMDEX',
+    description: 'エルデンリング・ダークソウル・ブラッドボーン等、FromSoftware作品の考察Wikiへのリンク一覧。',
   })
 
   const [games, setGames] = useState<Game[]>([])
