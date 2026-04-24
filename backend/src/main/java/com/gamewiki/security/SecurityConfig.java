@@ -59,6 +59,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/items/*/comments").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/comments/*/like").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/relation-graphs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/timelines/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/catalog/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/visitors/home").permitAll()

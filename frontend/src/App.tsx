@@ -35,6 +35,7 @@ import ReportsPage from './pages/ReportsPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import RelationGraphPage from './pages/RelationGraphPage'
 import RelationGraphSelectPage from './pages/RelationGraphSelectPage'
+import TimelinePage from './pages/TimelinePage'
 
 function bgOpacity(enlightenment: number): number {
   if (enlightenment >= 20) return 0.85
@@ -69,6 +70,7 @@ function AppLayout({ authVersion, enlightenment }: { authVersion: number; enligh
             <Route path="/games/:id" element={<GameDetailPage />} />
             <Route path="/relation-graph" element={<RelationGraphSelectPage />} />
             <Route path="/games/:id/relation-graph" element={<RelationGraphPage />} />
+            <Route path="/timeline/:id" element={<TimelinePage />} />
             <Route path="/games/:id/news" element={<NewsListPage />} />
             <Route path="/items" element={<ItemsPage />} />
             <Route path="/items/new" element={<ItemFormPage />} />

@@ -36,6 +36,7 @@ type OrgNodeData = {
   name: string
   bgColor: string
   borderColor: string
+  gameId?: number
 }
 type OrgNodeType = Node<OrgNodeData, 'organization'>
 
@@ -117,10 +118,21 @@ function OrganizationNode({ data, selected }: NodeProps<OrgNodeType>) {
       <Handle id="org-left-t"   type="target" position={Position.Left}   className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
       <Handle id="org-right-t"  type="target" position={Position.Right}  className="!w-2.5 !h-2.5 !opacity-60" style={{ background: data.borderColor }} />
       <div
-        className="px-2.5 py-1.5 font-bold text-sm select-none"
+        className="px-2.5 py-1.5 font-bold text-sm select-none flex items-center justify-between gap-1"
         style={{ color: data.borderColor, borderBottom: `1px solid ${data.borderColor}40` }}
       >
-        {data.name}
+        <span>{data.name}</span>
+        {data.gameId && (
+          <a
+            href={`/timeline/${data.gameId}?org=${encodeURIComponent(data.name)}`}
+            title="この組織の年表を見る"
+            className="text-xs opacity-60 hover:opacity-100 transition shrink-0"
+            style={{ color: data.borderColor }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            年表
+          </a>
+        )}
       </div>
     </div>
   )
@@ -210,8 +222,14 @@ function RelationGraphEditor() {
       setBosses(bossRes.data)
       setNpcs(npcRes.data)
 
-      const official = parseGraphData(officialRes?.data?.graphData)
-      const personal = loggedIn ? parseGraphData(personalRes?.data?.graphData) : { nodes: [], edges: [] }
+      const injectGameId = (parsed: { nodes: AppNode[]; edges: any[] }) => ({
+        ...parsed,
+        nodes: parsed.nodes.map((n) =>
+          n.type === 'organization' ? { ...n, data: { ...n.data, gameId: Number(gameId) } } : n
+        ),
+      })
+      const official = injectGameId(parseGraphData(officialRes?.data?.graphData))
+      const personal = loggedIn ? injectGameId(parseGraphData(personalRes?.data?.graphData)) : { nodes: [], edges: [] }
 
       officialCache[1](official)
       personalCache[1](personal)
@@ -277,7 +295,7 @@ function RelationGraphEditor() {
         position: { x: 100, y: 100 },
         style: { width: 280, height: 200 },
         zIndex: -1,
-        data: { name: orgName.trim(), bgColor: color.bg, borderColor: color.border },
+        data: { name: orgName.trim(), bgColor: color.bg, borderColor: color.border, gameId: Number(gameId) },
       } as OrgNodeType,
       ...nds,
     ])

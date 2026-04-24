@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, Report, Ban, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost, RelationGraph } from './types'
+import type { AuthResponse, Game, Item, Boss, Npc, Tag, TagAttribute, Comment, CatalogEntry, EditHistory, MyComment, EditRequest, Report, Ban, BoardGameSummary, BoardThreadSummary, BoardThreadDetail, BoardPost, RelationGraph, Timeline, TimelineEvent } from './types'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -269,6 +269,19 @@ export const getUserRelationGraph = (gameId: number) =>
 
 export const saveUserRelationGraph = (gameId: number, graphData: string) =>
   api.put<RelationGraph>(`/relation-graphs/${gameId}/mine`, { graphData })
+
+// Timelines
+export const getTimeline = (gameId: number) =>
+  api.get<Timeline>(`/timelines/${gameId}`)
+
+export const saveTimeline = (gameId: number, events: Omit<TimelineEvent, 'id'>[]) =>
+  api.put<Timeline>(`/timelines/${gameId}`, { events })
+
+export const getUserTimeline = (gameId: number) =>
+  api.get<Timeline>(`/timelines/${gameId}/mine`)
+
+export const saveUserTimeline = (gameId: number, events: Omit<TimelineEvent, 'id'>[]) =>
+  api.put<Timeline>(`/timelines/${gameId}/mine`, { events })
 
 // Reports
 export const createBoardThreadReport = (threadId: number, reason: string) =>

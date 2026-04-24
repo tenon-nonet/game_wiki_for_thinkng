@@ -191,6 +191,34 @@ export interface RelationGraph {
   updatedAt: string | null
 }
 
+export interface TimelineEventItem {
+  id: number
+  name: string
+  imagePath: string | null
+}
+
+export interface TimelineEvent {
+  id: number
+  title: string
+  description: string | null
+  imagePath: string | null
+  eraLabel: string | null
+  orderIndex: number
+  organizations: string[]
+  bosses: TimelineEventItem[]
+  npcs: TimelineEventItem[]
+  items: TimelineEventItem[]
+}
+
+export interface Timeline {
+  id: number
+  gameId: number
+  username: string | null
+  updatedBy: string | null
+  updatedAt: string | null
+  events: TimelineEvent[]
+}
+
 export interface Npc {
   id: number
   name: string
